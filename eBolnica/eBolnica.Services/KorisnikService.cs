@@ -1,4 +1,5 @@
 ﻿using eBolnica.Model;
+using eBolnica.Services.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,24 +10,26 @@ namespace eBolnica.Services
 {
     public class KorisnikService : IKorisnikService
     {
-        public List<Korisnik> List = new List<Korisnik>()
+        public EBolnicaContext Context { get; set; }
+        public KorisnikService(EBolnicaContext context)
         {
-            new Korisnik()
-            {
-                KorisnikId= 1,
-                Ime="Adnan",
-                Prezime="Voloder"
-            },
-            new Korisnik()
-            {
-                KorisnikId= 2,
-                Ime="Denis",
-                Prezime="Music"
-            }
-        };
-        public List<Korisnik> GetList()
+            Context = context;
+        }
+
+        public List<Model.Korisnik> GetList()
         {
-            return List;
+            var list = Context.Korisniks.ToList();
+            var result = new List<Model.Korisnik>();
+            list.ForEach(item =>
+            {
+                result.Add(new Model.Korisnik()
+                {
+                    KorisnikId = item.KorisnikId,
+                    Ime = item.Ime,
+                    Prezime = item.Prezime,
+                });
+            });
+            return result;
         }
     }
 }
