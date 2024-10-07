@@ -1,4 +1,5 @@
 using eBolnica.Model;
+using eBolnica.Model.Requests;
 using eBolnica.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,16 @@ namespace eBolnica.API.Controllers
         public List<Korisnik> GetList()
         {
             return _service.GetList();
+        }
+        [HttpPost]
+        public Korisnik Insert(KorisnikInsertRequest request)
+        {
+            return _service.Insert(request);
+        }
+        [HttpPut("{id}")]
+        public Korisnik Update(int id, KorisnikUpdateRequest request)
+        {
+            return _service.Update(id, request);
         }
     }
 }

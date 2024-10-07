@@ -1,7 +1,7 @@
 using eBolnica.Services;
 using eBolnica.Services.Database;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IKorisnikService, KorisnikService>();
 
 builder.Services.AddControllers();
+builder.Services.AddMapster();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,4 +1,5 @@
 ﻿using eBolnica.Model;
+using eBolnica.Model.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,7 @@ namespace eBolnica.Services
     public interface IKorisnikService
     {
         List<Korisnik> GetList();
+        Korisnik Insert(KorisnikInsertRequest request);
+        Korisnik Update(int id, KorisnikUpdateRequest request);
     }
 }
