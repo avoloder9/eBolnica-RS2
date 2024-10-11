@@ -1,5 +1,6 @@
 using eBolnica.Model;
 using eBolnica.Model.Requests;
+using eBolnica.Model.SearchObjects;
 using eBolnica.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,9 @@ namespace eBolnica.API.Controllers
             _service = service;
         }
         [HttpGet]
-        public List<Korisnik> GetList()
+        public PagedResult<Korisnik> GetList([FromQuery] KorisnikSearchObject searchObject)
         {
-            return _service.GetList();
+            return _service.GetList(searchObject);
         }
         [HttpPost]
         public Korisnik Insert(KorisnikInsertRequest request)

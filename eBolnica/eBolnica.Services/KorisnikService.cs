@@ -1,10 +1,12 @@
 ﻿using eBolnica.Model;
 using eBolnica.Model.Requests;
+using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Database;
 using MapsterMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,12 +24,44 @@ namespace eBolnica.Services
             Mapper = mapper;
         }
 
-        public virtual List<Model.Korisnik> GetList()
+        public virtual PagedResult<Model.Korisnik> GetList(KorisnikSearchObject searchObject)
         {
             List<Model.Korisnik> result = new List<Model.Korisnik>();
-            var list = Context.Korisniks.ToList();
-            result = Mapper.Map(list, result);
-            return result;
+            var query = Context.Korisniks.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
+            {
+                query = query.Where(x => x.Ime.StartsWith(searchObject.ImeGTE));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchObject?.PrezimeGTE))
+            {
+                query = query.Where(x => x.Prezime.StartsWith(searchObject.PrezimeGTE));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchObject?.Email))
+            {
+                query = query.Where(x => x.Email == searchObject.Email);
+            }
+            if (!string.IsNullOrWhiteSpace(searchObject?.KorisnickoIme))
+            {
+                query = query.Where(x => x.KorisnickoIme == searchObject.KorisnickoIme);
+            }
+
+            int count=query.Count();
+
+            if (searchObject?.Page.HasValue == true && searchObject.PageSize.HasValue == true)
+            {
+                query = query.Skip(searchObject.Page.Value * searchObject.PageSize.Value).Take(searchObject.PageSize.Value);
+            }
+
+            var list = query.ToList();
+            
+            var resultList = Mapper.Map(list, result);
+            PagedResult<Model.Korisnik> response = new PagedResult<Model.Korisnik>();
+            response.ResultList = resultList;
+            response.Count = count;
+            return response;
         }
 
         public Model.Korisnik Insert(KorisnikInsertRequest request)
