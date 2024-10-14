@@ -9,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services
 {
-    public interface IKorisnikService
-    {
-        PagedResult<Korisnik> GetList(KorisnikSearchObject searchObject);
-        Korisnik Insert(KorisnikInsertRequest request);
-        Korisnik Update(int id, KorisnikUpdateRequest request);
-    }
+    public interface IKorisnikService : ICRUDService<Korisnik, KorisnikSearchObject, KorisnikInsertRequest, KorisnikUpdateRequest>
+    { }
 }

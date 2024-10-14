@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services
 {
-    public class BaseService<TModel, TSearch, TDbEntity> : IService<TModel, TSearch> where TSearch : BaseSearchObject where TDbEntity : class where TModel : class
+    public abstract class BaseService<TModel, TSearch, TDbEntity> : IService<TModel, TSearch> where TSearch : BaseSearchObject where TDbEntity : class where TModel : class
     {
         public EBolnicaContext Context { get; set; }
         public IMapper Mapper { get; }
@@ -25,6 +25,9 @@ namespace eBolnica.Services
         {
             List<TModel> result = new List<TModel>();
             var query = Context.Set<TDbEntity>().AsQueryable();
+
+            query = AddFilter(search, query);
+
 
             int count = query.Count();
 
@@ -42,7 +45,10 @@ namespace eBolnica.Services
             response.Count = count;
             return response;
         }
-
+        public virtual IQueryable<TDbEntity> AddFilter(TSearch search, IQueryable<TDbEntity> query)
+        {
+            return query;
+        }
         public TModel GetById(int id)
         {
             var entity = Context.Set<TDbEntity>().Find(id);

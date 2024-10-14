@@ -13,21 +13,15 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services
 {
-    public class KorisnikService : IKorisnikService
+    public class KorisnikService : BaseCRUDService<Model.Korisnik, KorisnikSearchObject, Database.Korisnik, KorisnikInsertRequest, KorisnikUpdateRequest>, IKorisnikService
     {
-        public EBolnicaContext Context { get; set; }
-        public IMapper Mapper { get; }
-
-        public KorisnikService(EBolnicaContext context, IMapper mapper)
+        public KorisnikService(EBolnicaContext context, IMapper mapper) : base(context, mapper)
         {
-            Context = context;
-            Mapper = mapper;
         }
 
-        public virtual PagedResult<Model.Korisnik> GetList(KorisnikSearchObject searchObject)
+        public override IQueryable<Database.Korisnik> AddFilter(KorisnikSearchObject searchObject, IQueryable<Database.Korisnik> query)
         {
-            List<Model.Korisnik> result = new List<Model.Korisnik>();
-            var query = Context.Korisniks.AsQueryable();
+            query = base.AddFilter(searchObject, query);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
@@ -43,43 +37,26 @@ namespace eBolnica.Services
             {
                 query = query.Where(x => x.Email == searchObject.Email);
             }
+
             if (!string.IsNullOrWhiteSpace(searchObject?.KorisnickoIme))
             {
                 query = query.Where(x => x.KorisnickoIme == searchObject.KorisnickoIme);
             }
 
-            int count=query.Count();
-
-            if (searchObject?.Page.HasValue == true && searchObject.PageSize.HasValue == true)
-            {
-                query = query.Skip(searchObject.Page.Value * searchObject.PageSize.Value).Take(searchObject.PageSize.Value);
-            }
-
-            var list = query.ToList();
-            
-            var resultList = Mapper.Map(list, result);
-            PagedResult<Model.Korisnik> response = new PagedResult<Model.Korisnik>();
-            response.ResultList = resultList;
-            response.Count = count;
-            return response;
+            return query;
         }
-
-        public Model.Korisnik Insert(KorisnikInsertRequest request)
+        public override void BeforeInsert(KorisnikInsertRequest request, Database.Korisnik entity)
         {
             if (request.Lozinka != request.LozinkaPotvrda)
             {
                 throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
             }
-            Database.Korisnik korisnik = new Database.Korisnik();
-            Mapper.Map(request, korisnik);
-            korisnik.LozinkaSalt = GenerateSalt();
-            korisnik.LozinkaHash = GenerateHash(korisnik.LozinkaSalt, request.Lozinka);
+            entity.LozinkaSalt = GenerateSalt();
+            entity.LozinkaHash = GenerateHash(entity.LozinkaSalt, request.Lozinka);
 
-            Context.Add(korisnik);
-            Context.SaveChanges();
-
-            return Mapper.Map<Model.Korisnik>(korisnik);
+            base.BeforeInsert(request, entity);
         }
+
         public static string GenerateSalt()
         {
             var byteArray = RNGCryptoServiceProvider.GetBytes(16);
@@ -98,22 +75,19 @@ namespace eBolnica.Services
             byte[] inArray = algorithm!.ComputeHash(dst);
             return Convert.ToBase64String(inArray);
         }
-        public Model.Korisnik Update(int id, KorisnikUpdateRequest request)
+
+        public override void BeforeUpdate(KorisnikUpdateRequest request, Database.Korisnik entity)
         {
-            var korisnik = Context.Korisniks.Find(id);
-            Mapper.Map(request, korisnik);
+            base.BeforeUpdate(request, entity);
             if (request.Lozinka != null)
             {
                 if (request.Lozinka != request.LozinkaPotvrda)
                 {
                     throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
                 }
-                korisnik!.LozinkaSalt = GenerateSalt();
-                korisnik.LozinkaHash = GenerateHash(korisnik.LozinkaSalt, request.Lozinka);
+                entity!.LozinkaSalt = GenerateSalt();
+                entity.LozinkaHash = GenerateHash(entity.LozinkaSalt, request.Lozinka);
             }
-
-            Context.SaveChanges();
-            return Mapper.Map<Model.Korisnik>(korisnik!);
         }
     }
 }
