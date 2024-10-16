@@ -89,5 +89,21 @@ namespace eBolnica.Services
                 entity.LozinkaHash = GenerateHash(entity.LozinkaSalt, request.Lozinka);
             }
         }
+
+        public Model.Korisnik Login(string username, string password)
+        {
+            var entity = Context.Korisniks.FirstOrDefault(x => x.KorisnickoIme == username);
+            if (entity == null)
+            {
+                return null;
+            }
+            var hash = GenerateHash(entity.LozinkaSalt, password);
+            if (hash != entity.LozinkaHash)
+            {
+                return null;
+            }
+
+            return Mapper.Map<Model.Korisnik>(entity);
+        }
     }
 }
