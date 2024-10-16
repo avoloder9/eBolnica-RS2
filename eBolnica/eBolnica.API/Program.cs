@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddTransient<IKorisnikService, KorisnikService>();
+builder.Services.AddTransient<IAdministratorService, AdministratorService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();

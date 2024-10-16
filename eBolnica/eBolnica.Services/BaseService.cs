@@ -49,7 +49,7 @@ namespace eBolnica.Services
         {
             return query;
         }
-        public TModel GetById(int id)
+        public virtual TModel GetById(int id)
         {
             var entity = Context.Set<TDbEntity>().Find(id);
             if (entity != null)
