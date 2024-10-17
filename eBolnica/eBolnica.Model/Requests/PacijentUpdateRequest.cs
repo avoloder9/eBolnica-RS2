@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace eBolnica.Model.Requests
 {
-    public class AdministratorUpdateRequest
+    public class PacijentUpdateRequest
     {
         public string Ime { get; set; } = null!;
         public string Prezime { get; set; } = null!;
@@ -15,7 +15,9 @@ namespace eBolnica.Model.Requests
         public byte[]? SlikaThumb { get; set; }
         public string? Telefon { get; set; }
         public bool Status { get; set; } = true;
+        public string Adresa { get; set; } = null!;
         [JsonIgnore]
         public int? KorisnikID { get; set; }
     }
 }
+

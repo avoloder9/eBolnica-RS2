@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+
 namespace eBolnica.Model.Requests
 {
-    public class AdministratorInsertRequest
+    public class PacijentInsertRequest
     {
         public string Ime { get; set; } = null!;
 
@@ -29,6 +30,11 @@ namespace eBolnica.Model.Requests
         public string? Spol { get; set; }
 
         public bool Status { get; set; } = true;
+        public int BrojZdravstveneKartice { get; set; }
+
+        public string Adresa { get; set; } = null!;
+
+        public int Dob { get; set; }
 
         [JsonIgnore]
         public int? KorisnikId { get; set; }

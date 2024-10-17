@@ -1,22 +1,25 @@
-﻿using eBolnica.Model.Requests;
+﻿using eBolnica.Model;
+using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
-using eBolnica.Services.Database;
 using MapsterMapper;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using eBolnica.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
+
 namespace eBolnica.Services
 {
-    public class AdministratorService : BaseCRUDService<Model.Administrator, AdministratorSearchObject, Database.Administrator, AdministratorInsertRequest, AdministratorUpdateRequest>, IAdministratorService
+    public class PacijentService : BaseCRUDService<Model.Pacijent, PacijentSearchObject, Database.Pacijent, PacijentInsertRequest, PacijentUpdateRequest>, IPacijentService
     {
-        public AdministratorService(EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        public PacijentService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
         { }
-        public override void BeforeInsert(AdministratorInsertRequest request, Administrator entity)
+
+        public override void BeforeInsert(PacijentInsertRequest request, Database.Pacijent entity)
         {
             string salt = HashGenerator.GenerateSalt();
             string hash = HashGenerator.GenerateHash(salt, request.Lozinka);
@@ -33,17 +36,21 @@ namespace eBolnica.Services
                 Slika = request.Slika,
                 SlikaThumb = request.SlikaThumb,
                 LozinkaHash = hash,
-                LozinkaSalt = salt
+                LozinkaSalt = salt,
             };
 
             Context.Korisniks.Add(korisnik);
             Context.SaveChanges();
             entity.Korisnik = korisnik;
             entity.KorisnikId = korisnik.KorisnikId;
+            entity.Adresa = request.Adresa;
+            entity.BrojZdravstveneKartice = request.BrojZdravstveneKartice;
+            entity.Dob = request.Dob;
 
             base.BeforeInsert(request, entity);
         }
-        public override IQueryable<Database.Administrator> AddFilter(AdministratorSearchObject searchObject, IQueryable<Database.Administrator> query)
+
+        public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
             query = query.Include(x => x.Korisnik);
@@ -58,20 +65,22 @@ namespace eBolnica.Services
                 query = query.Where(x => x.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
 
-            if (!string.IsNullOrWhiteSpace(searchObject?.Email))
+            if (searchObject?.BrojZdravstveneKartice != null && searchObject.BrojZdravstveneKartice > 0)
             {
-                query = query.Where(x => x.Korisnik.Email == searchObject.Email);
+                query = query.Where(x => x.BrojZdravstveneKartice == searchObject.BrojZdravstveneKartice);
             }
-
-            if (!string.IsNullOrWhiteSpace(searchObject?.KorisnickoIme))
-            {
-                query = query.Where(x => x.Korisnik.KorisnickoIme == searchObject.KorisnickoIme);
-            }
-
             return query;
         }
-
-        public override void BeforeUpdate(AdministratorUpdateRequest request, Administrator entity)
+        public override Pacijent GetById(int id)
+        {
+            var entity = Context.Set<Database.Pacijent>().Include(x => x.Korisnik).FirstOrDefault(a => a.PacijentId == id);
+            if (entity == null)
+            {
+                return null;
+            }
+            return Mapper.Map<Model.Pacijent>(entity);
+        }
+        public override void BeforeUpdate(PacijentUpdateRequest request, Database.Pacijent entity)
         {
             base.BeforeUpdate(request, entity);
             var korisnik = Context.Korisniks.Find(entity.KorisnikId);
@@ -79,16 +88,6 @@ namespace eBolnica.Services
             {
                 Mapper.Map(request, korisnik);
             }
-        }
-
-        public override Model.Administrator GetById(int id)
-        {
-            var entity = Context.Set<Database.Administrator>().Include(x => x.Korisnik).FirstOrDefault(a => a.AdministratorId == id);
-            if (entity == null)
-            {
-                return null;
-            }
-            return Mapper.Map<Model.Administrator>(entity);
         }
     }
 }

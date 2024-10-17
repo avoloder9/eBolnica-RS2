@@ -16,19 +16,5 @@ namespace eBolnica.API.Controllers
         {
             _administratorService = service;
         }
-
-        [HttpPost("CreateAdministratorWithUserDetails")]
-        public IActionResult InsertAdministratorWithUserDetails([FromBody] AdministratorInsertRequest request)
-        {
-            try
-            {
-                var createdAdmin = _administratorService.InsertAdministratorWithUserDetails(request);
-                return Ok(createdAdmin);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while creating the tourist.");
-            }
-        }
     }
 }

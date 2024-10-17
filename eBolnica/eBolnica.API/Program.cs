@@ -12,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<IKorisnikService, KorisnikService>();
 builder.Services.AddTransient<IAdministratorService, AdministratorService>();
+builder.Services.AddTransient<IPacijentService, PacijentService>();
+builder.Services.AddTransient<IBolnicaService, BolnicaService>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();
