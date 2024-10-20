@@ -14,6 +14,8 @@ builder.Services.AddTransient<IKorisnikService, KorisnikService>();
 builder.Services.AddTransient<IAdministratorService, AdministratorService>();
 builder.Services.AddTransient<IPacijentService, PacijentService>();
 builder.Services.AddTransient<IBolnicaService, BolnicaService>();
+builder.Services.AddTransient<IDoktorService, DoktorService>();
+builder.Services.AddTransient<IOdjelService, OdjelService>();
 
 
 builder.Services.AddControllers();

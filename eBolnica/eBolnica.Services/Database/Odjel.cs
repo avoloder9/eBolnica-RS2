@@ -17,7 +17,7 @@ public partial class Odjel
 
     public int BolnicaId { get; set; }
 
-    public int GlavniDoktorId { get; set; }
+    public int? GlavniDoktorId { get; set; }
 
     public virtual Bolnica Bolnica { get; set; } = null!;
 
