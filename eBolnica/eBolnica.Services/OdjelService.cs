@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,8 @@ namespace eBolnica.Services
         }
         public override IQueryable<Database.Odjel> AddFilter(OdjelSearchObject searchObject, IQueryable<Database.Odjel> query)
         {
-            query = base.AddFilter(searchObject, query);
+            query = base.AddFilter(searchObject, query).Include(x => x.Bolnica);
+
 
             if (!string.IsNullOrWhiteSpace(searchObject?.NazivGTE))
             {
@@ -25,5 +27,24 @@ namespace eBolnica.Services
             }
             return query;
         }
+
+        public override void BeforeUpdate(OdjelUpdateRequest request, Database.Odjel entity)
+        {
+
+            if (request.GlavniDoktorId != 0)
+            {
+                var doktorExists = Context.Set<Database.Doktor>().Any(d => d.DoktorId == request.GlavniDoktorId);
+                if (!doktorExists)
+                {
+                    throw new Exception("Glavni doktor s tim Id-om ne postoji");
+                }
+                entity.GlavniDoktorId = request.GlavniDoktorId;
+            }
+            else
+            {
+                entity.GlavniDoktorId = null;
+            }
+        }
     }
 }
+

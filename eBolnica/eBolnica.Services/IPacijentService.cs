@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services
 {
-   public interface IPacijentService:ICRUDService<Pacijent,PacijentSearchObject,PacijentInsertRequest,PacijentUpdateRequest>
+    public interface IPacijentService : ICRUDService<Pacijent, PacijentSearchObject, PacijentInsertRequest, PacijentUpdateRequest>
     {
     }
 }

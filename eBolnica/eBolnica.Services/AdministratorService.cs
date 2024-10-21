@@ -18,6 +18,10 @@ namespace eBolnica.Services
         { }
         public override void BeforeInsert(AdministratorInsertRequest request, Administrator entity)
         {
+            if (request.Lozinka != request.LozinkaPotvrda)
+            {
+                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+            }
             string salt = HashGenerator.GenerateSalt();
             string hash = HashGenerator.GenerateHash(salt, request.Lozinka);
             var korisnik = new Database.Korisnik
@@ -73,6 +77,10 @@ namespace eBolnica.Services
 
         public override void BeforeUpdate(AdministratorUpdateRequest request, Administrator entity)
         {
+            if (request.Lozinka != request.LozinkaPotvrda)
+            {
+                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+            }
             base.BeforeUpdate(request, entity);
             var korisnik = Context.Korisniks.Find(entity.KorisnikId);
             if (korisnik != null)

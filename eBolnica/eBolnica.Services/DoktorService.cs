@@ -19,6 +19,10 @@ namespace eBolnica.Services
         }
         public override void BeforeInsert(DoktorInsertRequest request, Database.Doktor entity)
         {
+            if (request.Lozinka != request.LozinkaPotvrda)
+            {
+                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+            }
             string salt = HashGenerator.GenerateSalt();
             string hash = HashGenerator.GenerateHash(salt, request.Lozinka);
             var korisnik = new Database.Korisnik
@@ -49,7 +53,7 @@ namespace eBolnica.Services
         public override IQueryable<Database.Doktor> AddFilter(DoktorSearchObject searchObject, IQueryable<Database.Doktor> query)
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Korisnik);
-        
+
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
                 query = query.Where(x => x.Korisnik.Ime.StartsWith(searchObject.ImeGTE));
@@ -74,6 +78,10 @@ namespace eBolnica.Services
         }
         public override void BeforeUpdate(DoktorUpdateRequest request, Database.Doktor entity)
         {
+            if (request.Lozinka != request.LozinkaPotvrda)
+            {
+                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+            }
             base.BeforeUpdate(request, entity);
             var korisnik = Context.Korisniks.Find(entity.KorisnikId);
             if (korisnik != null)

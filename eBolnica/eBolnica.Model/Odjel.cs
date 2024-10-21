@@ -19,8 +19,8 @@ namespace eBolnica.Model
 
         public int? GlavniDoktorId { get; set; }
 
-        public virtual Bolnica Bolnica { get; set; } = null!;     
+        public virtual Bolnica Bolnica { get; set; } = null!;
 
-        public virtual Doktor GlavniDoktor { get; set; } = null!;
-        }
+        public virtual Doktor? GlavniDoktor { get; set; }
+    }
 }

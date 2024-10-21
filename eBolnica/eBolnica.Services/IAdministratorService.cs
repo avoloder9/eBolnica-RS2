@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 namespace eBolnica.Services
 {
     public interface IAdministratorService : ICRUDService<Administrator, AdministratorSearchObject, AdministratorInsertRequest, AdministratorUpdateRequest>
-    {       
+    {
     }
 }

@@ -23,7 +23,7 @@ public partial class Odjel
 
     public virtual ICollection<Doktor> Doktors { get; } = new List<Doktor>();
 
-    public virtual Doktor GlavniDoktor { get; set; } = null!;
+    public virtual Doktor? GlavniDoktor { get; set; }
 
     public virtual ICollection<Hospitalizacija> Hospitalizacijas { get; } = new List<Hospitalizacija>();
 
