@@ -23,6 +23,11 @@ namespace eBolnica.Services
             {
                 throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
             }
+            var odjelExists = Context.Set<Database.Odjel>().Any(d => d.OdjelId == request.OdjelId);
+            if (!odjelExists)
+            {
+                throw new Exception("Odjel s tim Id-om ne postoji");
+            }
             string salt = HashGenerator.GenerateSalt();
             string hash = HashGenerator.GenerateHash(salt, request.Lozinka);
             var korisnik = new Database.Korisnik

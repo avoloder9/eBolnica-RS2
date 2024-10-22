@@ -27,7 +27,7 @@ namespace eBolnica.Services
         }
 
         public virtual void BeforeInsert(TInsert request, TDbEntity entity) { }
-        public TModel Update(int id, TUpdate request)
+        public virtual TModel Update(int id, TUpdate request)
         {
             var set = Context.Set<TDbEntity>();
             var entity = set.Find(id);

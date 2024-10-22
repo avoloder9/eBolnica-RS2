@@ -1,6 +1,7 @@
 ﻿using eBolnica.Model;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
+using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;

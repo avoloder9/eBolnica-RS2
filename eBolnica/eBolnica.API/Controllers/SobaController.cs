@@ -8,11 +8,8 @@ namespace eBolnica.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class OdjelController : BaseCRUDController<Odjel, OdjelSearchObject, OdjelInsertRequest, OdjelUpdateRequest>
+    public class SobaController : BaseCRUDController<Soba, SobaSearchObject, SobaInsertRequest, SobaUpdateRequest>
     {
-
-        public OdjelController(IOdjelService service) : base(service)
-        { }
-
+        public SobaController(ISobaService service) : base(service) { }
     }
 }

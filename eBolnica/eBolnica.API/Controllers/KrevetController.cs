@@ -8,11 +8,8 @@ namespace eBolnica.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class OdjelController : BaseCRUDController<Odjel, OdjelSearchObject, OdjelInsertRequest, OdjelUpdateRequest>
+    public class KrevetController : BaseCRUDController<Krevet, KrevetSearchObject, KrevetInsertRequest, KrevetUpdateRequest>
     {
-
-        public OdjelController(IOdjelService service) : base(service)
-        { }
-
+        public KrevetController(IKrevetService service) : base(service) { }
     }
 }
