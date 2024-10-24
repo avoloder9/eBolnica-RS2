@@ -1,4 +1,4 @@
-﻿using eBolnica.Services;
+﻿using eBolnica.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;

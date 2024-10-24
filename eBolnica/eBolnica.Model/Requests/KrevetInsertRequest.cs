@@ -8,6 +8,6 @@ namespace eBolnica.Model.Requests
     {
         public int SobaId { get; set; }
 
-        public bool? Zauzet { get; set; }
+        public bool? Zauzet { get; set; } = false;
     }
 }

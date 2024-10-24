@@ -1,6 +1,7 @@
 using eBolnica.API;
-using eBolnica.Services;
 using eBolnica.Services.Database;
+using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,10 @@ builder.Services.AddTransient<IOdjelService, OdjelService>();
 builder.Services.AddTransient<IMedicinskoOsobljeService, MedicinskoOsobljeService>();
 builder.Services.AddTransient<ISobaService, SobaService>();
 builder.Services.AddTransient<IKrevetService, KrevetService>();
-
+builder.Services.AddTransient<IMedicinskaDokumentacijaService, MedicinskaDokumentacijaService>();
+builder.Services.AddTransient<ITerminService, TerminService>();
+builder.Services.AddTransient<IStatusService, StatusService>();
+builder.Services.AddTransient<IUputnicaService, UputnicaService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();

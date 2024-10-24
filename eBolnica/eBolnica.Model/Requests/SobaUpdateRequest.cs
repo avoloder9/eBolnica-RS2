@@ -10,6 +10,6 @@ namespace eBolnica.Model.Requests
 
         public int? BrojKreveta { get; set; }
 
-        public bool? Zauzeta { get; set; }
+        public bool? Zauzeta { get; set; } = false;
     }
 }
