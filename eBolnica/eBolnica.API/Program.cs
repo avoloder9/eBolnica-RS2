@@ -4,6 +4,7 @@ using eBolnica.Services.Interfaces;
 using eBolnica.Services.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -24,6 +25,8 @@ builder.Services.AddTransient<IMedicinskaDokumentacijaService, MedicinskaDokumen
 builder.Services.AddTransient<ITerminService, TerminService>();
 builder.Services.AddTransient<IStatusService, StatusService>();
 builder.Services.AddTransient<IUputnicaService, UputnicaService>();
+builder.Services.AddTransient<IPregledService, PregledService>();
+builder.Services.AddTransient<IHospitalizacijaService, HospitalizacijaService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();

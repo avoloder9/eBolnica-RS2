@@ -376,14 +376,14 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.PregledId).HasColumnName("PregledID");
             entity.Property(e => e.Anamneza).HasMaxLength(100);
             entity.Property(e => e.GlavnaDijagnoza).HasMaxLength(100);
-            entity.Property(e => e.TerminId).HasColumnName("TerminID");
+            //entity.Property(e => e.TerminId).HasColumnName("TerminID");
             entity.Property(e => e.UputnicaId).HasColumnName("UputnicaID");
             entity.Property(e => e.Zakljucak).HasMaxLength(100);
 
-            entity.HasOne(d => d.Termin).WithMany(p => p.Pregleds)
-                .HasForeignKey(d => d.TerminId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Pregled_Termin");
+            //entity.HasOne(d => d.Termin).WithMany(p => p.Pregleds)
+            //    .HasForeignKey(d => d.TerminId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_Pregled_Termin");
 
             entity.HasOne(d => d.Uputnica).WithMany(p => p.Pregleds)
                 .HasForeignKey(d => d.UputnicaId)
