@@ -27,6 +27,9 @@ builder.Services.AddTransient<IStatusService, StatusService>();
 builder.Services.AddTransient<IUputnicaService, UputnicaService>();
 builder.Services.AddTransient<IPregledService, PregledService>();
 builder.Services.AddTransient<IHospitalizacijaService, HospitalizacijaService>();
+builder.Services.AddTransient<ITerapijaService, TerapijaService>();
+builder.Services.AddTransient<IOperacijaService, OperacijaService>();
+builder.Services.AddTransient<ILaboratorijskiNalazService, LaboratorijskiNalazService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();
