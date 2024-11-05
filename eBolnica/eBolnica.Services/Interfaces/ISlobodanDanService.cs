@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services.Interfaces
 {
-    public interface INalazParametar : ICRUDService<NalazParametar, NalazParametarSearchObject, NalazParametarInsertRequest, NalazParametarUpdateRequest>
+    public interface ISlobodanDanService : ICRUDService<SlobodniDan, SlobodniDanSearchObject, SlobodanDanInsertRequest, SlobodanDanUpdateRequest>
     {
     }
 }

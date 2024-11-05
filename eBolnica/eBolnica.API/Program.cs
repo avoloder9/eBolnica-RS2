@@ -31,9 +31,12 @@ builder.Services.AddTransient<ITerapijaService, TerapijaService>();
 builder.Services.AddTransient<IOperacijaService, OperacijaService>();
 builder.Services.AddTransient<ILaboratorijskiNalazService, LaboratorijskiNalazService>();
 builder.Services.AddTransient<IParametarService, ParametarService>();
-builder.Services.AddTransient<INalazParametar, NalazParametarService>();
+builder.Services.AddTransient<INalazParametarService, NalazParametarService>();
 builder.Services.AddTransient<IVitalniParametriService, VitalniParemetriService>();
 builder.Services.AddTransient<IRadniZadatakService, RadniZadatakService>();
+builder.Services.AddTransient<ISmjenaService, SmjenaService>();
+builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
+builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();

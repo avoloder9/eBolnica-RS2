@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services.Services
 {
-    public class NalazParametarService : BaseCRUDService<NalazParametar, NalazParametarSearchObject, Database.NalazParametar, NalazParametarInsertRequest, NalazParametarUpdateRequest>, INalazParametar
+    public class NalazParametarService : BaseCRUDService<NalazParametar, NalazParametarSearchObject, Database.NalazParametar, NalazParametarInsertRequest, NalazParametarUpdateRequest>, INalazParametarService
     {
         public NalazParametarService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
         {

@@ -8,8 +8,8 @@ namespace eBolnica.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class NalazParametarController : BaseCRUDController<NalazParametar, NalazParametarSearchObject, NalazParametarInsertRequest, NalazParametarUpdateRequest>
+    public class SmjenaController : BaseCRUDController<Smjena, SmjenaSearchObject, SmjenaInsertRequest, SmjenaUpdateRequest>
     {
-        public NalazParametarController(INalazParametarService service) : base(service) { }
+        public SmjenaController(ISmjenaService service) : base(service) { }
     }
 }
