@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class OperacijaController : BaseCRUDController<Operacija, OperacijaSearchObject, OperacijaInsertRequest, OperacijaUpdateRequest>
     {
         public OperacijaController(IOperacijaService service) : base(service) { }

@@ -272,7 +272,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.NalazParametarId).HasColumnName("NalazParametarID");
             entity.Property(e => e.LaboratorijskiNalazId).HasColumnName("LaboratorijskiNalazID");
             entity.Property(e => e.ParametarId).HasColumnName("ParametarID");
-            entity.Property(e => e.Vrijednost).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Vrijednost).HasColumnType("decimal(18, 1)");
 
             entity.HasOne(d => d.LaboratorijskiNalaz).WithMany(p => p.NalazParametars)
                 .HasForeignKey(d => d.LaboratorijskiNalazId)
@@ -365,6 +365,9 @@ public partial class EBolnicaContext : DbContext
 
             entity.Property(e => e.ParametarId).HasColumnName("ParametarID");
             entity.Property(e => e.Naziv).HasMaxLength(20);
+            entity.Property(e => e.MinVrijednost).HasColumnType("decimal(18, 1)");
+            entity.Property(e => e.MaxVrijednost).HasColumnType("decimal(18, 1)");
+
         });
 
         modelBuilder.Entity<Pregled>(entity =>
