@@ -37,6 +37,7 @@ builder.Services.AddTransient<IRadniZadatakService, RadniZadatakService>();
 builder.Services.AddTransient<ISmjenaService, SmjenaService>();
 builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
 builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
+builder.Services.AddTransient<IRadniSatiService, RadniSatiService>();
 
 builder.Services.AddControllers();
 builder.Services.AddMapster();

@@ -38,10 +38,10 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Smjena sa zadanim ID-om ne postoji");
             }
-            var isMedicinskoOsoblje = Context.MedicinskoOsobljes.Any(m => m.KorisnikId == request.KorisnikId);
-            if (!isMedicinskoOsoblje)
+            var isKorisnik = Context.Korisniks.Any(k => k.KorisnikId == request.KorisnikId);
+            if (!isKorisnik)
             {
-                throw new Exception("Korisnik mora biti medicinsko osoblje da bi mu se dodijelila smjena");
+                throw new Exception("Korisnik sa zadanim ID-om ne postoji");
             }
             base.BeforeInsert(request, entity);
         }
