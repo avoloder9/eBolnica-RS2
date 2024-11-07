@@ -11,13 +11,16 @@ using System.Text;
 using System.Threading.Tasks;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace eBolnica.Services.Services
 {
     public class KorisnikService : BaseCRUDService<Model.Models.Korisnik, KorisnikSearchObject, Database.Korisnik, KorisnikInsertRequest, KorisnikUpdateRequest>, IKorisnikService
     {
-        public KorisnikService(EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        ILogger<KorisnikService> _logger;
+        public KorisnikService(EBolnicaContext context, IMapper mapper, ILogger<KorisnikService> logger) : base(context, mapper)
         {
+            _logger = logger;
         }
 
         public override IQueryable<Database.Korisnik> AddFilter(KorisnikSearchObject searchObject, IQueryable<Database.Korisnik> query)
@@ -48,6 +51,7 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(KorisnikInsertRequest request, Database.Korisnik entity)
         {
+            _logger.LogInformation($"Adding user: {entity.KorisnickoIme}");
             if (request.Lozinka != request.LozinkaPotvrda)
             {
                 throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");

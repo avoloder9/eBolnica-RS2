@@ -9,7 +9,7 @@ namespace eBolnica.Model.Requests
 
         public int TerminId { get; set; }
 
-        public int StatusId { get; set; }
+        public bool? Status { get; set; }
 
         public DateTime DatumKreiranja { get; set; } = DateTime.Now;
     }

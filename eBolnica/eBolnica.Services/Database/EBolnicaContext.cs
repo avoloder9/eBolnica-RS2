@@ -57,8 +57,6 @@ public partial class EBolnicaContext : DbContext
 
     public virtual DbSet<Soba> Sobas { get; set; }
 
-    public virtual DbSet<Status> Statuses { get; set; }
-
     public virtual DbSet<Terapija> Terapijas { get; set; }
 
     public virtual DbSet<Termin> Termins { get; set; }
@@ -320,7 +318,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.DoktorId).HasColumnName("DoktorID");
             entity.Property(e => e.Komentar).HasMaxLength(20);
             entity.Property(e => e.PacijentId).HasColumnName("PacijentID");
-            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.StateMachine).HasMaxLength(20);
             entity.Property(e => e.TerapijaId).HasColumnName("TerapijaID");
             entity.Property(e => e.TipOperacije).HasMaxLength(20);
 
@@ -508,15 +506,7 @@ public partial class EBolnicaContext : DbContext
                 .HasConstraintName("FK_Soba_Odjel");
         });
 
-        modelBuilder.Entity<Status>(entity =>
-        {
-            entity.HasKey(e => e.StatusId).HasName("PK__Status__C8EE204363BED503");
 
-            entity.ToTable("Status");
-
-            entity.Property(e => e.StatusId).HasColumnName("StatusID");
-            entity.Property(e => e.Naziv).HasMaxLength(20);
-        });
 
         modelBuilder.Entity<Terapija>(entity =>
         {
@@ -574,13 +564,11 @@ public partial class EBolnicaContext : DbContext
 
             entity.Property(e => e.UputnicaId).HasColumnName("UputnicaID");
             entity.Property(e => e.DatumKreiranja).HasColumnType("datetime");
-            entity.Property(e => e.StatusId).HasColumnName("StatusID");
+            entity.Property(e => e.StateMachine).HasMaxLength(50);
+            entity.Property(e => e.Status)
+                 .IsRequired()
+                 .HasDefaultValueSql("((0))");
             entity.Property(e => e.TerminId).HasColumnName("TerminID");
-
-            entity.HasOne(d => d.Status).WithMany(p => p.Uputnicas)
-                .HasForeignKey(d => d.StatusId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Uputnica_Status");
 
             entity.HasOne(d => d.Termin).WithMany(p => p.Uputnicas)
                 .HasForeignKey(d => d.TerminId)

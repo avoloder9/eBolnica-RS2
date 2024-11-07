@@ -18,7 +18,7 @@ namespace eBolnica.Model.Requests
 
         public string TipOperacije { get; set; } = null!;
 
-        public string Status { get; set; } = null!;
+        public string? StateMachine { get; set; }
 
         public string? Komentar { get; set; }
 

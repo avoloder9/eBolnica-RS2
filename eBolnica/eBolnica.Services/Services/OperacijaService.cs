@@ -4,9 +4,11 @@ using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Database;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.OperacijaStateMachine;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +20,12 @@ namespace eBolnica.Services.Services
 {
     public class OperacijaService : BaseCRUDService<Model.Models.Operacija, OperacijaSearchObject, Database.Operacija, OperacijaInsertRequest, OperacijaUpdateRequest>, IOperacijaService
     {
-        public OperacijaService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        public BaseOperacijaState BaseOperacijaState { get; set; }
+        ILogger<OperacijaService> _logger;
+        public OperacijaService(Database.EBolnicaContext context, IMapper mapper, BaseOperacijaState baseOperacijaState, ILogger<OperacijaService> logger) : base(context, mapper)
         {
+            BaseOperacijaState = baseOperacijaState;
+            _logger = logger;
         }
         public override IQueryable<Database.Operacija> AddFilter(OperacijaSearchObject searchObject, IQueryable<Database.Operacija> query)
         {
@@ -79,6 +85,69 @@ namespace eBolnica.Services.Services
         {
             var operacija = Context.Set<Database.Operacija>().Where(x => x.PacijentId == pacijentId).ToList();
             return Mapper.Map<List<Model.Models.Operacija>>(operacija);
+        }
+        public override Model.Models.Operacija Insert(OperacijaInsertRequest request)
+        {
+            var state = BaseOperacijaState.CreateState("initial");
+            return state.Insert(request);
+        }
+        public override Model.Models.Operacija Update(int id, OperacijaUpdateRequest request)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Update(id, request);
+        }
+
+        public Model.Models.Operacija Activate(int id)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Activate(id);
+        }
+
+        public Model.Models.Operacija Hide(int id)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Hide(id);
+        }
+
+        public Model.Models.Operacija Edit(int id)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Edit(id);
+        }
+
+        public List<string> AllowedActions(int id)
+        {
+            _logger.LogInformation($"Allowed actions called for: {id}");
+
+            if (id <= 0)
+            {
+                var state = BaseOperacijaState.CreateState("initial");
+                return state.AllowedActions(null);
+            }
+            else
+            {
+                var entity = Context.Operacijas.Find(id);
+                var state = BaseOperacijaState.CreateState(entity.StateMachine);
+                return state.AllowedActions(entity);
+            }
+        }
+
+        public Model.Models.Operacija Close(int id)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Close(id);
+        }
+
+        public Model.Models.Operacija Cancelled(int id)
+        {
+            var entity = GetById(id);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            return state.Cancel(id);
         }
     }
 }

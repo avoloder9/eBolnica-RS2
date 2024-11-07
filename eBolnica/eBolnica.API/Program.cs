@@ -1,7 +1,10 @@
 using eBolnica.API;
+using eBolnica.API.Filters;
 using eBolnica.Services.Database;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.OperacijaStateMachine;
 using eBolnica.Services.Services;
+using eBolnica.Services.UputnicaStateMachine;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Connections.Features;
@@ -23,7 +26,6 @@ builder.Services.AddTransient<ISobaService, SobaService>();
 builder.Services.AddTransient<IKrevetService, KrevetService>();
 builder.Services.AddTransient<IMedicinskaDokumentacijaService, MedicinskaDokumentacijaService>();
 builder.Services.AddTransient<ITerminService, TerminService>();
-builder.Services.AddTransient<IStatusService, StatusService>();
 builder.Services.AddTransient<IUputnicaService, UputnicaService>();
 builder.Services.AddTransient<IPregledService, PregledService>();
 builder.Services.AddTransient<IHospitalizacijaService, HospitalizacijaService>();
@@ -39,7 +41,25 @@ builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
 builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
 builder.Services.AddTransient<IRadniSatiService, RadniSatiService>();
 
-builder.Services.AddControllers();
+builder.Services.AddTransient<BaseUputnicaState>();
+builder.Services.AddTransient<InitialUputnicaState>();
+builder.Services.AddTransient<DraftUputnicaState>();
+builder.Services.AddTransient<ActiveUputnicaState>();
+builder.Services.AddTransient<HiddenUputnicaState>();
+builder.Services.AddTransient<ClosedUputnicaState>();
+
+builder.Services.AddTransient<BaseOperacijaState>();
+builder.Services.AddTransient<InitialOperacijaState>();
+builder.Services.AddTransient<DraftOperacijaState>();
+builder.Services.AddTransient<ActiveOperacijaState>();
+builder.Services.AddTransient<HiddenOperacijaState>();
+builder.Services.AddTransient<ClosedOperacijaState>();
+builder.Services.AddTransient<CancelledOperacijaState>();
+
+builder.Services.AddControllers(x =>
+{
+    x.Filters.Add<ExceptionFilter>();
+});
 builder.Services.AddMapster();
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
