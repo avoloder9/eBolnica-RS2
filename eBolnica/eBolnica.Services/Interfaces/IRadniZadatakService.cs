@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IRadniZadatakService : ICRUDService<RadniZadatak, RadniZadatakSearchObject, RadniZadatakInsertRequest, RadniZadatakUpdateRequest>
     {
+        public List<Database.MedicinskoOsoblje> GetMedicinskoOsobljeNaSmjeni(DateTime datumZadatka, TimeSpan vrijemeZadatka);
+
     }
 }

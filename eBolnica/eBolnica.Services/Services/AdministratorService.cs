@@ -21,6 +21,19 @@ namespace eBolnica.Services.Services
         { }
         public override void BeforeInsert(AdministratorInsertRequest request, Database.Administrator entity)
         {
+            var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
+            if (!string.IsNullOrEmpty(pw))
+            {
+                throw new Exception("Lozinka nije validna");
+            }
+            if (!string.IsNullOrEmpty(request.Telefon))
+            {
+                var phoneNumber = ValidationHelper.CheckPhoneNumber(request.Telefon);
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    throw new Exception("Broj telefona nije validan");
+                }
+            }
             if (request.Lozinka != request.LozinkaPotvrda)
             {
                 throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
@@ -79,6 +92,22 @@ namespace eBolnica.Services.Services
 
         public override void BeforeUpdate(AdministratorUpdateRequest request, Database.Administrator entity)
         {
+            if (!string.IsNullOrEmpty(request.Lozinka))
+            {
+                var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
+                if (!string.IsNullOrEmpty(pw))
+                {
+                    throw new Exception("Lozinka nije validna");
+                }
+            }
+            if (!string.IsNullOrEmpty(request.Telefon))
+            {
+                var phoneNumber = ValidationHelper.CheckPhoneNumber(request.Telefon);
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    throw new Exception("Broj telefona nije validan");
+                }
+            }
             if (request.Lozinka != request.LozinkaPotvrda)
             {
                 throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");

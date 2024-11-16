@@ -34,7 +34,7 @@ namespace eBolnica.Services.Services
             if (!sobaExists)
             {
                 throw new Exception("Soba s tim Id-om ne postoji");
-            }
+            }           
             var soba = Context.Set<Database.Soba>().Include(x => x.Odjel).FirstOrDefault(y => y.SobaId == request.SobaId);
             soba.BrojKreveta++;
             if (soba.Odjel != null)
@@ -46,7 +46,7 @@ namespace eBolnica.Services.Services
             else
             {
                 throw new Exception("Odjel za ovu sobu ne postoji");
-            }
+            }            
             Context.SaveChanges();
             entity.Soba = soba;
             base.BeforeInsert(request, entity);

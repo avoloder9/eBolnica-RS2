@@ -51,6 +51,21 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(KorisnikInsertRequest request, Database.Korisnik entity)
         {
+
+            var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
+            if (!string.IsNullOrEmpty(pw))
+            {
+                throw new Exception("Lozinka nije validna");
+            }
+            if (!string.IsNullOrEmpty(request.Telefon))
+            {
+                var phoneNumber = ValidationHelper.CheckPhoneNumber(request.Telefon);
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    throw new Exception("Broj telefona nije validan");
+                }
+            }
+
             _logger.LogInformation($"Adding user: {entity.KorisnickoIme}");
             if (request.Lozinka != request.LozinkaPotvrda)
             {
@@ -66,6 +81,22 @@ namespace eBolnica.Services.Services
         public override void BeforeUpdate(KorisnikUpdateRequest request, Database.Korisnik entity)
         {
             base.BeforeUpdate(request, entity);
+            if (!string.IsNullOrEmpty(request.Lozinka))
+            {
+                var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
+                if (!string.IsNullOrEmpty(pw))
+                {
+                    throw new Exception("Lozinka nije validna");
+                }
+            }
+            if (!string.IsNullOrEmpty(request.Telefon))
+            {
+                var phoneNumber = ValidationHelper.CheckPhoneNumber(request.Telefon);
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    throw new Exception("Broj telefona nije validan");
+                }
+            }
             if (request.Lozinka != null)
             {
                 if (request.Lozinka != request.LozinkaPotvrda)

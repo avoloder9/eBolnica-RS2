@@ -14,6 +14,7 @@ namespace eBolnica.Services.Services
 {
     public class RadniZadatakService : BaseCRUDService<RadniZadatak, RadniZadatakSearchObject, Database.RadniZadatak, RadniZadatakInsertRequest, RadniZadatakUpdateRequest>, IRadniZadatakService
     {
+
         public RadniZadatakService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
         {
         }
@@ -34,6 +35,12 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Osoblje sa zadanim ID-om ne postoji");
             }
+
+            var trenutnoOsoblje = GetMedicinskoOsobljeNaSmjeni(request.DatumZadatka, request.DatumZadatka.TimeOfDay);
+            if (!trenutnoOsoblje.Any(x => x.MedicinskoOsobljeId == request.MedicinskoOsobljeId))
+            {
+                throw new Exception("Odabrano medicinsko osoblje nije na smjeni u datom trenutku");
+            }
             base.BeforeInsert(request, entity);
         }
         public override IQueryable<Database.RadniZadatak> AddFilter(RadniZadatakSearchObject searchObject, IQueryable<Database.RadniZadatak> query)
@@ -42,5 +49,13 @@ namespace eBolnica.Services.Services
                 .Include(o => o.MedicinskoOsoblje).ThenInclude(x => x.Korisnik).Include(p => p.Pacijent).ThenInclude(y => y.Korisnik);
             return query;
         }
+
+        public List<Database.MedicinskoOsoblje> GetMedicinskoOsobljeNaSmjeni(DateTime datumZadatka, TimeSpan vrijemeZadatka)
+        {
+            var trenutnoOsoblje = Context.RasporedSmjenas.Where(rs => rs.Datum.Date == datumZadatka.Date && rs.Smjena.VrijemePocetka <= vrijemeZadatka
+            && rs.Smjena.VrijemeZavrsetka >= vrijemeZadatka).SelectMany(rs => rs.Korisnik.MedicinskoOsobljes).Distinct().ToList();
+            return trenutnoOsoblje;
+        }
+
     }
 }

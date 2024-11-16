@@ -29,7 +29,21 @@ namespace eBolnica.Services.Services
             }
             return query;
         }
-
+        public override void BeforeInsert(OdjelInsertRequest request, Database.Odjel entity)
+        {
+            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == entity.BolnicaId);
+            if (bolnica == null)
+            {
+                throw new Exception("Bolnica sa zadanim ID-om ne postoji");
+            }
+            if (bolnica.UkupanBrojOdjela == null)
+            {
+                bolnica.UkupanBrojOdjela = 0;
+            }
+            bolnica.UkupanBrojOdjela++;
+            Context.SaveChanges();
+            base.BeforeInsert(request, entity);
+        }
         public override void BeforeUpdate(OdjelUpdateRequest request, Database.Odjel entity)
         {
 

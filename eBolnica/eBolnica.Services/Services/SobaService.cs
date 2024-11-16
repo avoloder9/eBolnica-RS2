@@ -29,15 +29,26 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(SobaInsertRequest request, Database.Soba entity)
         {
-            var odjelExists = Context.Set<Database.Odjel>().Any(d => d.OdjelId == request.OdjelId);
-            if (!odjelExists)
+            var odjel = Context.Set<Database.Odjel>().FirstOrDefault(d => d.OdjelId == request.OdjelId);
+            if (odjel == null)
             {
-                throw new Exception("Odjel s tim Id-om ne postoji");
+                throw new Exception("Odjel s tim Id-om nije pronađen");
             }
-            var odjel = Context.Set<Database.Odjel>().Find(request.OdjelId);
+            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == odjel.BolnicaId);
+            if (bolnica == null)
+            {
+                throw new Exception("Bolnica sa zadanim ID-om ne postoji");
+            }
+            if (bolnica.UkupanBrojSoba == null)
+            {
+                bolnica.UkupanBrojSoba = 0;
+            }
+            bolnica.UkupanBrojSoba++;
             odjel.BrojSoba++;
+
             Context.SaveChanges();
             entity.Odjel = odjel;
+
             base.BeforeInsert(request, entity);
         }
     }
