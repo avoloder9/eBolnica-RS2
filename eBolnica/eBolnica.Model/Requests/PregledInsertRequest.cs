@@ -8,9 +8,10 @@ namespace eBolnica.Model.Requests
     public class PregledInsertRequest
     {
 
-        //public int TerminId { get; set; }
+      
 
         public int UputnicaId { get; set; }
+        public int MedicinskaDokumentacijaId { get; set; }
 
         public string GlavnaDijagnoza { get; set; } = null!;
 

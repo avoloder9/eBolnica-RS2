@@ -29,6 +29,6 @@ namespace eBolnica.Services.Services
                 throw new Exception("Parametar sa zadanim ID-om ne postoji");
             }
             base.BeforeInsert(request, entity);
-        }        
+        }
     }
 }

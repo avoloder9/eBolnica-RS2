@@ -60,22 +60,27 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Krevet sa zadanim ID-om ne postoji ili ne pripada zadanoj sobi");
             }
+            var medicinskaDokumentacijaExists = Context.MedicinskaDokumentacijas.Any(k => k.MedicinskaDokumentacijaId == request.MedicinskaDokumentacijaId);
+            if (!medicinskaDokumentacijaExists)
+            {
+                throw new Exception("Medicinska dokumentacija sa zadanim ID-om ne postoji ili ne pripada zadanoj sobi");
+            }
+
+            var bolnica = Context.Bolnicas.FirstOrDefault();
 
             var medicinskaDokumentacija = Context.MedicinskaDokumentacijas.FirstOrDefault(x => x.PacijentId == request.PacijentId);
             if (medicinskaDokumentacija != null)
             {
                 medicinskaDokumentacija.Hospitalizovan = true;
+                bolnica.TrenutniBrojHospitalizovanih++;
                 Context.SaveChanges();
             }
             else
             {
                 throw new Exception("Medicinska dokumentacija za zadatog pacijenta ne postoji");
             }
-
             base.BeforeInsert(request, entity);
         }
-
-
         public override void BeforeUpdate(HospitalizacijaUpdateRequest request, Database.Hospitalizacija entity)
         {
             var sobaExists = Context.Sobas.Any(s => s.SobaId == request.SobaId);

@@ -7,7 +7,10 @@ namespace eBolnica.Model.SearchObjects
 {
     public class PregledSearchObject : BaseSearchObject
     {
-        public string? ImeGTE { get; set; }
-        public string? PrezimeGTE { get; set; }
+        public string? PacijentImeGTE { get; set; }
+        public string? PacijentPrezimeGTE { get; set; }
+        public string? DoktorImeGTE { get; set; }
+        public string? DoktorPrezimeGTE { get; set; }
+        public string? NazivOdjela { get; set; }
     }
 }

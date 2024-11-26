@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,16 +20,28 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Pregled> AddFilter(PregledSearchObject searchObject, IQueryable<Database.Pregled> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Doktor).ThenInclude(d => d.Korisnik)
+            query = base.AddFilter(searchObject, query).Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(o => o.Odjel)
+                .Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Doktor).ThenInclude(d => d.Korisnik)
                 .Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Pacijent).ThenInclude(p => p.Korisnik);
-
-            if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
+            if (!string.IsNullOrWhiteSpace(searchObject?.PacijentImeGTE))
             {
-                query = query.Where(x => x.Uputnica.Termin.Pacijent.Korisnik.Ime.StartsWith(searchObject.ImeGTE));
+                query = query.Where(x => x.Uputnica.Termin.Pacijent.Korisnik.Ime.StartsWith(searchObject.PacijentImeGTE));
             }
-            if (!string.IsNullOrWhiteSpace(searchObject?.PrezimeGTE))
+            if (!string.IsNullOrWhiteSpace(searchObject?.PacijentImeGTE))
             {
-                query = query.Where(x => x.Uputnica.Termin.Pacijent.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
+                query = query.Where(x => x.Uputnica.Termin.Pacijent.Korisnik.Prezime.StartsWith(searchObject.PacijentImeGTE));
+            }
+            if (!string.IsNullOrWhiteSpace(searchObject?.DoktorImeGTE))
+            {
+                query = query.Where(x => x.Uputnica.Termin.Doktor.Korisnik.Ime.StartsWith(searchObject.DoktorImeGTE));
+            }
+            if (!string.IsNullOrWhiteSpace(searchObject?.DoktorPrezimeGTE))
+            {
+                query = query.Where(x => x.Uputnica.Termin.Doktor.Korisnik.Prezime.StartsWith(searchObject.DoktorPrezimeGTE));
+            }
+            if (!string.IsNullOrWhiteSpace(searchObject?.NazivOdjela))
+            {
+                query = query.Where(x => x.Uputnica.Termin.Odjel.Naziv.Equals(searchObject.NazivOdjela));
             }
             return query;
         }
@@ -39,7 +52,11 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Uputnica sa zadanim ID-om ne postoji");
             }
-
+            var medicinskaDokumentacijaExists = Context.MedicinskaDokumentacijas.Any(p => p.MedicinskaDokumentacijaId == request.MedicinskaDokumentacijaId);
+            if (!medicinskaDokumentacijaExists)
+            {
+                throw new Exception("Medicinska dokumentacija sa zadanim ID-om ne postoji");
+            }
             base.BeforeInsert(request, entity);
         }
     }

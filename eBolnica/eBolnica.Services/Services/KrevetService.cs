@@ -34,19 +34,29 @@ namespace eBolnica.Services.Services
             if (!sobaExists)
             {
                 throw new Exception("Soba s tim Id-om ne postoji");
-            }           
+            }
             var soba = Context.Set<Database.Soba>().Include(x => x.Odjel).FirstOrDefault(y => y.SobaId == request.SobaId);
+
+            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == soba.Odjel.BolnicaId);
+            if (bolnica == null)
+            {
+                throw new Exception("Bolnica sa zadanim ID-om ne postoji");
+            }
+            if (bolnica.UkupanBrojKreveta == null)
+            {
+                bolnica.UkupanBrojKreveta = 0;
+            }
+            bolnica.UkupanBrojKreveta++;
             soba.BrojKreveta++;
             if (soba.Odjel != null)
             {
-
                 soba.Odjel.BrojKreveta++;
                 soba.Odjel.BrojSlobodnihKreveta++;
             }
             else
             {
                 throw new Exception("Odjel za ovu sobu ne postoji");
-            }            
+            }
             Context.SaveChanges();
             entity.Soba = soba;
             base.BeforeInsert(request, entity);

@@ -14,6 +14,7 @@ namespace eBolnica.Model.Requests
         public int OdjelId { get; set; }
 
         public DateTime DatumPrijema { get; set; }
+        public int MedicinskaDokumentacijaId { get; set; }
 
         public int SobaId { get; set; }
 

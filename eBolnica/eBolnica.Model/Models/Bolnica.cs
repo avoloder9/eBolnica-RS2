@@ -18,7 +18,7 @@ namespace eBolnica.Model.Models
         public int? UkupanBrojSoba { get; set; }
 
         public int? UkupanBrojOdjela { get; set; }
-
+        public int? UkupanBrojKreveta { get; set; }
         public int? TrenutniBrojHospitalizovanih { get; set; }
     }
 }

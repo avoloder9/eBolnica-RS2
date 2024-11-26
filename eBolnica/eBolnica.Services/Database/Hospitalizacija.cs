@@ -21,11 +21,17 @@ public partial class Hospitalizacija
 
     public int KrevetId { get; set; }
 
+    public int MedicinskaDokumentacijaId { get; set; }
+
     public virtual Doktor Doktor { get; set; } = null!;
 
     public virtual Krevet Krevet { get; set; } = null!;
 
+    public virtual MedicinskaDokumentacija? MedicinskaDokumentacija { get; set; }
+
     public virtual Odjel Odjel { get; set; } = null!;
+
+    public virtual ICollection<OtpusnoPismo> OtpusnoPismos { get; } = new List<OtpusnoPismo>();
 
     public virtual Pacijent Pacijent { get; set; } = null!;
 

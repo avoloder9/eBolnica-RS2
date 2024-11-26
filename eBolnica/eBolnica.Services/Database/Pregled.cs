@@ -7,8 +7,6 @@ public partial class Pregled
 {
     public int PregledId { get; set; }
 
-    //public int TerminId { get; set; }
-
     public int UputnicaId { get; set; }
 
     public string GlavnaDijagnoza { get; set; } = null!;
@@ -17,9 +15,11 @@ public partial class Pregled
 
     public string Zakljucak { get; set; } = null!;
 
-    public virtual ICollection<Terapija> Terapijas { get; } = new List<Terapija>();
+    public int MedicinskaDokumentacijaId { get; set; }
 
-    //public virtual Termin Termin { get; set; } = null!;
+    public virtual MedicinskaDokumentacija? MedicinskaDokumentacija { get; set; }
+
+    public virtual ICollection<Terapija> Terapijas { get; } = new List<Terapija>();
 
     public virtual Uputnica Uputnica { get; set; } = null!;
 }

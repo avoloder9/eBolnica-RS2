@@ -39,6 +39,8 @@ public partial class EBolnicaContext : DbContext
 
     public virtual DbSet<Operacija> Operacijas { get; set; }
 
+    public virtual DbSet<OtpusnoPismo> OtpusnoPismos { get; set; }
+
     public virtual DbSet<Pacijent> Pacijents { get; set; }
 
     public virtual DbSet<Parametar> Parametars { get; set; }
@@ -67,7 +69,7 @@ public partial class EBolnicaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost, 1433;Initial Catalog=eBolnica; user=sa; Password=Mostar123!; TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Data source=localhost, 1433;Initial Catalog=eBolnica; user=sa; Password=Mostar123!; TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -100,6 +102,8 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.TrenutniBrojHospitalizovanih).HasDefaultValueSql("((0))");
             entity.Property(e => e.UkupanBrojOdjela).HasDefaultValueSql("((0))");
             entity.Property(e => e.UkupanBrojSoba).HasDefaultValueSql("((0))");
+            entity.Property(e => e.UkupanBrojKreveta).HasDefaultValueSql("((0))");
+
         });
 
         modelBuilder.Entity<Doktor>(entity =>
@@ -136,6 +140,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.DatumPrijema).HasColumnType("date");
             entity.Property(e => e.DoktorId).HasColumnName("DoktorID");
             entity.Property(e => e.KrevetId).HasColumnName("KrevetID");
+            entity.Property(e => e.MedicinskaDokumentacijaId).HasColumnName("MedicinskaDokumentacijaID");
             entity.Property(e => e.OdjelId).HasColumnName("OdjelID");
             entity.Property(e => e.PacijentId).HasColumnName("PacijentID");
             entity.Property(e => e.SobaId).HasColumnName("SobaID");
@@ -149,6 +154,10 @@ public partial class EBolnicaContext : DbContext
                 .HasForeignKey(d => d.KrevetId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Hospitalizacija_Krevet");
+
+            entity.HasOne(d => d.MedicinskaDokumentacija).WithMany(p => p.Hospitalizacijas)
+                .HasForeignKey(d => d.MedicinskaDokumentacijaId)
+                .HasConstraintName("FK__Hospitali__Medic__5224328E");
 
             entity.HasOne(d => d.Odjel).WithMany(p => p.Hospitalizacijas)
                 .HasForeignKey(d => d.OdjelId)
@@ -337,6 +346,28 @@ public partial class EBolnicaContext : DbContext
                 .HasConstraintName("FK_Operacija_Terapija");
         });
 
+        modelBuilder.Entity<OtpusnoPismo>(entity =>
+        {
+            entity.HasKey(e => e.OtpusnoPismoId).HasName("PK__OtpusnoP__3A85962A9D508918");
+
+            entity.ToTable("OtpusnoPismo");
+
+            entity.Property(e => e.OtpusnoPismoId).HasColumnName("OtpusnoPismoID");
+            entity.Property(e => e.Anamneza).HasMaxLength(50);
+            entity.Property(e => e.Dijagnoza).HasMaxLength(100);
+            entity.Property(e => e.HospitalizacijaId).HasColumnName("HospitalizacijaID");
+            entity.Property(e => e.TerapijaId).HasColumnName("TerapijaID");
+            entity.Property(e => e.Zakljucak).HasMaxLength(200);
+
+            entity.HasOne(d => d.Hospitalizacija).WithMany(p => p.OtpusnoPismos)
+                .HasForeignKey(d => d.HospitalizacijaId)
+                .HasConstraintName("FK__OtpusnoPi__Hospi__4F47C5E3");
+
+            entity.HasOne(d => d.Terapija).WithMany(p => p.OtpusnoPismos)
+                .HasForeignKey(d => d.TerapijaId)
+                .HasConstraintName("FK__OtpusnoPi__Terap__503BEA1C");
+        });
+
         modelBuilder.Entity<Pacijent>(entity =>
         {
             entity.HasKey(e => e.PacijentId).HasName("PK__Pacijent__7471C17DA3E8384D");
@@ -362,10 +393,9 @@ public partial class EBolnicaContext : DbContext
             entity.ToTable("Parametar");
 
             entity.Property(e => e.ParametarId).HasColumnName("ParametarID");
-            entity.Property(e => e.Naziv).HasMaxLength(20);
-            entity.Property(e => e.MinVrijednost).HasColumnType("decimal(18, 1)");
             entity.Property(e => e.MaxVrijednost).HasColumnType("decimal(18, 1)");
-
+            entity.Property(e => e.MinVrijednost).HasColumnType("decimal(18, 1)");
+            entity.Property(e => e.Naziv).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Pregled>(entity =>
@@ -377,10 +407,13 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.PregledId).HasColumnName("PregledID");
             entity.Property(e => e.Anamneza).HasMaxLength(100);
             entity.Property(e => e.GlavnaDijagnoza).HasMaxLength(100);
+            entity.Property(e => e.MedicinskaDokumentacijaId).HasColumnName("MedicinskaDokumentacijaID");
             entity.Property(e => e.UputnicaId).HasColumnName("UputnicaID");
             entity.Property(e => e.Zakljucak).HasMaxLength(100);
 
-
+            entity.HasOne(d => d.MedicinskaDokumentacija).WithMany(p => p.Pregleds)
+                .HasForeignKey(d => d.MedicinskaDokumentacijaId)
+                .HasConstraintName("FK__Pregled__Medicin__51300E55");
 
             entity.HasOne(d => d.Uputnica).WithMany(p => p.Pregleds)
                 .HasForeignKey(d => d.UputnicaId)
@@ -471,7 +504,6 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.Datum).HasColumnType("date");
             entity.Property(e => e.KorisnikId).HasColumnName("KorisnikID");
             entity.Property(e => e.Razlog).HasMaxLength(40);
-            entity.Property(e => e.Status).HasMaxLength(40);
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.SlobodniDans)
                 .HasForeignKey(d => d.KorisnikId)
@@ -505,8 +537,6 @@ public partial class EBolnicaContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Soba_Odjel");
         });
-
-
 
         modelBuilder.Entity<Terapija>(entity =>
         {
@@ -564,10 +594,7 @@ public partial class EBolnicaContext : DbContext
 
             entity.Property(e => e.UputnicaId).HasColumnName("UputnicaID");
             entity.Property(e => e.DatumKreiranja).HasColumnType("datetime");
-            entity.Property(e => e.StateMachine).HasMaxLength(50);
-            entity.Property(e => e.Status)
-                 .IsRequired()
-                 .HasDefaultValueSql("((0))");
+            entity.Property(e => e.StateMachine).HasMaxLength(20);
             entity.Property(e => e.TerminId).HasColumnName("TerminID");
 
             entity.HasOne(d => d.Termin).WithMany(p => p.Uputnicas)

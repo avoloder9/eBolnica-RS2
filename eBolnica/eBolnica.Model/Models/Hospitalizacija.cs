@@ -20,7 +20,7 @@ namespace eBolnica.Model.Models
         public int SobaId { get; set; }
 
         public int KrevetId { get; set; }
-
+        public int MedicinskaDokumentacijaId { get; set; }
         public virtual Doktor Doktor { get; set; } = null!;
 
         public virtual Krevet Krevet { get; set; } = null!;

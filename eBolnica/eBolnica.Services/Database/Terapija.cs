@@ -19,5 +19,7 @@ public partial class Terapija
 
     public virtual ICollection<Operacija> Operacijas { get; } = new List<Operacija>();
 
+    public virtual ICollection<OtpusnoPismo> OtpusnoPismos { get; } = new List<OtpusnoPismo>();
+
     public virtual Pregled Pregled { get; set; } = null!;
 }
