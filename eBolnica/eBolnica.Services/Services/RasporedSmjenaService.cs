@@ -1,4 +1,5 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
@@ -42,6 +43,14 @@ namespace eBolnica.Services.Services
             if (!isKorisnik)
             {
                 throw new Exception("Korisnik sa zadanim ID-om ne postoji");
+            }
+
+            var slobodanDan = Context.SlobodniDans.FirstOrDefault(s => s.KorisnikId == request.KorisnikId
+            && s.Datum.Date == request.Datum.Date && s.Status == true);
+
+            if (slobodanDan != null)
+            {
+                throw new UserException("Korisnik ima odobren slobodan dan na ovaj datum i ne može biti dodan u smjenu.");
             }
             base.BeforeInsert(request, entity);
         }

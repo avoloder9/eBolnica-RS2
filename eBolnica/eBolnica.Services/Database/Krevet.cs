@@ -9,7 +9,7 @@ public partial class Krevet
 
     public int SobaId { get; set; }
 
-    public bool? Zauzet { get; set; }
+    public bool Zauzet { get; set; }
 
     public virtual ICollection<Hospitalizacija> Hospitalizacijas { get; } = new List<Hospitalizacija>();
 

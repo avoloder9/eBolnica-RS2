@@ -1,6 +1,7 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
+using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,10 @@ namespace eBolnica.Services.Services
 {
     public class KrevetService : BaseCRUDService<Krevet, KrevetSearchObject, Database.Krevet, KrevetInsertRequest, KrevetUpdateRequest>, IKrevetService
     {
-        public KrevetService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        private readonly SobaHelper _sobaHelper;
+        public KrevetService(Database.EBolnicaContext context, IMapper mapper, SobaHelper sobaHelper) : base(context, mapper)
         {
+            _sobaHelper = sobaHelper;
         }
 
         public override IQueryable<Database.Krevet> AddFilter(KrevetSearchObject searchObject, IQueryable<Database.Krevet> query)
@@ -57,6 +60,7 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Odjel za ovu sobu ne postoji");
             }
+            _sobaHelper.ProvjeriZauzetostSobe(request.SobaId);
             Context.SaveChanges();
             entity.Soba = soba;
             base.BeforeInsert(request, entity);

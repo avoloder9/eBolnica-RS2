@@ -51,5 +51,20 @@ namespace eBolnica.Services.Services
 
             base.BeforeInsert(request, entity);
         }
+        private void ProvjeriStatusSobe(int sobaId)
+        {
+            var soba = Context.Sobas.FirstOrDefault(s => s.SobaId == sobaId);
+            if (soba == null)
+            {
+                throw new Exception("Soba sa zadanim ID-om ne postoji.");
+            }
+            var sviKrevetiZauzeti = Context.Krevets
+                .Where(k => k.SobaId == sobaId)
+                .All(k => k.Zauzet);
+
+            soba.Zauzeta = sviKrevetiZauzeti;
+            Context.SaveChanges();
+        }
     }
+
 }

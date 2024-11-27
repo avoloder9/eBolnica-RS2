@@ -1,6 +1,8 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
+using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using Mapster;
 using MapsterMapper;
@@ -15,8 +17,10 @@ namespace eBolnica.Services.Services
 {
     public class HospitalizacijaService : BaseCRUDService<Hospitalizacija, HospitalizacijaSearchObject, Database.Hospitalizacija, HospitalizacijaInsertRequest, HospitalizacijaUpdateRequest>, IHospitalizacijaService
     {
-        public HospitalizacijaService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        private readonly SobaHelper _sobaHelper;
+        public HospitalizacijaService(Database.EBolnicaContext context, IMapper mapper, SobaHelper sobaHelper) : base(context, mapper)
         {
+            _sobaHelper = sobaHelper;
         }
         public override IQueryable<Database.Hospitalizacija> AddFilter(HospitalizacijaSearchObject searchObject, IQueryable<Database.Hospitalizacija> query)
         {
@@ -55,11 +59,19 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Soba sa zadanim ID-om ne postoji ili ne pripada zadanom odjelu");
             }
-            var krevetExists = Context.Krevets.Any(k => k.KrevetId == request.KrevetId && k.SobaId == request.SobaId);
-            if (!krevetExists)
+            var krevet = Context.Krevets.FirstOrDefault(k => k.KrevetId == request.KrevetId && k.SobaId == request.SobaId);
+            if (krevet == null)
             {
                 throw new Exception("Krevet sa zadanim ID-om ne postoji ili ne pripada zadanoj sobi");
             }
+
+            if (krevet.Zauzet)
+            {
+                throw new UserException("Krevet je već zauzet.");
+            }
+            krevet.Zauzet = true;
+            Context.SaveChanges();
+            _sobaHelper.ProvjeriZauzetostSobe(request.SobaId);
             var medicinskaDokumentacijaExists = Context.MedicinskaDokumentacijas.Any(k => k.MedicinskaDokumentacijaId == request.MedicinskaDokumentacijaId);
             if (!medicinskaDokumentacijaExists)
             {

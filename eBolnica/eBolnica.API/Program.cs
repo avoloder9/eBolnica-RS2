@@ -1,6 +1,7 @@
 using eBolnica.API;
 using eBolnica.API.Filters;
 using eBolnica.Services.Database;
+using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.OperacijaStateMachine;
 using eBolnica.Services.Services;
@@ -40,6 +41,7 @@ builder.Services.AddTransient<ISmjenaService, SmjenaService>();
 builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
 builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
 builder.Services.AddTransient<IRadniSatiService, RadniSatiService>();
+builder.Services.AddTransient<IOtpusnoPismoService, OtpusnoPismoService>();
 
 builder.Services.AddTransient<BaseUputnicaState>();
 builder.Services.AddTransient<InitialUputnicaState>();
@@ -55,6 +57,8 @@ builder.Services.AddTransient<ActiveOperacijaState>();
 builder.Services.AddTransient<HiddenOperacijaState>();
 builder.Services.AddTransient<ClosedOperacijaState>();
 builder.Services.AddTransient<CancelledOperacijaState>();
+
+builder.Services.AddTransient<SobaHelper>();
 
 builder.Services.AddControllers(x =>
 {
