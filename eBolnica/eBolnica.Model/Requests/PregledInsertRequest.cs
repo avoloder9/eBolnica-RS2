@@ -7,9 +7,6 @@ namespace eBolnica.Model.Requests
 {
     public class PregledInsertRequest
     {
-
-      
-
         public int UputnicaId { get; set; }
         public int MedicinskaDokumentacijaId { get; set; }
 

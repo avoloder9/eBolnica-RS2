@@ -1,5 +1,6 @@
 using eBolnica.API;
 using eBolnica.API.Filters;
+using eBolnica.Model.Models;
 using eBolnica.Services.Database;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +65,15 @@ builder.Services.AddTransient<SobaHelper>();
 builder.Services.AddControllers(x =>
 {
     x.Filters.Add<ExceptionFilter>();
-});
+}).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddMapster();
+
+TypeAdapterConfig<eBolnica.Services.Database.Hospitalizacija, eBolnica.Model.Models.Hospitalizacija>
+    .NewConfig()
+    .PreserveReference(true) 
+    .MaxDepth(3);
+
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
