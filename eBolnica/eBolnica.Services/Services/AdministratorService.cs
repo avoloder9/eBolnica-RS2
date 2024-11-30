@@ -43,6 +43,7 @@ namespace eBolnica.Services.Services
             var korisnik = new Database.Korisnik
             {
                 Ime = request.Ime,
+                Prezime = request.Prezime,
                 KorisnickoIme = request.KorisnickoIme,
                 DatumRodjenja = request.DatumRodjenja,
                 Email = request.Email,
