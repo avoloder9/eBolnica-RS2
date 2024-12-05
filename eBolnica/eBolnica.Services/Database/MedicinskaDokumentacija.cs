@@ -15,5 +15,9 @@ public partial class MedicinskaDokumentacija
 
     public string? Napomena { get; set; }
 
+    public virtual ICollection<Hospitalizacija> Hospitalizacijas { get; } = new List<Hospitalizacija>();
+
     public virtual Pacijent Pacijent { get; set; } = null!;
+
+    public virtual ICollection<Pregled> Pregleds { get; } = new List<Pregled>();
 }

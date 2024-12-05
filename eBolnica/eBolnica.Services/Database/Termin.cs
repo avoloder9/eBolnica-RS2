@@ -25,7 +25,5 @@ public partial class Termin
 
     public virtual Pacijent Pacijent { get; set; } = null!;
 
-    public virtual ICollection<Pregled> Pregleds { get; } = new List<Pregled>();
-
     public virtual ICollection<Uputnica> Uputnicas { get; } = new List<Uputnica>();
 }

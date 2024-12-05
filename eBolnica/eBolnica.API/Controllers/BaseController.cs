@@ -1,6 +1,6 @@
 ﻿using eBolnica.Model;
 using eBolnica.Model.SearchObjects;
-using eBolnica.Services;
+using eBolnica.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +8,7 @@ namespace eBolnica.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
+  //  [Authorize]
     public class BaseController<TModel, TSearch> : ControllerBase where TSearch : BaseSearchObject
     {
         protected IService<TModel, TSearch> _service;

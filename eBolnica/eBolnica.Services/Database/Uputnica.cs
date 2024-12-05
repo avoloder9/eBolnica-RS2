@@ -9,13 +9,13 @@ public partial class Uputnica
 
     public int TerminId { get; set; }
 
-    public int StatusId { get; set; }
-
     public DateTime DatumKreiranja { get; set; }
 
-    public virtual ICollection<Pregled> Pregleds { get; } = new List<Pregled>();
+    public bool Status { get; set; }
 
-    public virtual Status Status { get; set; } = null!;
+    public string? StateMachine { get; set; }
+
+    public virtual ICollection<Pregled> Pregleds { get; } = new List<Pregled>();
 
     public virtual Termin Termin { get; set; } = null!;
 }

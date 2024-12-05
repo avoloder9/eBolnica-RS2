@@ -9,5 +9,9 @@ public partial class Parametar
 
     public string Naziv { get; set; } = null!;
 
+    public decimal MinVrijednost { get; set; }
+
+    public decimal MaxVrijednost { get; set; }
+
     public virtual ICollection<NalazParametar> NalazParametars { get; } = new List<NalazParametar>();
 }

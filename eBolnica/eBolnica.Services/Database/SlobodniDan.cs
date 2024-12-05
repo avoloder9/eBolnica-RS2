@@ -13,7 +13,7 @@ public partial class SlobodniDan
 
     public string Razlog { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
+    public bool? Status { get; set; }
 
     public virtual Korisnik Korisnik { get; set; } = null!;
 }
