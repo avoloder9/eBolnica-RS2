@@ -71,7 +71,7 @@ builder.Services.AddMapster();
 
 TypeAdapterConfig<eBolnica.Services.Database.Hospitalizacija, eBolnica.Model.Models.Hospitalizacija>
     .NewConfig()
-    .PreserveReference(true) 
+    .PreserveReference(true)
     .MaxDepth(3);
 
 builder.Services.AddAuthentication("BasicAuthentication")
@@ -115,4 +115,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<EBolnicaContext>();
+  //   dataContext.Database.Migrate();   
+}
 app.Run();

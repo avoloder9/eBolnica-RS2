@@ -1,0 +1,36 @@
+#version: '3'
+services:
+#mssql docker
+  ebolnica-sql:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Mostar1234!
+      - MSSQL_PID=Developer
+    ports:
+      - 1401:1433
+    expose:
+      - 1433
+    networks:
+      - ebolnicanet2024
+
+  ebolnica-api:
+    restart: unless-stopped
+    build:
+      context: .
+    environment:
+      - ConnectionStrings:eBolnicaConnection=Server=ebolnica-sql,1433;Database=eBolnica2024;User=sa;Password=Mostar1234!;ConnectRetryCount=0; TrustServerCertificate=True
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - 5218:5218
+    networks:
+      - ebolnicanet2024
+    links:
+      - ebolnica-sql
+    depends_on:
+      - ebolnica-sql
+      
+networks:
+  ebolnicanet2024:
+    driver: bridge      
