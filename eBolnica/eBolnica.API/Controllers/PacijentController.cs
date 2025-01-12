@@ -2,6 +2,8 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
@@ -10,6 +12,25 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class PacijentController : BaseCRUDController<Pacijent, PacijentSearchObject, PacijentInsertRequest, PacijentUpdateRequest>
     {
-        public PacijentController(IPacijentService service) : base(service) { }
+        private readonly IPacijentService _pacijentService;
+        public PacijentController(IPacijentService service) : base(service)
+        {
+            _pacijentService = service;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] PacijentInsertRequest request)
+        {
+            try
+            {
+                var pacijent = _pacijentService.Insert(request);
+                return Ok(pacijent);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

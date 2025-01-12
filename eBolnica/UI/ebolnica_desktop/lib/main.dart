@@ -35,6 +35,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  String? usernameError;
+  String? passwordError;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
+                  errorText: usernameError,
                 ),
               ),
               const SizedBox(height: 20),
@@ -72,62 +77,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
+                  errorText: passwordError,
                 ),
+                onSubmitted: (_) {
+                  _login();
+                },
               ),
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    var loginModel = LoginModel(
-                      username: _usernameController.text,
-                      password: _passwordController.text,
-                      deviceType: 'desktop',
-                    );
-
-                    var url =
-                        Uri.parse('${ApiConstants.baseUrl}/Korisnik/login');
-                    var response = await http.post(
-                      url,
-                      headers: {'Content-Type': 'application/json'},
-                      body: jsonEncode(loginModel.toJson()),
-                    );
-
-                    if (response.statusCode == 200) {
-                      var responseBody = json.decode(response.body);
-                      String? userType = responseBody['userType'];
-                      int userId = responseBody['userId'];
-
-                      if (userType != null) {
-                        if (userType == 'administrator') {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                DashboardAdmin(userId: userId),
-                          ));
-                        } else if (userType == 'doktor') {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                DashboardDoctor(userId: userId),
-                          ));
-                        } else if (userType == 'medicinsko osoblje') {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                DashboardMedicalStaff(userId: userId),
-                          ));
-                        } else if (userType == 'pacijent') {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                DashboardPatient(userId: userId),
-                          ));
-                        }
-                      }
-                    } else {
-                      Flushbar(
-                        message: "Login failed: ${response.body}",
-                        backgroundColor: Colors.red,
-                        duration: const Duration(seconds: 3),
-                      ).show(context);
-                    }
+                    _login();
                   },
                   child: const Text(
                     'Prijavi se',
@@ -145,8 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        const RegistrationScreen(), // Implementirajte RegistrationScreen
+                    builder: (context) => const RegistrationScreen(),
                   ));
                 },
                 child: const Text('Nemate račun? Registrujte se'),
@@ -156,5 +116,100 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _login() async {
+    setState(() {
+      usernameError = null;
+      passwordError = null;
+    });
+
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (username.isEmpty) {
+      setState(() {
+        usernameError = "Molimo unesite korisničko ime";
+      });
+      return;
+    }
+    if (password.isEmpty) {
+      setState(() {
+        passwordError = "Molimo unesite lozinku";
+      });
+      return;
+    }
+    if (password.length < 8) {
+      setState(() {
+        passwordError = "Lozinka mora imati najmanje 8 karaktera.";
+      });
+      return;
+    }
+
+    var loginModel = LoginModel(
+      username: username,
+      password: password,
+      deviceType: 'desktop',
+    );
+
+    var url = Uri.parse('${ApiConstants.baseUrl}/Korisnik/login');
+    try {
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(loginModel.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = json.decode(response.body);
+        String? userType = responseBody['userType'];
+        int userId = responseBody['userId'];
+
+        if (userType != null) {
+          Widget dashboard;
+          switch (userType) {
+            case 'administrator':
+              dashboard = DashboardAdmin(userId: userId);
+              break;
+            case 'doktor':
+              dashboard = DashboardDoctor(userId: userId);
+              break;
+            case 'medicinsko osoblje':
+              dashboard = DashboardMedicalStaff(userId: userId);
+              break;
+            case 'pacijent':
+              dashboard = DashboardPatient(userId: userId);
+              break;
+            default:
+              setState(() {
+                usernameError = "Nepoznata uloga korisnika.";
+              });
+              return;
+          }
+          _usernameController.clear();
+          _passwordController.clear();
+
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => dashboard),
+          );
+        }
+      } else {
+        setState(() {
+          Flushbar(
+                  message: "Pogrešno korisničko ime ili lozinka.",
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3))
+              .show(context);
+        });
+      }
+    } catch (e) {
+      setState(() {
+        Flushbar(
+                message: "Greška u komunikaciji s serverom.",
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3))
+            .show(context);
+      });
+    }
   }
 }
