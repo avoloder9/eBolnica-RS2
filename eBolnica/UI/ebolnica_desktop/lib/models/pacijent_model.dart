@@ -1,15 +1,16 @@
+import 'package:ebolnica_desktop/models/korisnik_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:typed_data';
 part 'pacijent_model.g.dart';
 
 @JsonSerializable()
 class Pacijent {
-  String ime;
-  String prezime;
-  String email;
-  String korisnickoIme;
-  String lozinka;
-  String lozinkaPotvrda;
+  String? ime;
+  String? prezime;
+  String? email;
+  String? korisnickoIme;
+  String? lozinka;
+  String? lozinkaPotvrda;
   @JsonKey(fromJson: _bytesFromJson, toJson: _bytesToJson)
   Uint8List? slika;
 
@@ -19,30 +20,31 @@ class Pacijent {
   DateTime? datumRodjenja;
   String? telefon;
   String? spol;
-  bool status;
-  int brojZdravstveneKartice;
-  String adresa;
-  int dob;
-
+  bool? status;
+  int? brojZdravstveneKartice;
+  String? adresa;
+  int? dob;
+  final Korisnik? korisnik;
   @JsonKey(includeFromJson: false, includeToJson: false)
   int? korisnikId;
   Pacijent({
-    required this.ime,
-    required this.prezime,
-    required this.email,
-    required this.korisnickoIme,
-    required this.lozinka,
-    required this.lozinkaPotvrda,
+    this.ime,
+    this.prezime,
+    this.email,
+    this.korisnickoIme,
+    this.lozinka,
+    this.lozinkaPotvrda,
     this.slika,
     this.slikaThumb,
     this.datumRodjenja,
     this.telefon,
     this.spol,
     this.status = true,
-    required this.brojZdravstveneKartice,
-    required this.adresa,
-    required this.dob,
+    this.brojZdravstveneKartice,
+    this.adresa,
+    this.dob,
     this.korisnikId,
+    this.korisnik,
   });
 
   factory Pacijent.fromJson(Map<String, dynamic> json) =>

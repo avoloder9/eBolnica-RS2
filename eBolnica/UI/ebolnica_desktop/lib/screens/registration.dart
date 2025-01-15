@@ -139,6 +139,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Image.asset(
+                    'assets/images/logo.jpg',
+                    height: 100,
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
               TextFormField(
                 controller: imeController,
                 decoration: const InputDecoration(labelText: 'Ime'),

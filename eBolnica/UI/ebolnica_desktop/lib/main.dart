@@ -1,5 +1,7 @@
 import 'package:ebolnica_desktop/api_constants.dart';
 import 'package:ebolnica_desktop/models/login_model.dart';
+import 'package:ebolnica_desktop/providers/auth_provider.dart';
+import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/dashboard_doctor.dart';
 import 'package:ebolnica_desktop/screens/dashboard_patient.dart';
 import 'package:ebolnica_desktop/screens/dashboard_medical_staff.dart';
@@ -9,9 +11,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:another_flushbar/flushbar.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => PacijentProvider(),
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -151,7 +157,8 @@ class _LoginScreenState extends State<LoginScreen> {
       password: password,
       deviceType: 'desktop',
     );
-
+    AuthProvider.username = _usernameController.text;
+    AuthProvider.password = _passwordController.text;
     var url = Uri.parse('${ApiConstants.baseUrl}/Korisnik/login');
     try {
       var response = await http.post(

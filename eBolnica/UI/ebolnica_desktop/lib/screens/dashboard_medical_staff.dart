@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 
 class DashboardMedicalStaff extends StatelessWidget {
@@ -8,6 +9,7 @@ class DashboardMedicalStaff extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Medicinsko osoblje')),
+      drawer: const SideBar(userType: 'medicinsko osoblje'),
       body: const Center(
         child: Text(
           "Dobrodošli na medicinsko osoblje dashboard!\nKorisnik ID:",
