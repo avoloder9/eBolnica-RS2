@@ -15,14 +15,26 @@ abstract class BaseProvider<T> with ChangeNotifier {
         defaultValue: "http://localhost:5218/");
   }
 
-  Future<SearchResult<T>> get({dynamic filter}) async {
+  Future<SearchResult<T>> get(
+      {dynamic filter, int? page, int? pageSize}) async {
     var url = "$_baseUrl$_endpoint";
 
+    Map<String, dynamic> queryParams = {};
+
     if (filter != null) {
-      var queryString = getQueryString(filter);
-      url = "$url?$queryString";
+      queryParams.addAll(Map<String, dynamic>.from(filter));
     }
 
+    if (page != null) {
+      queryParams['page'] = page;
+    }
+    if (pageSize != null) {
+      queryParams['pageSize'] = pageSize;
+    }
+    if (queryParams.isNotEmpty) {
+      var queryString = getQueryString(queryParams);
+      url = "$url?$queryString";
+    }
     var uri = Uri.parse(url);
     var headers = createHeaders();
 

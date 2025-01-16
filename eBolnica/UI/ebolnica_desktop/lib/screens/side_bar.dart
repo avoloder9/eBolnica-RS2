@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_list_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,10 @@ class SideBar extends StatelessWidget {
     final Map<String, List<Map<String, dynamic>>> menuItems = {
       'administrator': [
         {'label': 'Dashboard', 'route': '/dashboard'},
-        {'label': 'Doktori', 'route': '/doktori'},
+        {
+          'label': 'Doktori',
+          'route': (BuildContext context) => const DoktorListScreen()
+        },
         {
           'label': 'Pacijenti',
           'route': (BuildContext context) => const PacijentListScreen()

@@ -43,7 +43,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   int _generateHealthCardNumber() {
     Random random = Random();
-    return random.nextInt(100000);
+    return 10000 + random.nextInt(90000);
   }
 
   Future<void> _sendRegistrationRequest() async {

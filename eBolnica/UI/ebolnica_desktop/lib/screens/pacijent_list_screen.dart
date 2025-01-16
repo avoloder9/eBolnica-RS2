@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
+import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
+import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +16,8 @@ class PacijentListScreen extends StatefulWidget {
 
 class _PacijentListScreenState extends State<PacijentListScreen> {
   late PacijentProvider provider;
+  int pageSize = 15;
+  int page = 0;
 
   final TextEditingController _imeEditingController = TextEditingController();
   final TextEditingController _prezimeEditingController =
@@ -25,6 +30,12 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
   void initState() {
     super.initState();
     provider = PacijentProvider();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    result = await provider.get(filter: {}, page: page, pageSize: pageSize);
+    setState(() {});
   }
 
   String formattedDate(date) {
@@ -38,10 +49,12 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
       appBar: AppBar(
         title: const Text("Lista pacijenata"),
       ),
+      drawer: const SideBar(userType: 'administrator'),
       body: Column(
         children: [
           _buildSearch(),
           _buildResultView(),
+          _buildPaginationControls(),
         ],
       ),
     );
@@ -77,7 +90,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              var filter = {
+              var filter = <String, dynamic>{
                 'imeGTE': _imeEditingController.text.isNotEmpty
                     ? _imeEditingController.text
                     : null,
@@ -89,7 +102,8 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                     : null,
               };
 
-              result = await provider.get(filter: filter);
+              result = await provider.get(
+                  filter: filter, page: page, pageSize: pageSize);
               setState(() {});
             },
             child: const Text("Pretraga"),
@@ -97,7 +111,13 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
           const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
-              _showAddPatientDialog(context);
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const NoviPacijentScreen();
+                },
+              );
             },
             child: const Text("Dodaj"),
           ),
@@ -109,235 +129,114 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
   Widget _buildResultView() {
     return Expanded(
       child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text("Ime")),
-            DataColumn(label: Text("Prezime")),
-            DataColumn(label: Text("E-mail")),
-            DataColumn(label: Text("Broj zdravstvene kartice")),
-            DataColumn(label: Text("Telefon")),
-            DataColumn(label: Text("Adresa")),
-            DataColumn(label: Text("Datum rodjenja")),
-            DataColumn(label: Text("Slika")),
-          ],
-          rows: result?.result
-                  .map<DataRow>(
-                    (e) => DataRow(
-                      cells: [
-                        DataCell(Text(e.korisnik!.ime)),
-                        DataCell(Text(e.korisnik!.prezime)),
-                        DataCell(Text(e.korisnik!.email)),
-                        DataCell(Text(e.brojZdravstveneKartice.toString())),
-                        DataCell(Text(e.korisnik!.telefon ?? "-")),
-                        DataCell(Text(e.adresa ?? "-")),
-                        DataCell(
-                            Text(formattedDate(e.korisnik!.datumRodjenja))),
-                        DataCell(
-                          e.slika != null
-                              ? SizedBox(
-                                  width: 120,
-                                  height: 50,
-                                  child: Image.memory(
-                                    e.slika!,
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: DataTable(
+            columns: const [
+              DataColumn(label: Text("Ime")),
+              DataColumn(label: Text("Prezime")),
+              DataColumn(label: Text("E-mail")),
+              DataColumn(
+                  label: SizedBox(
+                      width: 160,
+                      child: Center(child: Text("Broj zdravstvene kartice")))),
+              DataColumn(label: Text("Telefon")),
+              DataColumn(label: SizedBox(width: 60, child: Text("Adresa"))),
+              DataColumn(
+                  label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
+              DataColumn(
+                  label:
+                      Align(alignment: Alignment.center, child: Text("Slika"))),
+              DataColumn(label: Text("Spol")),
+              DataColumn(label: Text("Status")),
+            ],
+            rows: result?.result
+                    .map<DataRow>(
+                      (e) => DataRow(
+                        cells: [
+                          DataCell(Text(e.korisnik!.ime)),
+                          DataCell(Text(e.korisnik!.prezime)),
+                          DataCell(Text(e.korisnik!.email)),
+                          DataCell(SizedBox(
+                              width: 160,
+                              child: Center(
+                                  child: Text(
+                                      e.brojZdravstveneKartice.toString())))),
+                          DataCell(Text(e.korisnik!.telefon ?? "-")),
+                          DataCell(Text(e.adresa ?? "-")),
+                          DataCell(
+                            SizedBox(
+                              width: 100,
+                              child: Center(
+                                child: Text(
+                                  formattedDate(e.korisnik!.datumRodjenja),
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(Center(
+                            child: e.slika != null
+                                ? Container(
+                                    width: 100,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: MemoryImage(e.slika!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/images/osoba.jpg',
+                                    width: 80,
+                                    height: 80,
                                     fit: BoxFit.cover,
                                   ),
-                                )
-                              : Image.asset(
-                                  'assets/images/osoba.jpg',
-                                  height: 120,
-                                  width: 50,
-                                ),
-                        )
-                      ],
-                    ),
-                  )
-                  .toList() ??
-              [],
+                          )),
+                          DataCell(Text(e.korisnik!.spol ?? "-")),
+                          DataCell(Text(e.korisnik!.status == true
+                              ? "Aktivan"
+                              : "Neaktivan")),
+                        ],
+                      ),
+                    )
+                    .toList() ??
+                [],
+          ),
         ),
       ),
     );
   }
 
-  Future<void> _showAddPatientDialog(BuildContext context) async {
-    final _formKey = GlobalKey<FormState>();
-    final imeController = TextEditingController();
-    final prezimeController = TextEditingController();
-    final emailController = TextEditingController();
-    final telefonController = TextEditingController();
-    final adresaController = TextEditingController();
-    String spol = '';
-    DateTime? datumRodjenja;
-    String lozinkaPotvrda = '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(16.0),
-          title: const Text('Dodaj Novog Pacijenta'),
-          content: Container(
-            width: 800,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextFormField(
-                    controller: imeController,
-                    decoration: const InputDecoration(labelText: 'Ime'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite ime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Ime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: prezimeController,
-                    decoration: const InputDecoration(labelText: 'Prezime'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite prezime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Prezime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return 'Molimo unesite validan email';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: telefonController,
-                    decoration: const InputDecoration(labelText: 'Telefon'),
-                    keyboardType: TextInputType.phone,
-                    maxLength: 10,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite broj telefona';
-                      }
-                      return null;
-                    },
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: spol.isEmpty ? null : spol,
-                    decoration: const InputDecoration(labelText: 'Spol'),
-                    items: const [
-                      DropdownMenuItem(value: 'Muški', child: Text('Muški')),
-                      DropdownMenuItem(value: 'Ženski', child: Text('Ženski')),
-                    ],
-                    onChanged: (value) {
-                      spol = value ?? '';
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo odaberite spol';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: adresaController,
-                    decoration: const InputDecoration(labelText: 'Adresa'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite adresu';
-                      }
-                      return null;
-                    },
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: datumRodjenja ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null && pickedDate != datumRodjenja) {
-                        datumRodjenja = pickedDate;
-                      }
-                    },
-                    child: AbsorbPointer(
-                      child: TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Datum Rođenja',
-                          suffixIcon: Icon(Icons.calendar_today),
-                        ),
-                        controller: TextEditingController(
-                          text: datumRodjenja != null
-                              ? '${datumRodjenja!.day}/${datumRodjenja!.month}/${datumRodjenja!.year}'
-                              : '',
-                        ),
-                        validator: (value) {
-                          if (datumRodjenja == null) {
-                            return 'Molimo unesite datum rođenja';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        String korisnickoIme =
-                            imeController.text.trim().toLowerCase();
-                        String lozinka = '${imeController.text.trim()}123!';
-                        lozinkaPotvrda = lozinka;
-
-                        var noviPacijent = {
-                          "ime": imeController.text.trim(),
-                          "prezime": prezimeController.text.trim(),
-                          "email": emailController.text.trim(),
-                          "telefon": telefonController.text.trim(),
-                          "adresa": adresaController.text.trim(),
-                          "spol": spol,
-                          "datumRodjenja": datumRodjenja?.toIso8601String(),
-                          "korisnickoIme": korisnickoIme,
-                          "lozinka": lozinka,
-                          "lozinkaPotvrda": lozinkaPotvrda
-                        };
-                        try {
-                          provider.insert(noviPacijent);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Pacijent je uspješno dodan'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Greška pri dodavanju pacijenta'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        }
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text('Dodaj Pacijenta'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+  Widget _buildPaginationControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: page > 0
+              ? () async {
+                  page--;
+                  result = await provider
+                      .get(filter: {}, page: page, pageSize: pageSize);
+                  setState(() {});
+                }
+              : null,
+        ),
+        Text("Strana ${page + 1}"),
+        IconButton(
+          icon: const Icon(Icons.arrow_forward),
+          onPressed: result != null && result!.result.length == pageSize
+              ? () async {
+                  page++;
+                  result = await provider
+                      .get(filter: {}, page: page, pageSize: pageSize);
+                  setState(() {});
+                }
+              : null,
+        ),
+      ],
     );
   }
 }
