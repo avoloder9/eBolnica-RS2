@@ -7,6 +7,7 @@ part of 'pacijent_model.dart';
 // **************************************************************************
 
 Pacijent _$PacijentFromJson(Map<String, dynamic> json) => Pacijent(
+      pacijentId: (json['pacijentId'] as num?)?.toInt(),
       ime: json['ime'] as String?,
       prezime: json['prezime'] as String?,
       email: json['email'] as String?,
@@ -30,6 +31,7 @@ Pacijent _$PacijentFromJson(Map<String, dynamic> json) => Pacijent(
     );
 
 Map<String, dynamic> _$PacijentToJson(Pacijent instance) => <String, dynamic>{
+      'pacijentId': instance.pacijentId,
       'ime': instance.ime,
       'prezime': instance.prezime,
       'email': instance.email,

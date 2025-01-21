@@ -61,6 +61,39 @@ namespace eBolnica.Services.Services
                 entity.GlavniDoktorId = null;
             }
         }
+        public List<Model.Models.Doktor> GetDoktorByOdjelId(int odjelId)
+        {
+            var doktoriDatabase = Context.Set<Database.Doktor>()
+                                         .Where(x => x.OdjelId == odjelId).Include(x => x.Korisnik)
+                                         .ToList();
+
+            if (doktoriDatabase.Count == 0)
+            {
+                throw new Exception("Nema doktora na ovom odjelu");
+            }
+
+            var doktoriModel = doktoriDatabase.Select(d => new Model.Models.Doktor
+            {
+                DoktorId = d.DoktorId,
+                Korisnik = new Model.Models.Korisnik
+                {
+                    Ime = d.Korisnik.Ime,
+                    Prezime = d.Korisnik.Prezime,
+                    Email = d.Korisnik.Email,
+                    KorisnickoIme = d.Korisnik.KorisnickoIme,
+                    DatumRodjenja = d.Korisnik.DatumRodjenja,
+                    KorisnikId = d.Korisnik.KorisnikId,
+                    Spol = d.Korisnik.Spol,
+                    Status = d.Korisnik.Status,
+                    Telefon = d.Korisnik.Telefon
+                },
+                Specijalizacija = d.Specijalizacija,
+                KorisnikId = d.KorisnikId,
+                Biografija = d.Biografija,
+                OdjelId = d.OdjelId
+            }).ToList();
+            return doktoriModel;
+        }
     }
 }
 

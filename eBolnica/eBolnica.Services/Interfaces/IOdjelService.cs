@@ -10,5 +10,9 @@ using System.Threading.Tasks;
 namespace eBolnica.Services.Interfaces
 {
     public interface IOdjelService : ICRUDService<Odjel, OdjelSearchObject, OdjelInsertRequest, OdjelUpdateRequest>
-    { }
+    {
+        public List<Doktor> GetDoktorByOdjelId(int odjelId);
+
+
+    }
 }

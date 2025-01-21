@@ -58,6 +58,26 @@ abstract class BaseProvider<T> with ChangeNotifier {
     // print("response: ${response.request} ${response.statusCode}, ${response.body}");
   }
 
+  Future<T> getById(int id) async {
+    var url = "$_baseUrl$_endpoint/$id";
+
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+    // throw new Exception("Greška");
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      // var result = data as T;
+      return fromJson(data);
+      // return result;
+    } else {
+      throw Exception("Unknown error");
+    }
+    // print("response: ${response.request} ${response.statusCode}, ${response.body}");
+  }
+
   Future<T> insert(dynamic request) async {
     var url = "$_baseUrl$_endpoint";
     var uri = Uri.parse(url);

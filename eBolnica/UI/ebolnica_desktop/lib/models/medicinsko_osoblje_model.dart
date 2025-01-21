@@ -1,29 +1,24 @@
 import 'package:ebolnica_desktop/models/korisnik_model.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-part 'doktor_model.g.dart';
+part 'medicinsko_osoblje_model.g.dart';
 
 @JsonSerializable()
-class Doktor {
-  int? doktorId;
+class MedicinskoOsoblje {
+  int? medicinskoOsobljeId;
   int? korisnikId;
   int? odjelId;
-  String? specijalizacija;
-  String? biografija;
   Korisnik? korisnik;
   Odjel? odjel;
 
-  Doktor({
-    this.doktorId,
+  MedicinskoOsoblje({
+    this.medicinskoOsobljeId,
     this.korisnikId,
     this.odjelId,
-    this.specijalizacija,
-    this.biografija,
     this.korisnik,
     this.odjel,
   });
-
-  factory Doktor.fromJson(Map<String, dynamic> json) => _$DoktorFromJson(json);
-  Map<String, dynamic> toJson() => _$DoktorToJson(this);
+  factory MedicinskoOsoblje.fromJson(Map<String, dynamic> json) =>
+      _$MedicinskoOsobljeFromJson(json);
+  Map<String, dynamic> toJson() => _$MedicinskoOsobljeToJson(this);
 }

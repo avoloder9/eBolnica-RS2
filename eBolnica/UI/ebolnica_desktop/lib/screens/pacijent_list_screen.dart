@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
+import 'package:ebolnica_desktop/screens/edit_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
@@ -145,11 +146,9 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               DataColumn(label: SizedBox(width: 60, child: Text("Adresa"))),
               DataColumn(
                   label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
-              DataColumn(
-                  label:
-                      Align(alignment: Alignment.center, child: Text("Slika"))),
               DataColumn(label: Text("Spol")),
               DataColumn(label: Text("Status")),
+              DataColumn(label: Text("")),
             ],
             rows: result?.result
                     .map<DataRow>(
@@ -175,29 +174,24 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                               ),
                             ),
                           ),
-                          DataCell(Center(
-                            child: e.slika != null
-                                ? Container(
-                                    width: 100,
-                                    height: 80,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: MemoryImage(e.slika!),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  )
-                                : Image.asset(
-                                    'assets/images/osoba.jpg',
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ),
-                          )),
                           DataCell(Text(e.korisnik!.spol ?? "-")),
                           DataCell(Text(e.korisnik!.status == true
                               ? "Aktivan"
                               : "Neaktivan")),
+                          DataCell(ElevatedButton(
+                            child: const Text("Ažuriraj podatke"),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => EditPacijentScreen(
+                                  pacijentId: e.pacijentId!,
+                                  onSave: () {
+                                    _loadInitialData();
+                                  },
+                                ),
+                              );
+                            },
+                          ))
                         ],
                       ),
                     )

@@ -176,7 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Widget dashboard;
           switch (userType) {
             case 'administrator':
-              dashboard = DashboardAdmin(userId: userId);
+              dashboard = const DashboardAdmin();
+              //userId: userId
               break;
             case 'doktor':
               dashboard = DashboardDoctor(userId: userId);

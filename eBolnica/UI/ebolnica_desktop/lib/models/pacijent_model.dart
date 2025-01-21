@@ -5,6 +5,7 @@ part 'pacijent_model.g.dart';
 
 @JsonSerializable()
 class Pacijent {
+  int? pacijentId;
   String? ime;
   String? prezime;
   String? email;
@@ -28,6 +29,7 @@ class Pacijent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   int? korisnikId;
   Pacijent({
+    this.pacijentId,
     this.ime,
     this.prezime,
     this.email,

@@ -2,9 +2,12 @@ import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 
 class DashboardAdmin extends StatelessWidget {
-  final int userId;
+  // final int userId;
 
-  const DashboardAdmin({super.key, required this.userId});
+  const DashboardAdmin({
+    super.key,
+  });
+  //required this.userId
   @override
   Widget build(BuildContext context) {
     return Scaffold(
