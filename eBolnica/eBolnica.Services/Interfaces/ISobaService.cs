@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface ISobaService : ICRUDService<Soba, SobaSearchObject, SobaInsertRequest, SobaUpdateRequest>
     {
+        public List<Model.Models.Soba> GetSobaByOdjelId(int odjelId);
+
     }
 }

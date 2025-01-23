@@ -8,10 +8,10 @@ class EditMedicinskoOsobljeScreen extends StatefulWidget {
   final VoidCallback onSave;
 
   const EditMedicinskoOsobljeScreen({
-    Key? key,
+    super.key,
     required this.medicinskoOsobljeId,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EditMedicinskoOsobljeScreenState createState() =>

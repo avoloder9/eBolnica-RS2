@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
@@ -10,6 +11,24 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class KrevetController : BaseCRUDController<Krevet, KrevetSearchObject, KrevetInsertRequest, KrevetUpdateRequest>
     {
-        public KrevetController(IKrevetService service) : base(service) { }
+        private readonly IKrevetService krevetService;
+        public KrevetController(IKrevetService service) : base(service) {
+
+            krevetService = service;
+        }
+        [HttpGet("GetKrevetBySobaId")]
+        public IActionResult GetSobaByOdjelId(int sobaId)
+        {
+            try
+            {
+                var kreveti = krevetService.GetKrevetBySobaId(sobaId);
+                return Ok(kreveti);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
 }

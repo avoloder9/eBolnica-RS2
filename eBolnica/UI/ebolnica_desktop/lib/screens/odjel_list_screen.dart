@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_odjel_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/screens/soba_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class OdjelListScreen extends StatefulWidget {
@@ -99,13 +100,15 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
           child: DataTable(
             columns: const [
               DataColumn(label: Text("Naziv")),
-              DataColumn(label: Text("Broj soba")),
-              DataColumn(label: Text("Broj kreveta")),
+              DataColumn(label: SizedBox(width: 140, child: Text("Broj soba"))),
+              DataColumn(
+                  label: SizedBox(width: 150, child: Text("Broj kreveta"))),
               DataColumn(
                   label: SizedBox(
                       width: 160,
                       child: Center(child: Text("Broj slobodnih kreveta")))),
               DataColumn(label: Text("Glavni doktor")),
+              DataColumn(label: Text("")),
               DataColumn(label: Text("")),
             ],
             rows: result?.result
@@ -113,8 +116,19 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                       (e) => DataRow(
                         cells: [
                           DataCell(Text(e.naziv.toString())),
-                          DataCell(Text(e.brojSoba.toString())),
-                          DataCell(Text(e.brojKreveta.toString())),
+                          DataCell(
+                            SizedBox(
+                              width: 50,
+                              child: Center(child: Text(e.brojSoba.toString())),
+                            ),
+                          ),
+                          DataCell(
+                            SizedBox(
+                              width: 90,
+                              child:
+                                  Center(child: Text(e.brojKreveta.toString())),
+                            ),
+                          ),
                           DataCell(
                             SizedBox(
                               width: 160,
@@ -130,7 +144,18 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                           DataCell(ElevatedButton(
                             child: const Text("Odredi glavnog doktora"),
                             onPressed: () {},
-                          ))
+                          )),
+                          DataCell(
+                            ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => SobaListScreen(
+                                              odjelId: e.odjelId!)));
+                                },
+                                child: const Text("Detalji")),
+                          )
                         ],
                       ),
                     )

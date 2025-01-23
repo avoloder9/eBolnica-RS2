@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
@@ -10,6 +11,23 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class SobaController : BaseCRUDController<Soba, SobaSearchObject, SobaInsertRequest, SobaUpdateRequest>
     {
-        public SobaController(ISobaService service) : base(service) { }
+        public readonly ISobaService sobaService;
+        public SobaController(ISobaService service) : base(service) {
+            sobaService = service;
+        }
+
+        [HttpGet("GetSobaByOdjelId")]
+        public IActionResult GetSobaByOdjelId(int odjelId)
+        {
+            try
+            {
+                var sobe = sobaService.GetSobaByOdjelId(odjelId);
+                return Ok(sobe);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

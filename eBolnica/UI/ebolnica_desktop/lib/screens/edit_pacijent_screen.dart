@@ -7,10 +7,10 @@ class EditPacijentScreen extends StatefulWidget {
   final VoidCallback onSave;
 
   const EditPacijentScreen({
-    Key? key,
+    super.key,
     required this.pacijentId,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EditPacijentScreenState createState() => _EditPacijentScreenState();

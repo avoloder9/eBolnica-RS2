@@ -14,6 +14,12 @@ abstract class BaseProvider<T> with ChangeNotifier {
     _baseUrl = const String.fromEnvironment("baseUrl",
         defaultValue: "http://localhost:5218/");
   }
+  static String get baseUrl {
+    if (_baseUrl == null) {
+      throw Exception("Base URL is not set");
+    }
+    return _baseUrl!;
+  }
 
   Future<SearchResult<T>> get(
       {dynamic filter, int? page, int? pageSize}) async {
@@ -118,10 +124,25 @@ abstract class BaseProvider<T> with ChangeNotifier {
     if (response.statusCode < 299) {
       return true;
     } else if (response.statusCode == 401) {
-      throw Exception("Unauthorized");
+      throw UserFriendlyException("Unauthorized");
     } else {
-      print(response.body);
-      throw Exception("Something bad happened please try again");
+      try {
+        final errorResponse = jsonDecode(response.body);
+        if (errorResponse is Map<String, dynamic> &&
+            errorResponse['errors'] != null &&
+            errorResponse['errors']['userError'] != null) {
+          throw UserFriendlyException(
+              errorResponse['errors']['userError'].join(', '));
+        } else {
+          throw UserFriendlyException(
+              "Something bad happened, please try again");
+        }
+      } catch (e) {
+        if (e is UserFriendlyException) {
+          throw e;
+        }
+        throw UserFriendlyException("Something bad happened, please try again");
+      }
     }
   }
 
@@ -173,4 +194,13 @@ abstract class BaseProvider<T> with ChangeNotifier {
     });
     return query;
   }
+}
+
+class UserFriendlyException implements Exception {
+  final String message;
+
+  UserFriendlyException(this.message);
+
+  @override
+  String toString() => message;
 }

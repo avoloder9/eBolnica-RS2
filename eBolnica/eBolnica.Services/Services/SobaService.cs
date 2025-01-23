@@ -2,7 +2,9 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using Mapster;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client.Extensibility;
 using System;
 using System.Collections.Generic;
@@ -64,6 +66,31 @@ namespace eBolnica.Services.Services
 
             soba.Zauzeta = sviKrevetiZauzeti;
             Context.SaveChanges();
+        }
+        public List<Model.Models.Soba> GetSobaByOdjelId(int odjelId)
+        {
+            var sobaDatabase = Context.Set<Database.Soba>().Include(s => s.Odjel).Where(x => x.OdjelId == odjelId).ToList();
+            if (sobaDatabase.Count == 0)
+            {
+                throw new Exception("Nema sobe na ovom odjelu");
+            }
+            var sobaModel = sobaDatabase.Select(s => new Model.Models.Soba
+            {
+                OdjelId = s.OdjelId,
+                Naziv=s.Naziv,
+                SobaId = s.SobaId,
+                BrojKreveta = s.BrojKreveta,
+                Zauzeta = s.Zauzeta,
+                Odjel = new Model.Models.Odjel
+                {
+                    Naziv= s.Odjel.Naziv,
+                    OdjelId=s.Odjel.OdjelId,
+                    BrojKreveta=s.Odjel.BrojKreveta,
+                    BrojSlobodnihKreveta=s.Odjel.BrojSlobodnihKreveta,
+                    BrojSoba=s.Odjel.BrojSoba                    
+                }
+            }).ToList();
+            return sobaModel;
         }
     }
 

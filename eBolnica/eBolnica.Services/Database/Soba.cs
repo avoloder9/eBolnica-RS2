@@ -6,7 +6,7 @@ namespace eBolnica.Services.Database;
 public partial class Soba
 {
     public int SobaId { get; set; }
-
+    public string Naziv { get; set; }
     public int OdjelId { get; set; }
 
     public int? BrojKreveta { get; set; }

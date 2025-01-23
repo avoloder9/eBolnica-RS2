@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eBolnica.Services.Database;
 
@@ -11,9 +12,11 @@ using eBolnica.Services.Database;
 namespace eBolnica.Services.Migrations
 {
     [DbContext(typeof(EBolnicaContext))]
-    partial class EBolnicaContextModelSnapshot : ModelSnapshot
+    [Migration("20250122145217_UpdateSoba")]
+    partial class UpdateSoba
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
