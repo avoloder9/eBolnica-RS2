@@ -11,6 +11,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -68,6 +69,15 @@ builder.Services.AddControllers(x =>
 }).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddMapster();
+TypeAdapterConfig<eBolnica.Services.Database.Doktor, eBolnica.Model.Models.Doktor>
+    .NewConfig() 
+    .PreserveReference(true) 
+    .MaxDepth(3);  
+
+TypeAdapterConfig<eBolnica.Services.Database.Odjel, eBolnica.Model.Models.Odjel>
+    .NewConfig()
+    .PreserveReference(true)
+    .MaxDepth(3);
 
 TypeAdapterConfig<eBolnica.Services.Database.Hospitalizacija, eBolnica.Model.Models.Hospitalizacija>
     .NewConfig()

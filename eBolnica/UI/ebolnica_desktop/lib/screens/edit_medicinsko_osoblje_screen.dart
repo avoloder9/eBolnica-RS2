@@ -51,8 +51,8 @@ class _EditMedicinskoOsobljeScreenState
   Future<void> _loadOsobljeData() async {
     final osoblje = await provider.getById(widget.medicinskoOsobljeId);
     setState(() {
-      _imeController.text = osoblje.korisnik!.ime;
-      _prezimeController.text = osoblje.korisnik!.prezime;
+      _imeController.text = osoblje.korisnik!.ime!;
+      _prezimeController.text = osoblje.korisnik!.prezime!;
       _telefonController.text = osoblje.korisnik!.telefon ?? '';
       _status = osoblje.korisnik?.status ?? true;
       _selectedOdjelId = osoblje.odjelId;

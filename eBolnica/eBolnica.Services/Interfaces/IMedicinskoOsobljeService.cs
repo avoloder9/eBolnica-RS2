@@ -11,5 +11,6 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IMedicinskoOsobljeService : ICRUDService<MedicinskoOsoblje, MedicinskoOsobljeSearchObject, MedicinskoOsobljeInsertRequest, MedicinskoOsobljeUpdateRequest>
     {
+        public int GetOsobljeIdByKorisnikId(int korisnikId);
     }
 }

@@ -32,5 +32,34 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetTerminByPacijent")]
+        public IActionResult GetTerminByPacijent(int pacijentId)
+        {
+            try
+            {
+                var termini = _pacijentService.GetTerminByPacijentId(pacijentId);
+                return Ok(termini);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetPacijentIdByKorisnikId/{korisnikId}")]
+        public IActionResult GetPacijentIdByKorisnikId(int korisnikId)
+        {
+            int pacijentId = _pacijentService.GetPacijentIdByKorisnikId(korisnikId);
+
+            if (pacijentId != 0)
+            {
+                return Ok(pacijentId);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
     }
 }

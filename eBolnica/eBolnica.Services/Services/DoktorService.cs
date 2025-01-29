@@ -95,5 +95,10 @@ namespace eBolnica.Services.Services
                 Mapper.Map(request, korisnik);
             }
         }
+        public int GetDoktorIdByKorisnikId(int korisnikId)
+        {
+            var admin = Context.Doktors.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return admin.DoktorId;
+        }
     }
 }

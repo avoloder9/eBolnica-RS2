@@ -154,9 +154,9 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                     .map<DataRow>(
                       (e) => DataRow(
                         cells: [
-                          DataCell(Text(e.korisnik!.ime)),
-                          DataCell(Text(e.korisnik!.prezime)),
-                          DataCell(Text(e.korisnik!.email)),
+                          DataCell(Text(e.korisnik!.ime!)),
+                          DataCell(Text(e.korisnik!.prezime!)),
+                          DataCell(Text(e.korisnik!.email!)),
                           DataCell(SizedBox(
                               width: 160,
                               child: Center(

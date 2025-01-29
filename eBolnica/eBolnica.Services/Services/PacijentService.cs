@@ -12,6 +12,7 @@ using eBolnica.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
+using System.Security.Cryptography.X509Certificates;
 
 namespace eBolnica.Services.Services
 {
@@ -126,6 +127,57 @@ namespace eBolnica.Services.Services
             {
                 Mapper.Map(request, korisnik);
             }
+        }
+
+        public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId)
+        {
+            var termini = Context.Set<Database.Termin>().Where(x => x.PacijentId == pacijentId)
+                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d=>d.Doktor).ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).ToList();
+
+            if (termini.Count == 0)
+            {
+                throw new Exception("Nema zakazanih termina za ovog pacijenta");
+            }
+            var terminModel = termini.Select(p => new Model.Models.Termin
+            {
+                TerminId = p.TerminId,
+                VrijemeTermina = p.VrijemeTermina,
+                DatumTermina = p.DatumTermina,
+                Otkazano = p.Otkazano,
+                Doktor = new Model.Models.Doktor
+                {
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = p.Doktor.Korisnik.Ime,
+                        Prezime = p.Doktor.Korisnik.Prezime,
+                        KorisnikId=p.Doktor.KorisnikId
+                    }
+                },
+                DoktorId = p.DoktorId,
+                OdjelId = p.OdjelId,
+                PacijentId = p.PacijentId,
+                Pacijent = new Model.Models.Pacijent
+                {
+                    PacijentId=p.PacijentId,
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = p.Pacijent.Korisnik.Ime,
+                        Prezime = p.Pacijent.Korisnik.Prezime,
+                        KorisnikId=p.Pacijent.KorisnikId,                        
+                    }
+                },
+                Odjel = new Model.Models.Odjel
+                {
+                    OdjelId=p.OdjelId,
+                    Naziv = p.Odjel.Naziv,
+                }
+            }).ToList();
+            return terminModel;
+        }
+        public int GetPacijentIdByKorisnikId(int korisnikId)
+        {
+            var admin = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return admin.PacijentId;
         }
     }
 }

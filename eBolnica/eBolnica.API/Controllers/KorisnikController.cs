@@ -29,6 +29,7 @@ namespace eBolnica.API.Controllers
             {
                 case AuthenticationResult.Success:
                     var userId = authenticationResponse.UserId;
+                    
                     if (korisnikService.isKorisnikDoktor((int)userId))
                     {
                         userType = "doktor";
@@ -56,7 +57,7 @@ namespace eBolnica.API.Controllers
                             return BadRequest("Administrator ne moze koristiti mobilnu aplikaciju");
                         }
                     }
-                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType });
+                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik });
                 case AuthenticationResult.UserNotFound:
                     return BadRequest("Korisnik nije pronadjen.");
                 default:

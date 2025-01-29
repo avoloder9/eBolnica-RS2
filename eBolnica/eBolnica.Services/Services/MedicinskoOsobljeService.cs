@@ -136,5 +136,10 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<MedicinskoOsoblje>(entity);
         }
+        public int GetOsobljeIdByKorisnikId(int korisnikId)
+        {
+            var admin = Context.MedicinskoOsobljes.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return admin.MedicinskoOsobljeId;
+        }
     }
 }

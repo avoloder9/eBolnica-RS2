@@ -11,5 +11,8 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IPacijentService : ICRUDService<Pacijent, PacijentSearchObject, PacijentInsertRequest, PacijentUpdateRequest>
     {
+        public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId);
+        public int GetPacijentIdByKorisnikId(int korisnikId);
+
     }
 }

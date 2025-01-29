@@ -56,5 +56,9 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<Termin>(entity);
         }
+        public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId)
+        {
+            return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId==doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
+        }
     }
 }

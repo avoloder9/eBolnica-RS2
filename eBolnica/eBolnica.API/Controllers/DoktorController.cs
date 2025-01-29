@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
@@ -10,6 +11,23 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class DoktorController : BaseCRUDController<Doktor, DoktorSearchObject, DoktorInsertRequest, DoktorUpdateRequest>
     {
-        public DoktorController(IDoktorService service) : base(service) { }
+        private readonly IDoktorService _doktorService;
+        public DoktorController(IDoktorService service) : base(service) {
+            _doktorService = service;
+        }
+        [HttpGet("GetDoktorIdByKorisnikId/{korisnikId}")]
+        public IActionResult GetDoktorIdByKorisnikId(int korisnikId)
+        {
+            int doktorId = _doktorService.GetDoktorIdByKorisnikId(korisnikId);
+
+            if (doktorId != 0)
+            {
+                return Ok(doktorId);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }

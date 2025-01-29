@@ -67,8 +67,8 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
 
   void filterDoctors(String query) {
     final results = doktori.where((doctor) {
-      final ime = doctor.korisnik?.ime.toLowerCase();
-      final prezime = doctor.korisnik?.prezime.toLowerCase();
+      final ime = doctor.korisnik?.ime!.toLowerCase();
+      final prezime = doctor.korisnik?.prezime!.toLowerCase();
 
       final specijalizacija = doctor.specijalizacija?.toLowerCase();
       final matchesSearchQuery =

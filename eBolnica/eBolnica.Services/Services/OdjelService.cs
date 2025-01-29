@@ -20,7 +20,7 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Odjel> AddFilter(OdjelSearchObject searchObject, IQueryable<Database.Odjel> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Bolnica);
+            query = base.AddFilter(searchObject, query).Include(x => x.Bolnica).Include(y=>y.GlavniDoktor).ThenInclude(k=>k!=null ? k.Korisnik:null);
 
 
             if (!string.IsNullOrWhiteSpace(searchObject?.NazivGTE))

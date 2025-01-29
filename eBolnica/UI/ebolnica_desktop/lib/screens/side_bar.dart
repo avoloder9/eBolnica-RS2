@@ -3,12 +3,15 @@ import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
 import 'package:ebolnica_desktop/screens/medicinsko_osoblje_list_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_list_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_list_screen.dart';
+import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
+import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
+
 import 'package:flutter/material.dart';
 
 class SideBar extends StatelessWidget {
   final String userType;
-
-  const SideBar({super.key, required this.userType});
+  final int? userId;
+  const SideBar({super.key, required this.userType, this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -43,16 +46,33 @@ class SideBar extends StatelessWidget {
       'doktor': [
         {'label': 'Pregledi', 'route': '/pregledi'},
         {'label': 'Pacijenti', 'route': '/pacijenti'},
-        {'label': 'Odjeli', 'route': '/odjeli'},
+        {'label': 'Operacije', 'route': '/operacije'},
+        {'label': 'Hospitalizacije', 'route': '/hospitalizacije'},
+        {'label': 'Postavke', 'route': '/postavke'},
+        {'label': 'Odjava', 'route': '/odjava'},
       ],
       'pacijent': [
-        {'label': 'Pregledi', 'route': '/pregledi'},
-        {'label': 'Terapije', 'route': '/terapije'},
+        {'label': 'Medicinska dokumentacija', 'route': '/dokumentacija'},
+        {
+          'label': 'Pregledi',
+          'route': (BuildContext context) => PreglediScreen(userId: userId)
+        },
+        {
+          'label': 'Termini',
+          'route': (BuildContext context) => TerminiScreen(userId: userId)
+        },
+        {'label': 'Nalazi', 'route': '/nalazi'},
+        {'label': 'Postavke', 'route': '/postavke'},
+        {'label': 'Odjava', 'route': '/odjava'},
       ],
       'medicinsko osoblje': [
         {'label': 'Odjeli', 'route': '/odjeli'},
         {'label': 'Pregledi', 'route': '/pregledi'},
         {'label': 'Pacijenti', 'route': '/pacijenti'},
+        {'label': 'Smjene', 'route': '/smjene'},
+        {'label': 'Nalazi', 'route': '/nalazi'},
+        {'label': 'Postavke', 'route': '/postavke'},
+        {'label': 'Odjava', 'route': '/odjava'},
       ],
     };
     return Drawer(

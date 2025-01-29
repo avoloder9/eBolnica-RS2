@@ -1,9 +1,11 @@
 import 'dart:convert';
-
+import 'package:ebolnica_desktop/models/pacijent_model.dart';
+import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+late PacijentProvider pacijentProvider;
 String formatNumber(dynamic) {
   var f = NumberFormat('###,00');
   if (dynamic == null) {
@@ -40,4 +42,20 @@ class PhoneNumberFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: text.length),
     );
   }
+}
+
+int? getPacijentIdByUserId(int? userId, List<Pacijent> pacijenti) {
+  if (userId == null) return null;
+
+  final pacijent = pacijenti.firstWhere(
+    (pacijent) => pacijent.korisnikId == userId,
+    orElse: () => Pacijent(),
+  );
+
+  return pacijent.pacijentId;
+}
+
+Future<List<Pacijent>> fetchPacijenti() async {
+  final response = await pacijentProvider.get();
+  return response.result;
 }

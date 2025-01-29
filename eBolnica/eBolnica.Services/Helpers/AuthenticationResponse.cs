@@ -1,4 +1,6 @@
-﻿using Microsoft.Identity.Client;
+﻿using eBolnica.Model.Models;
+using eBolnica.Services.Database;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +19,6 @@ namespace eBolnica.Services.Helpers
     {
         public AuthenticationResult Result { get; set; }
         public int? UserId { get; set; }
+        public Database.Korisnik? Korisnik { get; set; }
     }
 }

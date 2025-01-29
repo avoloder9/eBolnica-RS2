@@ -10,6 +10,16 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class TerminController : BaseCRUDController<Termin, TerminSearchObject, TerminInsertRequest, TerminUpdateRequest>
     {
-        public TerminController(ITerminService service) : base(service) { }
+        private readonly ITerminService _terminService;
+        public TerminController(ITerminService service) : base(service)
+        {
+            _terminService = service;
+        }
+        [HttpGet("zauzeti-termini")]
+        public ActionResult<List<string>> GetZauzetiTermini(DateTime datum, int doktorId)
+        {
+            var zauzetiTermini = _terminService.GetZauzetiTerminiZaDatum(datum,doktorId);
+            return Ok(zauzetiTermini);
+        }
     }
 }

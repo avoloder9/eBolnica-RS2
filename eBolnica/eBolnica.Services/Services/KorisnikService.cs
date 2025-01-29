@@ -124,7 +124,7 @@ namespace eBolnica.Services.Services
                 return new AuthenticationResponse { Result = AuthenticationResult.InvalidPassword };
             }
 
-            return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId};
+            return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId, Korisnik=user};
         }
 
         public bool isKorisnikDoktor(int korisnikId)

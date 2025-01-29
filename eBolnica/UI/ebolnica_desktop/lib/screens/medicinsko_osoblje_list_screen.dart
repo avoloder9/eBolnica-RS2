@@ -45,8 +45,8 @@ class _MedicinskoOsobljeListScreenState
 
   void filterOsoblje(String query) {
     final results = osoblje.where((osoblje) {
-      final ime = osoblje.korisnik?.ime.toLowerCase();
-      final prezime = osoblje.korisnik?.prezime.toLowerCase();
+      final ime = osoblje.korisnik?.ime!.toLowerCase();
+      final prezime = osoblje.korisnik?.prezime!.toLowerCase();
 
       final matchesSearchQuery =
           ('$ime $prezime'.contains(query.toLowerCase()) ||
@@ -131,9 +131,9 @@ class _MedicinskoOsobljeListScreenState
                   .map<DataRow>(
                     (e) => DataRow(
                       cells: [
-                        DataCell(Text(e.korisnik!.ime)),
-                        DataCell(Text(e.korisnik!.prezime)),
-                        DataCell(Text(e.korisnik!.email)),
+                        DataCell(Text(e.korisnik!.ime!)),
+                        DataCell(Text(e.korisnik!.prezime!)),
+                        DataCell(Text(e.korisnik!.email!)),
                         DataCell(Text(e.korisnik!.telefon ?? "-")),
                         DataCell(
                           SizedBox(

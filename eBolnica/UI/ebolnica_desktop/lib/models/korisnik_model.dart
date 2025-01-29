@@ -4,24 +4,26 @@ part 'korisnik_model.g.dart';
 
 @JsonSerializable()
 class Korisnik {
-  final String ime;
-  final String prezime;
-  final String email;
-  final String korisnickoIme;
-  final DateTime datumRodjenja;
+  final int? korisnikId;
+  final String? ime;
+  final String? prezime;
+  final String? email;
+  final String? korisnickoIme;
+  final DateTime? datumRodjenja;
   final String? telefon;
   final String? spol;
-  final bool status;
+  final bool? status;
 
   Korisnik({
-    required this.ime,
-    required this.prezime,
-    required this.email,
-    required this.korisnickoIme,
-    required this.datumRodjenja,
+    this.korisnikId,
+    this.ime,
+    this.prezime,
+    this.email,
+    this.korisnickoIme,
+    this.datumRodjenja,
     this.telefon,
     this.spol,
-    required this.status,
+    this.status,
   });
 
   factory Korisnik.fromJson(Map<String, dynamic> json) =>

@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IDoktorService : ICRUDService<Doktor, DoktorSearchObject, DoktorInsertRequest, DoktorUpdateRequest>
     {
+        public int GetDoktorIdByKorisnikId(int korisnikId);
+
     }
 }

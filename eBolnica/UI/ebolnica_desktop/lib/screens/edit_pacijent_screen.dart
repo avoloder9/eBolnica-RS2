@@ -44,8 +44,8 @@ class _EditPacijentScreenState extends State<EditPacijentScreen> {
   Future<void> _loadPacijentData() async {
     final pacijent = await provider.getById(widget.pacijentId);
     setState(() {
-      _imeController.text = pacijent.korisnik!.ime;
-      _prezimeController.text = pacijent.korisnik!.prezime;
+      _imeController.text = pacijent.korisnik!.ime!;
+      _prezimeController.text = pacijent.korisnik!.prezime!;
       _telefonController.text = pacijent.korisnik!.telefon ?? '';
       _adresaController.text = pacijent.adresa ?? '';
       _status = pacijent.korisnik?.status ?? true;

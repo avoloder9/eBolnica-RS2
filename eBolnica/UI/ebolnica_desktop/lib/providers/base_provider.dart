@@ -133,6 +133,10 @@ abstract class BaseProvider<T> with ChangeNotifier {
             errorResponse['errors']['userError'] != null) {
           throw UserFriendlyException(
               errorResponse['errors']['userError'].join(', '));
+        } else if (response.statusCode == 404 &&
+            response.body.contains("doktori")) {
+          throw UserFriendlyException(
+              "Potrebno je dodati doktore na ovaj odjel");
         } else {
           throw UserFriendlyException(
               "Something bad happened, please try again");
