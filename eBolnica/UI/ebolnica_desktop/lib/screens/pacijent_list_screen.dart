@@ -9,7 +9,8 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:intl/intl.dart';
 
 class PacijentListScreen extends StatefulWidget {
-  const PacijentListScreen({super.key});
+  final int userId;
+  const PacijentListScreen({super.key, required this.userId});
 
   @override
   State<PacijentListScreen> createState() => _PacijentListScreenState();
@@ -50,7 +51,10 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
       appBar: AppBar(
         title: const Text("Lista pacijenata"),
       ),
-      drawer: const SideBar(userType: 'administrator'),
+      drawer: SideBar(
+        userType: 'administrator',
+        userId: widget.userId,
+      ),
       body: Column(
         children: [
           _buildSearch(),
@@ -116,7 +120,9 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                 context: context,
                 barrierDismissible: false,
                 builder: (BuildContext context) {
-                  return const NoviPacijentScreen();
+                  return NoviPacijentScreen(
+                    userId: widget.userId,
+                  );
                 },
               );
             },

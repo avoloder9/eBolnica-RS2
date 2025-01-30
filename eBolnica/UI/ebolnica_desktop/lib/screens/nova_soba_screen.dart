@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 class NovaSobaScreen extends StatefulWidget {
   final int odjelId;
-
-  const NovaSobaScreen({required this.odjelId, super.key});
+  final int userId;
+  const NovaSobaScreen(
+      {required this.odjelId, super.key, required this.userId});
 
   @override
   _NovaSobaScreenState createState() => _NovaSobaScreenState();
@@ -87,8 +88,10 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            SobaListScreen(odjelId: widget.odjelId),
+                        builder: (context) => SobaListScreen(
+                          odjelId: widget.odjelId,
+                          userId: widget.userId,
+                        ),
                       ),
                       (route) => route.isFirst)
                 ]);

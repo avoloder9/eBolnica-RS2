@@ -9,7 +9,10 @@ class DashboardDoctor extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Doktor')),
-      drawer: const SideBar(userType: 'doktor'),
+      drawer: SideBar(
+        userType: 'doktor',
+        userId: userId,
+      ),
       body: const Center(
         child: Text(
           "Dobrodošli na doktorski dashboard!\nKorisnik ID:",

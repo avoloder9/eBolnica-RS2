@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 class NoviKrevetScreen extends StatefulWidget {
   final int sobaId;
   final int odjelId;
+  final int userId;
   const NoviKrevetScreen(
-      {required this.sobaId, required this.odjelId, super.key});
+      {required this.sobaId,
+      required this.odjelId,
+      super.key,
+      required this.userId});
   @override
   _NoviKrevetScreenState createState() => _NoviKrevetScreenState();
 }
@@ -49,6 +53,7 @@ class _NoviKrevetScreenState extends State<NoviKrevetScreen> {
                         builder: (context) => KrevetListScreen(
                           sobaId: widget.sobaId,
                           odjelId: widget.odjelId,
+                          userId: widget.userId,
                         ),
                       ),
                       (route) => route.isFirst)

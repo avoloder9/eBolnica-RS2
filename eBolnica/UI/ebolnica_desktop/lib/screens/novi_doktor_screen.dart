@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class NoviDoktorScreen extends StatefulWidget {
-  const NoviDoktorScreen({super.key});
+  final int userId;
+  const NoviDoktorScreen({super.key, required this.userId});
   @override
   _NoviDoktorScreenState createState() => _NoviDoktorScreenState();
 }
@@ -366,7 +367,9 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const DoktorListScreen()),
+                                builder: (context) => DoktorListScreen(
+                                      userId: widget.userId,
+                                    )),
                           ),
                         ]);
                       } catch (e) {

@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 
 class SobaListScreen extends StatefulWidget {
   final int odjelId;
-
-  const SobaListScreen({super.key, required this.odjelId});
+  final int userId;
+  const SobaListScreen(
+      {super.key, required this.odjelId, required this.userId});
 
   @override
   _SobaListScreenState createState() => _SobaListScreenState();
@@ -39,7 +40,9 @@ class _SobaListScreenState extends State<SobaListScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const OdjelListScreen(),
+            builder: (context) => OdjelListScreen(
+              userId: widget.userId,
+            ),
           ),
         );
         return false;
@@ -54,6 +57,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
                 builder: (BuildContext context) {
                   return NovaSobaScreen(
                     odjelId: widget.odjelId,
+                    userId: widget.userId,
                   );
                 },
                 barrierDismissible: false,
@@ -116,6 +120,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
                                         builder: (context) => KrevetListScreen(
                                               sobaId: e.sobaId!,
                                               odjelId: widget.odjelId,
+                                              userId: widget.userId,
                                             )));
                               },
                               child: const Text("Detalji"),

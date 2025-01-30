@@ -8,7 +8,9 @@ import 'package:ebolnica_desktop/screens/odjel_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class NoviOdjelScreen extends StatefulWidget {
-  const NoviOdjelScreen({super.key});
+  final int userId;
+
+  const NoviOdjelScreen({super.key, required this.userId});
 
   @override
   _NoviOdjelScreenState createState() => _NoviOdjelScreenState();
@@ -136,7 +138,9 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const OdjelListScreen()),
+                                builder: (context) => OdjelListScreen(
+                                      userId: widget.userId,
+                                    )),
                           ),
                         ]);
                       } catch (e) {

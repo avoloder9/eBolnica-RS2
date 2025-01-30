@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TerminiScreen extends StatefulWidget {
-  final int? userId;
+  final int userId;
   const TerminiScreen({super.key, required this.userId});
   @override
   _TerminiScreenState createState() => _TerminiScreenState();
@@ -20,6 +20,12 @@ class _TerminiScreenState extends State<TerminiScreen> {
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
+    //   fetchTermini();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     fetchTermini();
   }
 
@@ -35,15 +41,16 @@ class _TerminiScreenState extends State<TerminiScreen> {
   }
 
   Future<void> fetchTermini() async {
-    if (widget.userId != null) {
-      pacijentId =
-          await pacijentProvider.getPacijentIdByKorisnikId(widget.userId!);
-      if (pacijentId != null) {
-        var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
-        setState(() {
-          termini = result;
-        });
-      }
+    setState(() {
+      termini = [];
+    });
+    pacijentId =
+        await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
+    if (pacijentId != null) {
+      var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
+      setState(() {
+        termini = result;
+      });
     } else
       print("error");
   }
@@ -51,7 +58,9 @@ class _TerminiScreenState extends State<TerminiScreen> {
   @override
   Widget build(BuildContext context) {
     if (termini == null || termini!.isEmpty) {
-      fetchTermini();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        fetchTermini();
+      });
     }
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +73,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
                   builder: (BuildContext context) {
                     return NoviTerminScreen(
                       pacijentId: pacijentId!,
-                      userId: widget.userId!,
+                      userId: widget.userId,
                     );
                   },
                   barrierDismissible: false);
@@ -74,7 +83,10 @@ class _TerminiScreenState extends State<TerminiScreen> {
           ),
         ],
       ),
-      drawer: const SideBar(userType: 'pacijent'),
+      drawer: SideBar(
+        userType: 'pacijent',
+        userId: widget.userId,
+      ),
       body: Column(
         children: [_buildResultView()],
       ),

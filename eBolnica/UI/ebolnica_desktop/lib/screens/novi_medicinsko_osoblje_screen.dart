@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class NoviMedicinskoOsobljeScreen extends StatefulWidget {
-  const NoviMedicinskoOsobljeScreen({super.key});
+  final int userId;
+
+  const NoviMedicinskoOsobljeScreen({super.key, required this.userId});
 
   @override
   _NoviMedicinskoOsobljeScreenState createState() =>
@@ -305,7 +307,9 @@ class _NoviMedicinskoOsobljeScreenState
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const MedicinskoOsobljeListScreen()),
+                                    MedicinskoOsobljeListScreen(
+                                      userId: widget.userId,
+                                    )),
                           ),
                         ]);
                       } catch (e) {

@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 class KrevetListScreen extends StatefulWidget {
   final int sobaId;
   final int odjelId;
+  final int userId;
   const KrevetListScreen(
-      {super.key, required this.sobaId, required this.odjelId});
+      {super.key,
+      required this.sobaId,
+      required this.odjelId,
+      required this.userId});
   @override
   State<KrevetListScreen> createState() => _KrevetListScreenState();
 }
@@ -40,6 +44,7 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
           MaterialPageRoute(
             builder: (context) => SobaListScreen(
               odjelId: widget.odjelId,
+              userId: widget.userId,
             ),
           ),
         );
@@ -56,6 +61,7 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                   return NoviKrevetScreen(
                     sobaId: widget.sobaId,
                     odjelId: widget.odjelId,
+                    userId: widget.userId,
                   );
                 },
                 barrierDismissible: false,

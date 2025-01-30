@@ -9,7 +9,7 @@ class DashboardMedicalStaff extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Medicinsko osoblje')),
-      drawer: const SideBar(userType: 'medicinsko osoblje'),
+      drawer: SideBar(userType: 'medicinsko osoblje', userId: userId),
       body: const Center(
         child: Text(
           "Dobrodošli na medicinsko osoblje dashboard!\nKorisnik ID:",

@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class NoviPacijentScreen extends StatefulWidget {
-  const NoviPacijentScreen({super.key});
+  final int userId;
+
+  const NoviPacijentScreen({super.key, required this.userId});
 
   @override
   _NoviPacijentScreenState createState() => _NoviPacijentScreenState();
@@ -289,8 +291,9 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    const PacijentListScreen()),
+                                builder: (context) => PacijentListScreen(
+                                      userId: widget.userId,
+                                    )),
                           ),
                         ]);
                       } catch (e) {

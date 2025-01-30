@@ -10,7 +10,8 @@ import 'package:ebolnica_desktop/screens/soba_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class OdjelListScreen extends StatefulWidget {
-  const OdjelListScreen({super.key});
+  final int userId;
+  const OdjelListScreen({super.key, required this.userId});
   @override
   State<OdjelListScreen> createState() => _OdjelListScreenState();
 }
@@ -71,7 +72,10 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
       appBar: AppBar(
         title: const Text("Lista odjela"),
       ),
-      drawer: const SideBar(userType: 'administrator'),
+      drawer: SideBar(
+        userType: 'administrator',
+        userId: widget.userId,
+      ),
       body: Column(
         children: [
           _buildSearch(),
@@ -116,7 +120,9 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                 context: context,
                 barrierDismissible: false,
                 builder: (BuildContext context) {
-                  return const NoviOdjelScreen();
+                  return NoviOdjelScreen(
+                    userId: widget.userId,
+                  );
                 },
               );
             },
@@ -205,7 +211,9 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => SobaListScreen(
-                                              odjelId: e.odjelId!)));
+                                                odjelId: e.odjelId!,
+                                                userId: widget.userId,
+                                              )));
                                 },
                                 child: const Text("Detalji")),
                           )

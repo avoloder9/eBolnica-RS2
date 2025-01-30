@@ -1,112 +1,110 @@
+import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
 import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
 import 'package:ebolnica_desktop/screens/medicinsko_osoblje_list_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_list_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_list_screen.dart';
-import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
-
-import 'package:flutter/material.dart';
 
 class SideBar extends StatelessWidget {
   final String userType;
-  final int? userId;
-  const SideBar({super.key, required this.userType, this.userId});
+  final int userId;
+  const SideBar({super.key, required this.userType, required this.userId});
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, List<Map<String, dynamic>>> menuItems = {
-      'administrator': [
-        {
-          'label': 'Bolnica',
-          'route': (BuildContext context) => const DashboardAdmin()
-        },
-        {
-          'label': 'Doktori',
-          'route': (BuildContext context) => const DoktorListScreen()
-        },
-        {
-          'label': 'Pacijenti',
-          'route': (BuildContext context) => const PacijentListScreen()
-        },
-        {
-          'label': 'Odjeli',
-          'route': (BuildContext context) => const OdjelListScreen()
-        },
-        {
-          'label': 'Medicinsko osoblje',
-          'route': (BuildContext context) => const MedicinskoOsobljeListScreen()
-        },
-        {'label': 'Smjene', 'route': '/smjene'},
-        {'label': 'Pregledi', 'route': '/pregledi'},
-        {'label': 'Izvjestaji', 'route': '/izvjestaji'},
-        {'label': 'Postavke', 'route': '/postavke'},
-        {'label': 'Odjava', 'route': '/odjava'},
-      ],
-      'doktor': [
-        {'label': 'Pregledi', 'route': '/pregledi'},
-        {'label': 'Pacijenti', 'route': '/pacijenti'},
-        {'label': 'Operacije', 'route': '/operacije'},
-        {'label': 'Hospitalizacije', 'route': '/hospitalizacije'},
-        {'label': 'Postavke', 'route': '/postavke'},
-        {'label': 'Odjava', 'route': '/odjava'},
-      ],
-      'pacijent': [
-        {'label': 'Medicinska dokumentacija', 'route': '/dokumentacija'},
-        {
-          'label': 'Pregledi',
-          'route': (BuildContext context) => PreglediScreen(userId: userId)
-        },
-        {
-          'label': 'Termini',
-          'route': (BuildContext context) => TerminiScreen(userId: userId)
-        },
-        {'label': 'Nalazi', 'route': '/nalazi'},
-        {'label': 'Postavke', 'route': '/postavke'},
-        {'label': 'Odjava', 'route': '/odjava'},
-      ],
-      'medicinsko osoblje': [
-        {'label': 'Odjeli', 'route': '/odjeli'},
-        {'label': 'Pregledi', 'route': '/pregledi'},
-        {'label': 'Pacijenti', 'route': '/pacijenti'},
-        {'label': 'Smjene', 'route': '/smjene'},
-        {'label': 'Nalazi', 'route': '/nalazi'},
-        {'label': 'Postavke', 'route': '/postavke'},
-        {'label': 'Odjava', 'route': '/odjava'},
-      ],
-    };
     return Drawer(
       child: ListView(
         children: [
-          DrawerHeader(
-            decoration:
-                const BoxDecoration(color: Color.fromARGB(255, 32, 145, 231)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 18),
-              child: const Center(
-                child: Text(
-                  'Kantonalna bolnica dr. Safet Mujić',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                  softWrap: true,
-                ),
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Color.fromARGB(255, 32, 145, 231)),
+            child: Center(
+              child: Text(
+                'Kantonalna bolnica dr. Safet Mujić',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
-          ...menuItems[userType]!.map((item) {
-            return Center(
-              child: ListTile(
-                title: Center(child: Text(item['label']!)),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: item['route']),
-                  );
-                },
-              ),
-            );
-          }).toList(),
+          if (userType == 'administrator') ...[
+            _buildListTile(
+                context,
+                'Bolnica',
+                DashboardAdmin(
+                  userId: userId,
+                )),
+            _buildListTile(
+                context,
+                'Doktori',
+                DoktorListScreen(
+                  userId: userId,
+                )),
+            _buildListTile(
+                context,
+                'Pacijenti',
+                PacijentListScreen(
+                  userId: userId,
+                )),
+            _buildListTile(
+                context,
+                'Odjeli',
+                OdjelListScreen(
+                  userId: userId,
+                )),
+            _buildListTile(
+                context,
+                'Medicinsko osoblje',
+                MedicinskoOsobljeListScreen(
+                  userId: userId,
+                )),
+            _buildListTile(context, 'Smjene', '/smjene'),
+            _buildListTile(context, 'Pregledi', '/pregledi'),
+            _buildListTile(context, 'Izvještaji', '/izvjestaji'),
+            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Odjava', '/odjava'),
+          ] else if (userType == 'doktor') ...[
+            _buildListTile(context, 'Pregledi', '/pregledi'),
+            _buildListTile(context, 'Pacijenti', '/pacijenti'),
+            _buildListTile(context, 'Operacije', '/operacije'),
+            _buildListTile(context, 'Hospitalizacije', '/hospitalizacije'),
+            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Odjava', '/odjava'),
+          ] else if (userType == 'pacijent') ...[
+            _buildListTile(
+                context, 'Medicinska dokumentacija', '/dokumentacija'),
+            _buildListTile(context, 'Pregledi', PreglediScreen(userId: userId)),
+            _buildListTile(context, 'Termini', TerminiScreen(userId: userId)),
+            _buildListTile(context, 'Nalazi', '/nalazi'),
+            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Odjava', '/odjava'),
+          ] else if (userType == 'medicinsko osoblje') ...[
+            _buildListTile(context, 'Odjeli', '/odjeli'),
+            _buildListTile(context, 'Pregledi', '/pregledi'),
+            _buildListTile(context, 'Pacijenti', '/pacijenti'),
+            _buildListTile(context, 'Smjene', '/smjene'),
+            _buildListTile(context, 'Nalazi', '/nalazi'),
+            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Odjava', '/odjava'),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildListTile(BuildContext context, String title, dynamic route) {
+    return ListTile(
+      title: Text(title, textAlign: TextAlign.center),
+      onTap: () {
+        if (route is String) {
+          Navigator.pushNamed(context, route);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => route),
+          );
+        }
+      },
     );
   }
 }

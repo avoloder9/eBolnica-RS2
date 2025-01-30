@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class MedicinskoOsobljeListScreen extends StatefulWidget {
-  const MedicinskoOsobljeListScreen({super.key});
+  final int userId;
+
+  const MedicinskoOsobljeListScreen({super.key, required this.userId});
   @override
   State<MedicinskoOsobljeListScreen> createState() =>
       _MedicinskoOsobljeListScreenState();
@@ -65,7 +67,10 @@ class _MedicinskoOsobljeListScreenState
       appBar: AppBar(
         title: const Text("Medicinsko osoblje"),
       ),
-      drawer: const SideBar(userType: 'administrator'),
+      drawer: SideBar(
+        userType: 'administrator',
+        userId: widget.userId,
+      ),
       body: Column(
         children: [
           _buildSearch(),
@@ -97,7 +102,9 @@ class _MedicinskoOsobljeListScreenState
                 context: context,
                 barrierDismissible: false,
                 builder: (BuildContext context) {
-                  return const NoviMedicinskoOsobljeScreen();
+                  return NoviMedicinskoOsobljeScreen(
+                    userId: widget.userId,
+                  );
                 },
               );
             },
