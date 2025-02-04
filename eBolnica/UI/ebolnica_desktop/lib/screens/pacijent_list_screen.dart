@@ -6,11 +6,13 @@ import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class PacijentListScreen extends StatefulWidget {
   final int userId;
-  const PacijentListScreen({super.key, required this.userId});
+  final String? userType;
+  const PacijentListScreen({super.key, required this.userId, this.userType});
 
   @override
   State<PacijentListScreen> createState() => _PacijentListScreenState();
@@ -52,7 +54,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
         title: const Text("Lista pacijenata"),
       ),
       drawer: SideBar(
-        userType: 'administrator',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: Column(
@@ -114,20 +116,21 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
             child: const Text("Pretraga"),
           ),
           const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return NoviPacijentScreen(
-                    userId: widget.userId,
-                  );
-                },
-              );
-            },
-            child: const Text("Dodaj"),
-          ),
+          if (widget.userType == "administrator")
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return NoviPacijentScreen(
+                      userId: widget.userId,
+                    );
+                  },
+                );
+              },
+              child: const Text("Dodaj"),
+            ),
         ],
       ),
     );
@@ -184,20 +187,25 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                           DataCell(Text(e.korisnik!.status == true
                               ? "Aktivan"
                               : "Neaktivan")),
-                          DataCell(ElevatedButton(
-                            child: const Text("Ažuriraj podatke"),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => EditPacijentScreen(
-                                  pacijentId: e.pacijentId!,
-                                  onSave: () {
-                                    _loadInitialData();
-                                  },
-                                ),
-                              );
-                            },
-                          ))
+                          DataCell(
+                            widget.userType == "administrator"
+                                ? ElevatedButton(
+                                    child: const Text("Ažuriraj podatke"),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            EditPacijentScreen(
+                                          pacijentId: e.pacijentId!,
+                                          onSave: () {
+                                            _loadInitialData();
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
+                          )
                         ],
                       ),
                     )

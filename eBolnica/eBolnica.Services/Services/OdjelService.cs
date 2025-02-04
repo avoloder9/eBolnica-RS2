@@ -20,7 +20,7 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Odjel> AddFilter(OdjelSearchObject searchObject, IQueryable<Database.Odjel> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Bolnica).Include(y=>y.GlavniDoktor).ThenInclude(k=>k!=null ? k.Korisnik:null);
+            query = base.AddFilter(searchObject, query).Include(x => x.Bolnica).Include(y => y.GlavniDoktor).ThenInclude(k => k != null ? k.Korisnik : null);
 
 
             if (!string.IsNullOrWhiteSpace(searchObject?.NazivGTE))
@@ -93,6 +93,50 @@ namespace eBolnica.Services.Services
                 OdjelId = d.OdjelId
             }).ToList();
             return doktoriModel;
+        }
+        public List<Model.Models.Termin> GetTerminByOdjelId(int odjelId)
+        {
+            var termini = Context.Set<Database.Termin>().Where(x => x.OdjelId == odjelId).Include(p=>p.Pacijent)
+                .ThenInclude(k=>k.Korisnik).Include(d=>d.Doktor).ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).ToList();
+            if (termini.Count == 0)
+            {
+                throw new Exception("Nema zakazanih termina na ovom odjelu");
+            }
+            var terminModel = termini.Select(t => new Model.Models.Termin
+            {
+                TerminId = t.TerminId,
+                DatumTermina = t.DatumTermina,
+                VrijemeTermina = t.VrijemeTermina,
+                Otkazano = t.Otkazano,
+                Doktor = new Model.Models.Doktor
+                {
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = t.Doktor.Korisnik.Ime,
+                        Prezime = t.Doktor.Korisnik.Prezime,
+                        KorisnikId = t.Doktor.KorisnikId
+                    }
+                },
+                DoktorId = t.DoktorId,
+                OdjelId = t.OdjelId,
+                PacijentId = t.PacijentId,
+                Pacijent = new Model.Models.Pacijent
+                {
+                    PacijentId = t.PacijentId,
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = t.Pacijent.Korisnik.Ime,
+                        Prezime = t.Pacijent.Korisnik.Prezime,
+                        KorisnikId = t.Pacijent.KorisnikId,
+                    }
+                },
+                Odjel = new Model.Models.Odjel
+                {
+                    OdjelId = t.OdjelId,
+                    Naziv = t.Odjel.Naziv,
+                }
+            }).ToList();
+            return terminModel;
         }
     }
 }

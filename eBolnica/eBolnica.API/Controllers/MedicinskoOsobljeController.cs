@@ -27,5 +27,19 @@ namespace eBolnica.API.Controllers
                 return NotFound();
             }
         }
+        [HttpGet("GetOdjelIdByMedicinskoOsoljeId/{osobljeId}")]
+        public IActionResult GetOdjelIdByMedicinskoOsoljeId(int osobljeId)
+        {
+            int? odjelId = _medicinskoOsobljeService.GetOdjelIdByOsobljeId(osobljeId);
+
+            if (odjelId != 0)
+            {
+                return Ok(odjelId);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }

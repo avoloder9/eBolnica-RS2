@@ -29,5 +29,19 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetTerminByOdjelId")]
+        public IActionResult GetTerminByOdjelId(int odjelId)
+        {
+            try
+            {
+                var termini = odjelService.GetTerminByOdjelId(odjelId);
+                return Ok(termini);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

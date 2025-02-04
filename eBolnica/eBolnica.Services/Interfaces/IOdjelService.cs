@@ -12,6 +12,7 @@ namespace eBolnica.Services.Interfaces
     public interface IOdjelService : ICRUDService<Odjel, OdjelSearchObject, OdjelInsertRequest, OdjelUpdateRequest>
     {
         public List<Doktor> GetDoktorByOdjelId(int odjelId);
+        public List<Model.Models.Termin> GetTerminByOdjelId(int odjelId);
 
 
     }

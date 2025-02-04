@@ -1,19 +1,24 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/doktor_model.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
+import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
+import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
+import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class NoviTerminScreen extends StatefulWidget {
-  final int pacijentId;
+  final int? pacijentId;
+  final int? odjelId;
   final int userId;
   const NoviTerminScreen(
-      {super.key, required this.pacijentId, required this.userId});
+      {super.key, this.pacijentId, this.odjelId, required this.userId});
 
   @override
   _NoviTerminScreenState createState() => _NoviTerminScreenState();
@@ -24,6 +29,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   late DoktorProvider doktorProvider;
   late OdjelProvider odjelProvider;
   late TerminProvider terminProvider;
+  late PacijentProvider pacijentProvider;
+  List<Pacijent> pacijenti = [];
+  Pacijent? odabraniPacijent;
   List<String> odjeli = [];
   Odjel? odabraniOdjel;
   Doktor? odabraniDoktor;
@@ -39,7 +47,30 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
     odjelProvider = OdjelProvider();
     doktorProvider = DoktorProvider();
     terminProvider = TerminProvider();
-    fetchOdjeli();
+    pacijentProvider = PacijentProvider();
+    fetchOdjeli().then((_) {
+      if (widget.odjelId != null && resultOdjel != null) {
+        var matchingOdjel = resultOdjel!.result.firstWhere(
+            (odjel) => odjel.odjelId == widget.odjelId,
+            orElse: () => Odjel());
+        if (matchingOdjel.odjelId != null) {
+          setState(() {
+            odabraniOdjel = matchingOdjel;
+          });
+          fetchDoktor();
+        }
+      }
+    });
+    if (widget.pacijentId == null) {
+      fetchPacijente();
+    }
+  }
+
+  void fetchPacijente() async {
+    final result = await pacijentProvider.get();
+    setState(() {
+      pacijenti = result.result;
+    });
   }
 
   Future<void> pickDate() async {
@@ -118,6 +149,39 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                widget.pacijentId != null
+                    ? Container()
+                    : Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: DropdownButtonFormField<Pacijent>(
+                          value: odabraniPacijent,
+                          decoration: InputDecoration(
+                            labelText: 'Pacijent',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            prefixIcon: const Icon(Icons.person),
+                          ),
+                          items: pacijenti.map((pacijent) {
+                            return DropdownMenuItem(
+                              value: pacijent,
+                              child: Text(
+                                  "${pacijent.korisnik!.ime} ${pacijent.korisnik!.prezime}"),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              odabraniPacijent = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Molimo odaberite pacijenta';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: DropdownButtonFormField<Odjel>(
@@ -135,14 +199,16 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               child: Text(odjel.naziv.toString()),
                             ))
                         .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        odabraniOdjel = value;
-                        odabraniDoktor = null;
-                        resultDoktor = [];
-                      });
-                      fetchDoktor();
-                    },
+                    onChanged: widget.odjelId != null
+                        ? null
+                        : (value) {
+                            setState(() {
+                              odabraniOdjel = value;
+                              odabraniDoktor = null;
+                              resultDoktor = [];
+                            });
+                            fetchDoktor();
+                          },
                     validator: (value) {
                       if (value == null || value.naziv == "") {
                         return 'Molimo odaberite odjel';
@@ -267,7 +333,8 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                         onPressed: () async {
                           if (_formKey.currentState?.validate() ?? false) {
                             var noviTermin = {
-                              "pacijentId": widget.pacijentId,
+                              "pacijentId": widget.pacijentId ??
+                                  odabraniPacijent?.pacijentId,
                               "doktorId": odabraniDoktor!.doktorId,
                               "odjelId": odabraniOdjel!.odjelId,
                               "datumTermina":
@@ -283,15 +350,32 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                       backgroundColor: Colors.green,
                                       duration: const Duration(seconds: 3))
                                   .show(context);
-                              setState(() {});
-                              _formKey.currentState?.reset();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TerminiScreen(
+
+                              if (mounted) {
+                                setState(() {
+                                  odabraniPacijent = null;
+                                  odabraniDoktor = null;
+                                  odabraniOdjel = null;
+                                });
+                              }
+                              if (mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      if (widget.odjelId != null) {
+                                        return OdjelTerminiScreen(
+                                            userId: widget.userId);
+                                      } else {
+                                        return TerminiScreen(
                                           userId: widget.userId,
-                                        )),
-                              );
+                                        );
+                                      }
+                                    },
+                                  ),
+                                );
+                                return;
+                              }
                             } catch (e) {
                               await Flushbar(
                                       message:

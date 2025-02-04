@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
@@ -45,6 +46,7 @@ class SideBar extends StatelessWidget {
                 'Pacijenti',
                 PacijentListScreen(
                   userId: userId,
+                  userType: userType,
                 )),
             _buildListTile(
                 context,
@@ -80,8 +82,15 @@ class SideBar extends StatelessWidget {
             _buildListTile(context, 'Odjava', '/odjava'),
           ] else if (userType == 'medicinsko osoblje') ...[
             _buildListTile(context, 'Odjeli', '/odjeli'),
-            _buildListTile(context, 'Pregledi', '/pregledi'),
-            _buildListTile(context, 'Pacijenti', '/pacijenti'),
+            _buildListTile(
+                context, 'Termini', OdjelTerminiScreen(userId: userId)),
+            _buildListTile(
+                context,
+                'Pacijenti',
+                PacijentListScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
             _buildListTile(context, 'Smjene', '/smjene'),
             _buildListTile(context, 'Nalazi', '/nalazi'),
             _buildListTile(context, 'Postavke', '/postavke'),
