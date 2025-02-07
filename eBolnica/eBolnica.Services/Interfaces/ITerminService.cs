@@ -12,6 +12,7 @@ namespace eBolnica.Services.Interfaces
     public interface ITerminService : ICRUDService<Termin, TerminSearchObject, TerminInsertRequest, TerminUpdateRequest>
     {
         public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId);
+        public  Task<Database.Uputnica?> GetUputnicaByTerminId(int terminId);
 
     }
 }

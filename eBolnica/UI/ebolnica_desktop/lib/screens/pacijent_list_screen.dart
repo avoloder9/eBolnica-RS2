@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/screens/edit_pacijent_screen.dart';
+import 'package:ebolnica_desktop/screens/medicinska_dokumentacija_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class PacijentListScreen extends StatefulWidget {
@@ -157,6 +157,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                   label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
               DataColumn(label: Text("Spol")),
               DataColumn(label: Text("Status")),
+              DataColumn(label: Text("Medicinska dokumentacija")),
               DataColumn(label: Text("")),
             ],
             rows: result?.result
@@ -187,6 +188,18 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                           DataCell(Text(e.korisnik!.status == true
                               ? "Aktivan"
                               : "Neaktivan")),
+                          DataCell(ElevatedButton(
+                            child: const Text("Prikazi dokumentaciju"),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    MedicinskaDokumentacijaScreen(
+                                  pacijentId: e.pacijentId!,
+                                ),
+                              );
+                            },
+                          )),
                           DataCell(
                             widget.userType == "administrator"
                                 ? ElevatedButton(

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -58,7 +59,11 @@ namespace eBolnica.Services.Services
         }
         public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId)
         {
-            return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId==doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
+            return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId == doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
+        }
+        public Task<Database.Uputnica?> GetUputnicaByTerminId(int terminId)
+        {
+            return Context.Uputnicas.FirstOrDefaultAsync(x => x.TerminId == terminId);
         }
     }
 }
