@@ -41,7 +41,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  bool isLoading = false;
   String? usernameError;
   String? passwordError;
 
@@ -93,13 +93,13 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    _login();
-                  },
-                  child: const Text(
-                    'Prijavi se',
-                    style: TextStyle(fontSize: 18.0),
-                  ),
+                  onPressed: isLoading ? null : _login,
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Prijavi se',
+                          style: TextStyle(fontSize: 18.0),
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -125,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
+    if (isLoading) return;
     setState(() {
       usernameError = null;
       passwordError = null;
@@ -136,6 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (username.isEmpty) {
       setState(() {
         usernameError = "Molimo unesite korisničko ime";
+        isLoading = false;
       });
       return;
     }
@@ -179,7 +181,6 @@ class _LoginScreenState extends State<LoginScreen> {
               dashboard = DashboardAdmin(
                 userId: userId,
               );
-              //userId: userId
               break;
             case 'doktor':
               dashboard = DashboardDoctor(userId: userId);
@@ -193,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
             default:
               setState(() {
                 usernameError = "Nepoznata uloga korisnika.";
+                isLoading = false;
               });
               return;
           }
@@ -213,12 +215,14 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (e) {
+      Flushbar(
+              message: "Greška u komunikaciji s serverom.",
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3))
+          .show(context);
+    } finally {
       setState(() {
-        Flushbar(
-                message: "Greška u komunikaciji s serverom.",
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3))
-            .show(context);
+        isLoading = false;
       });
     }
   }

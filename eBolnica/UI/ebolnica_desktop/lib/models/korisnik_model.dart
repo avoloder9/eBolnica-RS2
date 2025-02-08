@@ -13,7 +13,9 @@ class Korisnik {
   final String? telefon;
   final String? spol;
   final bool? status;
+  String? slika;
 
+  String? slikaThumb;
   Korisnik({
     this.korisnikId,
     this.ime,
@@ -24,6 +26,8 @@ class Korisnik {
     this.telefon,
     this.spol,
     this.status,
+    this.slika,
+    this.slikaThumb,
   });
 
   factory Korisnik.fromJson(Map<String, dynamic> json) =>

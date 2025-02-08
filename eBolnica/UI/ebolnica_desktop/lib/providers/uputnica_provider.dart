@@ -53,7 +53,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Potvrda akcije"),
+          title: const Center(child: Text("Potvrda akcije")),
           content: Text("Da li ste sigurni da želite $action?"),
           actions: [
             TextButton(
@@ -79,9 +79,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
         return FutureBuilder<List<String>>(
           future: fetchAllowedActions(uputnicaId),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
+            if (snapshot.hasError) {
               return Text("Greška: ${snapshot.error}");
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Text("Nema dostupnih akcija");

@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 class SobaListScreen extends StatefulWidget {
   final int odjelId;
   final int userId;
+  final String? userType;
   const SobaListScreen(
-      {super.key, required this.odjelId, required this.userId});
+      {super.key, required this.odjelId, required this.userId, this.userType});
 
   @override
   _SobaListScreenState createState() => _SobaListScreenState();
@@ -42,6 +43,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
           MaterialPageRoute(
             builder: (context) => OdjelListScreen(
               userId: widget.userId,
+              userType: widget.userType,
             ),
           ),
         );
@@ -51,22 +53,23 @@ class _SobaListScreenState extends State<SobaListScreen> {
         appBar: AppBar(
           title: const Text("Lista soba"),
           actions: [
-            ElevatedButton.icon(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return NovaSobaScreen(
-                    odjelId: widget.odjelId,
-                    userId: widget.userId,
-                  );
-                },
-                barrierDismissible: false,
-              ).then((value) {
-                _fetchSobe();
-              }),
-              icon: const Icon(Icons.add),
-              label: const Text("Dodaj novu sobu"),
-            ),
+            if (widget.userType == "administrator")
+              ElevatedButton.icon(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return NovaSobaScreen(
+                      odjelId: widget.odjelId,
+                      userId: widget.userId,
+                    );
+                  },
+                  barrierDismissible: false,
+                ).then((value) {
+                  _fetchSobe();
+                }),
+                icon: const Icon(Icons.add),
+                label: const Text("Dodaj novu sobu"),
+              ),
           ],
         ),
         body: Column(
@@ -92,7 +95,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
                   label: SizedBox(width: 150, child: Text("Broj kreveta"))),
               DataColumn(
                   label: SizedBox(
-                      width: 160, child: Center(child: Text("Zauzeta")))),
+                      width: 160, child: Center(child: Text("Status")))),
               DataColumn(label: Text("")),
             ],
             rows: sobe
@@ -121,6 +124,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
                                               sobaId: e.sobaId!,
                                               odjelId: widget.odjelId,
                                               userId: widget.userId,
+                                              userType: widget.userType,
                                             )));
                               },
                               child: const Text("Detalji"),

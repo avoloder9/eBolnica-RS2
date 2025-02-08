@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 
 class OdjelListScreen extends StatefulWidget {
   final int userId;
-  const OdjelListScreen({super.key, required this.userId});
+  final String? userType;
+  const OdjelListScreen({super.key, required this.userId, this.userType});
   @override
   State<OdjelListScreen> createState() => _OdjelListScreenState();
 }
@@ -73,7 +74,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
         title: const Text("Lista odjela"),
       ),
       drawer: SideBar(
-        userType: 'administrator',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: Column(
@@ -114,20 +115,21 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
           const SizedBox(
             width: 8,
           ),
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return NoviOdjelScreen(
-                    userId: widget.userId,
-                  );
-                },
-              );
-            },
-            child: const Text("Dodaj"),
-          ),
+          if (widget.userType == "administrator")
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return NoviOdjelScreen(
+                      userId: widget.userId,
+                    );
+                  },
+                );
+              },
+              child: const Text("Dodaj"),
+            ),
         ],
       ),
     );
@@ -187,23 +189,28 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                                 ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
                                 : "Nije određen glavni doktor",
                           )),
-                          DataCell(ElevatedButton(
-                            child: const Text("Odredi glavnog doktora"),
-                            onPressed: () {
-                              _loadDoktori(e.odjelId!);
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => setGlavniDoktor(
-                                      e.odjelId!,
-                                      e.naziv!,
-                                      (e.glavniDoktor?.korisnik?.ime != null &&
-                                              e.glavniDoktor?.korisnik
-                                                      ?.prezime !=
-                                                  null)
-                                          ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
-                                          : ""));
-                            },
-                          )),
+                          DataCell(
+                            widget.userType == "administrator"
+                                ? ElevatedButton(
+                                    child: const Text("Odredi glavnog doktora"),
+                                    onPressed: () {
+                                      _loadDoktori(e.odjelId!);
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => setGlavniDoktor(
+                                              e.odjelId!,
+                                              e.naziv!,
+                                              (e.glavniDoktor?.korisnik?.ime !=
+                                                          null &&
+                                                      e.glavniDoktor?.korisnik
+                                                              ?.prezime !=
+                                                          null)
+                                                  ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
+                                                  : ""));
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
                           DataCell(
                             ElevatedButton(
                                 onPressed: () {
@@ -213,6 +220,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                                           builder: (context) => SobaListScreen(
                                                 odjelId: e.odjelId!,
                                                 userId: widget.userId,
+                                                userType: widget.userType,
                                               )));
                                 },
                                 child: const Text("Detalji")),

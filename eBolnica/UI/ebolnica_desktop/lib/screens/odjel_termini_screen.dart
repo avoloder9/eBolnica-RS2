@@ -134,7 +134,57 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                     DataCell(
                       ElevatedButton(
                         child: const Text("Otkaži termin"),
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Potvrda"),
+                                content: const Text(
+                                    "Da li ste sigurni da želite otkazati termin?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Ne"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      var request = {
+                                        "DatumTermina":
+                                            e.datumTermina!.toIso8601String(),
+                                        "VrijemeTermina":
+                                            e.vrijemeTermina.toString(),
+                                        "Otkazano": true
+                                      };
+                                      try {
+                                        await terminProvider.update(
+                                            e.terminId!, request);
+                                        Navigator.of(context).pop();
+                                        await Flushbar(
+                                          message: "Uspješno otkazan termin",
+                                          backgroundColor: Colors.green,
+                                          duration: const Duration(seconds: 3),
+                                        ).show(context);
+
+                                        setState(() {});
+                                      } catch (error) {
+                                        await Flushbar(
+                                          message:
+                                              "Došlo je do greške. Pokušajte ponovo.",
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(seconds: 3),
+                                        ).show(context);
+                                      }
+                                    },
+                                    child: const Text("Da"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
                     DataCell(
@@ -204,9 +254,6 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
     return FutureBuilder<Uputnica?>(
       future: terminProvider.getUputnicaByTerminId(termin.terminId!),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
         if (!snapshot.hasData) {
           return ElevatedButton(
             child: const Text("Kreiraj uputnicu"),

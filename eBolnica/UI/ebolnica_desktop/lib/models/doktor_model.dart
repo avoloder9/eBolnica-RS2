@@ -13,7 +13,17 @@ class Doktor {
   String? biografija;
   Korisnik? korisnik;
   Odjel? odjel;
+  final String? ime;
+  final String? prezime;
+  final String? email;
+  final String? korisnickoIme;
+  final DateTime? datumRodjenja;
+  final String? telefon;
+  final String? spol;
+  final bool? status;
+  String? slika;
 
+  String? slikaThumb;
   Doktor({
     this.doktorId,
     this.korisnikId,
@@ -22,6 +32,16 @@ class Doktor {
     this.biografija,
     this.korisnik,
     this.odjel,
+    this.ime,
+    this.prezime,
+    this.email,
+    this.korisnickoIme,
+    this.datumRodjenja,
+    this.telefon,
+    this.spol,
+    this.status,
+    this.slika,
+    this.slikaThumb,
   });
 
   factory Doktor.fromJson(Map<String, dynamic> json) => _$DoktorFromJson(json);

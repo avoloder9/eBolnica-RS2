@@ -41,9 +41,8 @@ namespace eBolnica.Services.UputnicaStateMachine
         }
         public override List<string> AllowedActions(Uputnica entity)
         {
-            return new List<string>() { nameof(Activate),
-                                                          nameof(Hide) };
-                // nameof(Update),
+            return new List<string>() { nameof(Activate), nameof(Hide) };
+            // nameof(Update),
         }
     }
 }

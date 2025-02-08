@@ -75,7 +75,7 @@ namespace eBolnica.Services.Services
 
         public override Doktor GetById(int id)
         {
-            var entity = Context.Set<Database.Doktor>().Include(x => x.Korisnik).FirstOrDefault(a => a.DoktorId == id);
+            var entity = Context.Set<Database.Doktor>().Include(x => x.Korisnik).Include(x=>x.Odjel).FirstOrDefault(a => a.DoktorId == id);
             if (entity == null)
             {
                 return null;

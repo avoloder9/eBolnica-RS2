@@ -23,7 +23,8 @@ namespace eBolnica.Services.Services
 
         public override IQueryable<Database.Termin> AddFilter(TerminSearchObject searchObject, IQueryable<Database.Termin> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik).Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik);
+            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
+                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina >= DateTime.Now);
 
             return base.AddFilter(searchObject, query);
         }

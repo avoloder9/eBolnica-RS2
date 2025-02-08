@@ -1,5 +1,7 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
+import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_termin_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
@@ -15,11 +17,13 @@ class TerminiScreen extends StatefulWidget {
 class _TerminiScreenState extends State<TerminiScreen> {
   int? pacijentId;
   late PacijentProvider pacijentProvider;
+  late TerminProvider terminProvider;
   List<Termin>? termini = [];
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
+    terminProvider = TerminProvider();
     //   fetchTermini();
   }
 
@@ -116,9 +120,63 @@ class _TerminiScreenState extends State<TerminiScreen> {
                       DataCell(Text(e.odjel!.naziv.toString())),
                       DataCell(Text(formattedDate(e.datumTermina))),
                       DataCell(Text(formattedTime(e.vrijemeTermina!))),
-                      DataCell(ElevatedButton(
+                      DataCell(
+                        ElevatedButton(
                           child: const Text("Otkaži termin"),
-                          onPressed: () {})),
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Potvrda"),
+                                    content: const Text(
+                                        "Da li ste sigurni da želite otkazati termin?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("Ne"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          var request = {
+                                            "DatumTermina": e.datumTermina!
+                                                .toIso8601String(),
+                                            "VrijemeTermina":
+                                                e.vrijemeTermina.toString(),
+                                            "Otkazano": true
+                                          };
+                                          try {
+                                            await terminProvider.update(
+                                                e.terminId!, request);
+                                            Navigator.of(context).pop();
+                                            await Flushbar(
+                                              message:
+                                                  "Uspješno otkazan termin",
+                                              backgroundColor: Colors.green,
+                                              duration:
+                                                  const Duration(seconds: 3),
+                                            ).show(context);
+                                            fetchTermini();
+                                          } catch (error) {
+                                            await Flushbar(
+                                              message:
+                                                  "Došlo je do greške. Pokušajte ponovo.",
+                                              backgroundColor: Colors.red,
+                                              duration:
+                                                  const Duration(seconds: 3),
+                                            ).show(context);
+                                          }
+                                        },
+                                        child: const Text("Da"),
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 )

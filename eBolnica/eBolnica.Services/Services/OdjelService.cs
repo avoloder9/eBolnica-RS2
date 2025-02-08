@@ -96,8 +96,10 @@ namespace eBolnica.Services.Services
         }
         public List<Model.Models.Termin> GetTerminByOdjelId(int odjelId)
         {
-            var termini = Context.Set<Database.Termin>().Where(x => x.OdjelId == odjelId).Include(p=>p.Pacijent)
-                .ThenInclude(k=>k.Korisnik).Include(d=>d.Doktor).ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).ToList();
+            var termini = Context.Set<Database.Termin>().Where(x => x.OdjelId == odjelId).Include(p => p.Pacijent)
+                .ThenInclude(k => k.Korisnik).Include(d => d.Doktor).ThenInclude(k => k.Korisnik).Include(o => o.Odjel)
+                .Where(x => x.DatumTermina > DateTime.Now && x.Otkazano==false).OrderBy(x=>x.DatumTermina)
+                .ToList();
             if (termini.Count == 0)
             {
                 throw new Exception("Nema zakazanih termina na ovom odjelu");

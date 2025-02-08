@@ -132,7 +132,8 @@ namespace eBolnica.Services.Services
         public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId)
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.PacijentId == pacijentId)
-                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d=>d.Doktor).ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).ToList();
+                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d=>d.Doktor)
+                .ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).Where(x=>x.DatumTermina>=DateTime.Now && x.Otkazano==false).OrderBy(x=>x.DatumTermina).ToList();
 
             if (termini.Count == 0)
             {

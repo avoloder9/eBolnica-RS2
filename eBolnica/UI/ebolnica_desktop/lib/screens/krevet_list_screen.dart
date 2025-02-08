@@ -8,11 +8,14 @@ class KrevetListScreen extends StatefulWidget {
   final int sobaId;
   final int odjelId;
   final int userId;
+  final String? userType;
+
   const KrevetListScreen(
       {super.key,
       required this.sobaId,
       required this.odjelId,
-      required this.userId});
+      required this.userId,
+      this.userType});
   @override
   State<KrevetListScreen> createState() => _KrevetListScreenState();
 }
@@ -43,9 +46,9 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => SobaListScreen(
-              odjelId: widget.odjelId,
-              userId: widget.userId,
-            ),
+                odjelId: widget.odjelId,
+                userId: widget.userId,
+                userType: widget.userType),
           ),
         );
         return false;
@@ -54,23 +57,24 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
         appBar: AppBar(
           title: const Text("Lista kreveta"),
           actions: [
-            ElevatedButton.icon(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return NoviKrevetScreen(
-                    sobaId: widget.sobaId,
-                    odjelId: widget.odjelId,
-                    userId: widget.userId,
-                  );
-                },
-                barrierDismissible: false,
-              ).then((value) {
-                _fetchKreveti();
-              }),
-              icon: const Icon(Icons.add),
-              label: const Text("Dodaj novi krevet"),
-            ),
+            if (widget.userType == "administrator")
+              ElevatedButton.icon(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return NoviKrevetScreen(
+                      sobaId: widget.sobaId,
+                      odjelId: widget.odjelId,
+                      userId: widget.userId,
+                    );
+                  },
+                  barrierDismissible: false,
+                ).then((value) {
+                  _fetchKreveti();
+                }),
+                icon: const Icon(Icons.add),
+                label: const Text("Dodaj novi krevet"),
+              ),
           ],
         ),
         body: Column(
