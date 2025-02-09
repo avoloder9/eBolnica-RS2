@@ -1,5 +1,5 @@
 import 'package:ebolnica_desktop/main.dart';
-import 'package:ebolnica_desktop/screens/doktor_postavke_screen.dart';
+import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +43,8 @@ class SideBar extends StatelessWidget {
             _buildListTile(context, 'Smjene', '/smjene'),
             _buildListTile(context, 'Pregledi', '/pregledi'),
             _buildListTile(context, 'Izvještaji', '/izvjestaji'),
-            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Postavke',
+                PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'doktor') ...[
             _buildListTile(context, 'Zakazani termini', '/zakazani-pregledi'),
@@ -52,8 +53,8 @@ class SideBar extends StatelessWidget {
             _buildListTile(context, 'Pacijenti', '/pacijenti'),
             _buildListTile(context, 'Operacije', '/operacije'),
             _buildListTile(context, 'Hospitalizacije', '/hospitalizacije'),
-            _buildListTile(
-                context, 'Postavke', DoktorPostavkeScreen(userId: userId)),
+            _buildListTile(context, 'Postavke',
+                PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'pacijent') ...[
             _buildListTile(
@@ -61,7 +62,8 @@ class SideBar extends StatelessWidget {
             _buildListTile(context, 'Pregledi', PreglediScreen(userId: userId)),
             _buildListTile(context, 'Termini', TerminiScreen(userId: userId)),
             _buildListTile(context, 'Nalazi', '/nalazi'),
-            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Postavke',
+                PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'medicinsko osoblje') ...[
             _buildListTile(
@@ -82,7 +84,8 @@ class SideBar extends StatelessWidget {
                 )),
             _buildListTile(context, 'Smjene', '/smjene'),
             _buildListTile(context, 'Nalazi', '/nalazi'),
-            _buildListTile(context, 'Postavke', '/postavke'),
+            _buildListTile(context, 'Postavke',
+                PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ],
         ],
