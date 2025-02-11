@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:another_flushbar/flushbar.dart';
+import 'package:ebolnica_desktop/models/medicinska_dokumentacija_model.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
+import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
 import 'package:ebolnica_desktop/screens/edit_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/medicinska_dokumentacija_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
@@ -20,6 +23,7 @@ class PacijentListScreen extends StatefulWidget {
 
 class _PacijentListScreenState extends State<PacijentListScreen> {
   late PacijentProvider provider;
+  late MedicinskaDokumentacijaProvider dokumentacijaProvider;
   int pageSize = 15;
   int page = 0;
 
@@ -34,6 +38,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
   void initState() {
     super.initState();
     provider = PacijentProvider();
+    dokumentacijaProvider = MedicinskaDokumentacijaProvider();
     _loadInitialData();
   }
 
@@ -116,7 +121,8 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
             child: const Text("Pretraga"),
           ),
           const SizedBox(width: 8),
-          if (widget.userType == "administrator")
+          if (widget.userType == "administrator" ||
+              widget.userType == "medicinsko osoblje")
             ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -188,18 +194,42 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                           DataCell(Text(e.korisnik!.status == true
                               ? "Aktivan"
                               : "Neaktivan")),
-                          DataCell(ElevatedButton(
-                            child: const Text("Prikazi dokumentaciju"),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    MedicinskaDokumentacijaScreen(
-                                  pacijentId: e.pacijentId!,
-                                ),
-                              );
-                            },
-                          )),
+                          DataCell(
+                            FutureBuilder<MedicinskaDokumentacija?>(
+                              future: dokumentacijaProvider
+                                  .getMedicinskaDokumentacijaByPacijentId(
+                                      e.pacijentId!),
+                              builder: (context,
+                                  AsyncSnapshot<MedicinskaDokumentacija?>
+                                      snapshot) {
+                                if (!snapshot.hasData) {
+                                  return ElevatedButton(
+                                    child: const Text("Kreiraj dokumentaciju"),
+                                    onPressed: () {
+                                      kreirajMedicinskuDokumentaciju(
+                                        context,
+                                        MedicinskaDokumentacija(
+                                            pacijentId: e.pacijentId!),
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  return ElevatedButton(
+                                    child: const Text("Prikaži dokumentaciju"),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            MedicinskaDokumentacijaScreen(
+                                          pacijentId: e.pacijentId!,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                          ),
                           DataCell(
                             widget.userType == "administrator"
                                 ? ElevatedButton(
@@ -258,6 +288,56 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               : null,
         ),
       ],
+    );
+  }
+
+  Future<void> kreirajMedicinskuDokumentaciju(
+      BuildContext context, MedicinskaDokumentacija dokumentacija) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Potvrda"),
+          content: const Text(
+              "Da li ste sigurni da želite kreirati medicinsku dokumentaciju za datog pacijenta?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Ne"),
+            ),
+            TextButton(
+              onPressed: () async {
+                var request = {
+                  "PacijentId": dokumentacija.pacijentId,
+                  "DatumKreiranja": DateTime.now().toIso8601String(),
+                  "Hospitalizovan": false,
+                  "Napomena": ""
+                };
+
+                try {
+                  await dokumentacijaProvider.insert(request);
+                  Navigator.of(context).pop();
+                  await Flushbar(
+                          message: "Uputnica uspješno kreirana",
+                          backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 3))
+                      .show(context);
+                  setState(() {});
+                } catch (error) {
+                  await Flushbar(
+                          message: "Došlo je do greške. Pokušajte ponovo.",
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 3))
+                      .show(context);
+                }
+              },
+              child: const Text("Da"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

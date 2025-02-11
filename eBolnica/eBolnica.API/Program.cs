@@ -1,6 +1,7 @@
 using eBolnica.API;
 using eBolnica.API.Filters;
 using eBolnica.Model.Models;
+using eBolnica.Model.Requests;
 using eBolnica.Services.Database;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
@@ -78,7 +79,9 @@ TypeAdapterConfig<eBolnica.Services.Database.Odjel, eBolnica.Model.Models.Odjel>
     .NewConfig()
     .PreserveReference(true)
     .MaxDepth(3);
-
+TypeAdapterConfig<PacijentInsertRequest, eBolnica.Model.Models.Pacijent>
+    .NewConfig()
+    .Ignore(dest => dest.PacijentId);
 TypeAdapterConfig<eBolnica.Services.Database.Hospitalizacija, eBolnica.Model.Models.Hospitalizacija>
     .NewConfig()
     .PreserveReference(true)

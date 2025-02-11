@@ -132,8 +132,8 @@ namespace eBolnica.Services.Services
         public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId)
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.PacijentId == pacijentId)
-                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d=>d.Doktor)
-                .ThenInclude(k=>k.Korisnik).Include(o=>o.Odjel).Where(x=>x.DatumTermina>=DateTime.Now && x.Otkazano==false).OrderBy(x=>x.DatumTermina).ToList();
+                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d => d.Doktor)
+                .ThenInclude(k => k.Korisnik).Include(o => o.Odjel).Where(x => x.DatumTermina >= DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina).ToList();
 
             if (termini.Count == 0)
             {
@@ -151,7 +151,7 @@ namespace eBolnica.Services.Services
                     {
                         Ime = p.Doktor.Korisnik.Ime,
                         Prezime = p.Doktor.Korisnik.Prezime,
-                        KorisnikId=p.Doktor.KorisnikId
+                        KorisnikId = p.Doktor.KorisnikId
                     }
                 },
                 DoktorId = p.DoktorId,
@@ -159,17 +159,17 @@ namespace eBolnica.Services.Services
                 PacijentId = p.PacijentId,
                 Pacijent = new Model.Models.Pacijent
                 {
-                    PacijentId=p.PacijentId,
+                    PacijentId = p.PacijentId,
                     Korisnik = new Model.Models.Korisnik
                     {
                         Ime = p.Pacijent.Korisnik.Ime,
                         Prezime = p.Pacijent.Korisnik.Prezime,
-                        KorisnikId=p.Pacijent.KorisnikId,                        
+                        KorisnikId = p.Pacijent.KorisnikId,
                     }
                 },
                 Odjel = new Model.Models.Odjel
                 {
-                    OdjelId=p.OdjelId,
+                    OdjelId = p.OdjelId,
                     Naziv = p.Odjel.Naziv,
                 }
             }).ToList();

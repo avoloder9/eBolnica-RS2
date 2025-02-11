@@ -1,4 +1,5 @@
 import 'package:ebolnica_desktop/main.dart';
+import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
@@ -47,10 +48,12 @@ class SideBar extends StatelessWidget {
                 PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'doktor') ...[
-            _buildListTile(context, 'Zakazani termini', '/zakazani-pregledi'),
+            _buildListTile(context, 'Zakazani termini',
+                DoktorTerminiScreen(userId: userId)),
             _buildListTile(
                 context, 'Historija pregleda', '/historija-pregledi'),
-            _buildListTile(context, 'Pacijenti', '/pacijenti'),
+            _buildListTile(context, 'Pacijenti',
+                PacijentListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Operacije', '/operacije'),
             _buildListTile(context, 'Hospitalizacije', '/hospitalizacije'),
             _buildListTile(context, 'Postavke',

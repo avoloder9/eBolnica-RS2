@@ -12,6 +12,7 @@ namespace eBolnica.Services.Interfaces
     public interface IDoktorService : ICRUDService<Doktor, DoktorSearchObject, DoktorInsertRequest, DoktorUpdateRequest>
     {
         public int GetDoktorIdByKorisnikId(int korisnikId);
+        public List<Model.Models.Termin> GetTerminByDoktorId(int doktorId);
 
     }
 }

@@ -12,7 +12,8 @@ namespace eBolnica.API.Controllers
     public class DoktorController : BaseCRUDController<Doktor, DoktorSearchObject, DoktorInsertRequest, DoktorUpdateRequest>
     {
         private readonly IDoktorService _doktorService;
-        public DoktorController(IDoktorService service) : base(service) {
+        public DoktorController(IDoktorService service) : base(service)
+        {
             _doktorService = service;
         }
         [HttpGet("GetDoktorIdByKorisnikId/{korisnikId}")]
@@ -27,6 +28,20 @@ namespace eBolnica.API.Controllers
             else
             {
                 return NotFound();
+            }
+        }
+        [HttpGet("GetTerminByDoktorId/{doktorId}")]
+
+        public IActionResult GetTerminByDoktorId(int doktorId)
+        {
+            try
+            {
+                var termini = _doktorService.GetTerminByDoktorId(doktorId);
+                return Ok(termini);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

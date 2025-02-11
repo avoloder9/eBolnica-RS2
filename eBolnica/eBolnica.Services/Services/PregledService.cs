@@ -47,10 +47,21 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(PregledInsertRequest request, Database.Pregled entity)
         {
-            var uputnicaExists = Context.Uputnicas.Any(p => p.UputnicaId == request.UputnicaId);
-            if (!uputnicaExists)
+            var uputnica = Context.Uputnicas.Where(p => p.UputnicaId == request.UputnicaId).Select(p => new { p.StateMachine, p.Termin.DatumTermina }).FirstOrDefault();
+
+            if (uputnica == null)
             {
                 throw new Exception("Uputnica sa zadanim ID-om ne postoji");
+            }
+
+            if (uputnica.StateMachine != "active")
+            {
+                throw new Exception("Uputnica nije aktivna i nije moguce izvršiti pregled");
+            }
+
+            if (uputnica.DatumTermina.Date != DateTime.Now.Date)
+            {
+                throw new Exception("Pregled se može obaviti samo za termine zakazane na današnji dan");
             }
             var medicinskaDokumentacijaExists = Context.MedicinskaDokumentacijas.Any(p => p.MedicinskaDokumentacijaId == request.MedicinskaDokumentacijaId);
             if (!medicinskaDokumentacijaExists)
@@ -59,5 +70,6 @@ namespace eBolnica.Services.Services
             }
             base.BeforeInsert(request, entity);
         }
+
     }
 }
