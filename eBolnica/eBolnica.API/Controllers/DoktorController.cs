@@ -30,14 +30,28 @@ namespace eBolnica.API.Controllers
                 return NotFound();
             }
         }
-        [HttpGet("GetTerminByDoktorId/{doktorId}")]
 
+        [HttpGet("GetTerminByDoktorId/{doktorId}")]
         public IActionResult GetTerminByDoktorId(int doktorId)
         {
             try
             {
                 var termini = _doktorService.GetTerminByDoktorId(doktorId);
                 return Ok(termini);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetPregledByDoktorId/{doktorId}")]
+        public IActionResult GetPregledByDoktorId(int doktorId)
+        {
+            try
+            {
+                var pregledi = _doktorService.GetPreglediByDoktorId(doktorId);
+                return Ok(pregledi);
             }
             catch (Exception ex)
             {

@@ -4,6 +4,7 @@ import 'package:ebolnica_desktop/models/uputnica_model.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
 import 'package:ebolnica_desktop/providers/pregled_provider.dart';
+import 'package:ebolnica_desktop/providers/terapija_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
   late TerminProvider terminProvider;
   late PregledProvider pregledProvider;
   late MedicinskaDokumentacijaProvider dokumentacijaProvider;
+  late TerapijaProvider terapijaProvider;
   List<Termin>? termini = [];
   int? doktorId;
   List<Uputnica>? uputnica = [];
@@ -33,6 +35,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
     terminProvider = TerminProvider();
     pregledProvider = PregledProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
+    terapijaProvider = TerapijaProvider();
     fetchTermini();
   }
 
@@ -98,6 +101,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
       ).show(context);
       return;
     }
+
     TextEditingController dijagnozaController = TextEditingController();
     TextEditingController anamnezaController = TextEditingController();
     TextEditingController zakljucakController = TextEditingController();
@@ -105,96 +109,221 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Kreiranje pregleda"),
-          content: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            // height: MediaQuery.of(context).size.height * 0.4,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: dijagnozaController,
-                    decoration:
-                        const InputDecoration(labelText: "Glavna dijagnoza"),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ovo polje je obavezno';
-                      }
-                      return null;
-                    },
-                    maxLines: 2,
-                    keyboardType: TextInputType.multiline,
+        bool prikaziTerapiju = false;
+        TextEditingController nazivTerapijeController = TextEditingController();
+        TextEditingController opisTerapijeController = TextEditingController();
+        DateTime? datumPocetka;
+        DateTime? datumZavrsetka;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Kreiranje pregleda"),
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: dijagnozaController,
+                          decoration: const InputDecoration(
+                            labelText: "Glavna dijagnoza",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ovo polje je obavezno';
+                            }
+                            return null;
+                          },
+                          maxLines: 2,
+                        ),
+                        TextFormField(
+                          controller: anamnezaController,
+                          decoration:
+                              const InputDecoration(labelText: "Anamneza"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ovo polje je obavezno';
+                            }
+                            return null;
+                          },
+                          maxLines: 2,
+                        ),
+                        TextFormField(
+                          controller: zakljucakController,
+                          decoration:
+                              const InputDecoration(labelText: "Zakljucak"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ovo polje je obavezno';
+                            }
+                            return null;
+                          },
+                          maxLines: 2,
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              prikaziTerapiju = !prikaziTerapiju;
+                            });
+                          },
+                          child: Text(prikaziTerapiju
+                              ? "Sakrij terapiju"
+                              : "Dodaj terapiju"),
+                        ),
+                        if (prikaziTerapiju) ...[
+                          TextFormField(
+                            controller: nazivTerapijeController,
+                            decoration: const InputDecoration(
+                                labelText: "Naziv terapije"),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Ovo polje je obavezno';
+                              }
+                              return null;
+                            },
+                          ),
+                          TextFormField(
+                            controller: opisTerapijeController,
+                            decoration: const InputDecoration(
+                                labelText: "Opis terapije"),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Ovo polje je obavezno';
+                              }
+                              return null;
+                            },
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ListTile(
+                                  title: Text(
+                                    datumPocetka == null
+                                        ? "Odaberite datum početka"
+                                        : DateFormat('dd.MM.yyyy')
+                                            .format(datumPocetka!),
+                                  ),
+                                  trailing: const Icon(Icons.calendar_today),
+                                  onTap: () async {
+                                    DateTime? picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (picked != null) {
+                                      setState(() {
+                                        datumPocetka = picked;
+                                        if (datumZavrsetka != null &&
+                                            !datumZavrsetka!
+                                                .isAfter(datumPocetka!)) {
+                                          datumZavrsetka = null;
+                                        }
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: ListTile(
+                                  title: Text(
+                                    datumZavrsetka == null
+                                        ? "Odaberite datum završetka"
+                                        : DateFormat('dd.MM.yyyy')
+                                            .format(datumZavrsetka!),
+                                  ),
+                                  trailing: const Icon(Icons.calendar_today),
+                                  onTap: () async {
+                                    if (datumPocetka == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              "Prvo odaberite datum početka."),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    DateTime initialDate = datumPocetka!
+                                        .add(const Duration(days: 1));
+                                    DateTime? picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: initialDate,
+                                      firstDate: initialDate,
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (picked != null) {
+                                      setState(() {
+                                        datumZavrsetka = picked;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  TextFormField(
-                    controller: anamnezaController,
-                    decoration: const InputDecoration(labelText: "Anamneza"),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ovo polje je obavezno';
-                      }
-                      return null;
-                    },
-                    maxLines: 2,
-                    //   keyboardType: TextInputType.multiline,
-                  ),
-                  TextFormField(
-                    controller: zakljucakController,
-                    decoration: const InputDecoration(labelText: "Zakljucak"),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ovo polje je obavezno';
-                      }
-                      return null;
-                    },
-                    maxLines: 2,
-                    keyboardType: TextInputType.multiline,
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Odustani"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  var dokumentacija = await dokumentacijaProvider
-                      .getMedicinskaDokumentacijaByPacijentId(pacijentId);
-                  try {
-                    await pregledProvider.insert({
-                      "UputnicaId": uputnicaId,
-                      "MedicinskaDokumentacijaId":
-                          dokumentacija.medicinskaDokumentacijaId,
-                      "GlavnaDijagnoza": dijagnozaController.text,
-                      "Anamneza": anamnezaController.text,
-                      "Zakljucak": zakljucakController.text,
-                    });
-                    await Flushbar(
-                      message: "Pregled je uspješno dodan",
-                      backgroundColor: Colors.green,
-                      duration: const Duration(seconds: 3),
-                    ).show(context);
-                    setState(() {});
-                    await Future.delayed(const Duration(seconds: 1));
-                    Navigator.pop(context);
-                  } catch (e) {
-                    await Flushbar(
-                      message: "Došlo je do greške. Pokušajte ponovo.",
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 2),
-                    ).show(context);
-                  }
-                }
-              },
-              child: const Text("Sacuvaj"),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Odustani"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      var dokumentacija = await dokumentacijaProvider
+                          .getMedicinskaDokumentacijaByPacijentId(pacijentId);
+                      try {
+                        var pregled = await pregledProvider.insert({
+                          "UputnicaId": uputnicaId,
+                          "MedicinskaDokumentacijaId":
+                              dokumentacija.medicinskaDokumentacijaId,
+                          "GlavnaDijagnoza": dijagnozaController.text,
+                          "Anamneza": anamnezaController.text,
+                          "Zakljucak": zakljucakController.text,
+                        });
+
+                        if (prikaziTerapiju) {
+                          await terapijaProvider.insert({
+                            "Naziv": nazivTerapijeController.text,
+                            "Opis": opisTerapijeController.text,
+                            "DatumPocetka": datumPocetka!.toIso8601String(),
+                            "DatumZavrsetka": datumZavrsetka!.toIso8601String(),
+                            "PregledId": pregled.pregledId
+                          });
+                        }
+
+                        await Flushbar(
+                          message: "Pregled je uspješno dodan",
+                          backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 3),
+                        ).show(context);
+                        await Future.delayed(const Duration(seconds: 1));
+                        Navigator.pop(context);
+                      } catch (e) {
+                        await Flushbar(
+                          message: "Došlo je do greške. Pokušajte ponovo.",
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 2),
+                        ).show(context);
+                      }
+                    }
+                  },
+                  child: const Text("Sačuvaj"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -227,7 +356,6 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
               DataColumn(label: Text("Pacijent")),
               DataColumn(label: Text("Datum termin")),
               DataColumn(label: Text("Vrijeme termina")),
-              DataColumn(label: Text("Uputnica")),
               DataColumn(label: Text("")),
             ],
             rows: termini!
@@ -238,24 +366,6 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                           "${e.pacijent!.korisnik!.ime} ${e.pacijent!.korisnik!.prezime}")),
                       DataCell(Text(formattedDate(e.datumTermina))),
                       DataCell(Text(formattedTime(e.vrijemeTermina!))),
-                      DataCell(
-                        FutureBuilder<Uputnica>(
-                          future:
-                              terminProvider.getUputnicaByTerminId(e.terminId!),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return const Text("Uputnica nije poslana");
-                            } else if (snapshot.hasData) {
-                              return Text(snapshot.data!.stateMachine ?? "N/A");
-                            } else {
-                              return const Text("N/A");
-                            }
-                          },
-                        ),
-                      ),
                       DataCell(
                         ElevatedButton(
                           child: const Text("Obavi pregled"),

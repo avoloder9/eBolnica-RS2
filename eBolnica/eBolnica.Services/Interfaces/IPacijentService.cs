@@ -13,6 +13,7 @@ namespace eBolnica.Services.Interfaces
     {
         public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId);
         public int GetPacijentIdByKorisnikId(int korisnikId);
+        public List<Pacijent> GetPacijentWithDokumentacija();
 
     }
 }

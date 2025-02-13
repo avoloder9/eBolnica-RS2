@@ -13,6 +13,8 @@ namespace eBolnica.Services.Interfaces
     {
         public int GetDoktorIdByKorisnikId(int korisnikId);
         public List<Model.Models.Termin> GetTerminByDoktorId(int doktorId);
+        public List<Model.Models.Pregled> GetPreglediByDoktorId(int doktorId);
+
 
     }
 }

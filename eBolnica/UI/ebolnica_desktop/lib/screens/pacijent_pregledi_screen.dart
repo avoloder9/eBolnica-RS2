@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class PreglediScreen extends StatefulWidget {
+class PacijentPreglediScreen extends StatefulWidget {
   final int? userId;
-  const PreglediScreen({super.key, required this.userId});
+  const PacijentPreglediScreen({super.key, required this.userId});
 
   @override
-  _PreglediScreenState createState() => _PreglediScreenState();
+  _PacijentPreglediScreenState createState() => _PacijentPreglediScreenState();
 }
 
-class _PreglediScreenState extends State<PreglediScreen> {
+class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
   @override
   void initState() {
     super.initState();

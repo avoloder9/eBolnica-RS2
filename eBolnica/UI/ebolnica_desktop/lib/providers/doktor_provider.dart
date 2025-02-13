@@ -1,4 +1,5 @@
 import 'package:ebolnica_desktop/models/doktor_model.dart';
+import 'package:ebolnica_desktop/models/pregled_model.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
 import 'package:ebolnica_desktop/providers/base_provider.dart';
 import 'package:http/http.dart' as http;
@@ -44,6 +45,27 @@ class DoktorProvider extends BaseProvider<Doktor> {
 
       if (data is List) {
         List<Termin> lista = data.map((item) => Termin.fromJson(item)).toList();
+        return lista;
+      } else {
+        throw Exception("Ocekivana lista iz JSON odgovora");
+      }
+    }
+    throw Exception("Greska");
+  }
+
+  Future<List<Pregled>> getPreglediByDoktorId(int doktorId) async {
+    var url = "${BaseProvider.baseUrl}Doktor/GetPregledByDoktorId/$doktorId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      if (data is List) {
+        List<Pregled> lista =
+            data.map((item) => Pregled.fromJson(item)).toList();
         return lista;
       } else {
         throw Exception("Ocekivana lista iz JSON odgovora");

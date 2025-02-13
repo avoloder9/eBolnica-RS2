@@ -59,3 +59,14 @@ Future<List<Pacijent>> fetchPacijenti() async {
   final response = await pacijentProvider.get();
   return response.result;
 }
+
+String formattedDate(date) {
+  final formatter = DateFormat('dd/MM/yyyy');
+  return formatter.format(date);
+}
+
+String formattedTime(Duration time) {
+  final hours = time.inHours.toString().padLeft(2, '0');
+  final minutes = (time.inMinutes % 60).toString().padLeft(2, '0');
+  return '$hours:$minutes';
+}

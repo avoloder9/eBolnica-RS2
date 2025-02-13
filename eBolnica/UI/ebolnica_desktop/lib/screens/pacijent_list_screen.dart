@@ -320,7 +320,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                   await dokumentacijaProvider.insert(request);
                   Navigator.of(context).pop();
                   await Flushbar(
-                          message: "Uputnica uspješno kreirana",
+                          message: "Medicinska dokumentacija uspješno kreirana",
                           backgroundColor: Colors.green,
                           duration: const Duration(seconds: 3))
                       .show(context);

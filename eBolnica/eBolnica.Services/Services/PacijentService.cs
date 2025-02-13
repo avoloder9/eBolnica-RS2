@@ -180,5 +180,21 @@ namespace eBolnica.Services.Services
             var admin = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
             return admin.PacijentId;
         }
+        public List<Pacijent> GetPacijentWithDokumentacija()
+        {
+            return Context.Pacijents.Where(p => Context.MedicinskaDokumentacijas.Any(d => d.PacijentId == p.PacijentId)).Select(p => new Pacijent
+            {
+                PacijentId = p.PacijentId,
+                Korisnik = new Korisnik
+                {
+                    KorisnikId = p.KorisnikId,
+                    Ime = p.Korisnik.Ime,
+                    Prezime = p.Korisnik.Prezime
+                }
+            }).ToList();
+        }
+
+
+
     }
 }

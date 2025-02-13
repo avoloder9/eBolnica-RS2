@@ -5,6 +5,7 @@ using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,11 +101,52 @@ namespace eBolnica.Services.Services
             var admin = Context.Doktors.FirstOrDefault(t => t.KorisnikId == korisnikId);
             return admin.DoktorId;
         }
+
+        public List<Model.Models.Pregled> GetPreglediByDoktorId(int doktorId)
+        {
+            var pregledi = Context.Set<Database.Pregled>().Where(x => x.Uputnica.Termin.DoktorId == doktorId)
+                .Include(u => u.Uputnica).ThenInclude(t => t.Termin).ThenInclude(x => x.Pacijent).ThenInclude(k=>k.Korisnik)
+                .OrderBy(x => x.Uputnica.DatumKreiranja).ToList();
+            if (pregledi.Count == 0)
+            {
+                throw new Exception("Nema obavljenih pregleda kod ovog doktora");
+            }
+            var pregledModel = pregledi.Select(p => new Model.Models.Pregled
+            {
+                PregledId = p.PregledId,
+                Anamneza = p.Anamneza,
+                GlavnaDijagnoza = p.GlavnaDijagnoza,
+                Zakljucak = p.Zakljucak,
+                Uputnica = new Model.Models.Uputnica
+                {
+                    Termin = new Model.Models.Termin
+                    {
+                        DatumTermina=p.Uputnica.Termin.DatumTermina,
+                        Pacijent = new Model.Models.Pacijent
+                        {
+                            PacijentId = p.Uputnica.Termin.PacijentId,
+                            Korisnik = new Model.Models.Korisnik
+                            {
+                                KorisnikId = p.Uputnica.Termin.Pacijent.KorisnikId,
+                                Ime = p.Uputnica.Termin.Pacijent.Korisnik.Ime,
+                                Prezime = p.Uputnica.Termin.Pacijent.Korisnik.Prezime
+                            }
+                        }
+                    }
+                }
+            }).ToList();
+            return pregledModel;
+        }
+
+
         public List<Model.Models.Termin> GetTerminByDoktorId(int doktorId)
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.DoktorId == doktorId)
                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d => d.Doktor)
-               .ThenInclude(k => k.Korisnik).Include(o => o.Odjel).Where(x => x.DatumTermina >= DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina).ToList();
+               .ThenInclude(k => k.Korisnik).Include(o => o.Odjel)
+               .Where(x => x.DatumTermina.Date >= DateTime.Today && x.Otkazano == false)
+               .Where(x => x.Uputnicas.Any(u => u.StateMachine != "closed"))
+               .OrderBy(x => x.DatumTermina).ToList();
 
             if (termini.Count == 0)
             {
@@ -146,6 +188,5 @@ namespace eBolnica.Services.Services
             }).ToList();
             return terminModel;
         }
-
     }
 }

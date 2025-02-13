@@ -2,9 +2,11 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.UputnicaStateMachine;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +17,10 @@ namespace eBolnica.Services.Services
 {
     public class PregledService : BaseCRUDService<Pregled, PregledSearchObject, Database.Pregled, PregledInsertRequest, PregledUpdateRequest>, IPregledService
     {
-        public PregledService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
+        public IServiceProvider ServiceProvider { get; set; }
+        public PregledService(Database.EBolnicaContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper)
         {
+            ServiceProvider = serviceProvider;
         }
         public override IQueryable<Database.Pregled> AddFilter(PregledSearchObject searchObject, IQueryable<Database.Pregled> query)
         {
@@ -47,7 +51,7 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(PregledInsertRequest request, Database.Pregled entity)
         {
-            var uputnica = Context.Uputnicas.Where(p => p.UputnicaId == request.UputnicaId).Select(p => new { p.StateMachine, p.Termin.DatumTermina }).FirstOrDefault();
+            var uputnica = Context.Uputnicas.Where(p => p.UputnicaId == request.UputnicaId ).Select(p => new { p.StateMachine, p.Termin.DatumTermina }).FirstOrDefault();
 
             if (uputnica == null)
             {
@@ -63,13 +67,17 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Pregled se može obaviti samo za termine zakazane na današnji dan");
             }
+
             var medicinskaDokumentacijaExists = Context.MedicinskaDokumentacijas.Any(p => p.MedicinskaDokumentacijaId == request.MedicinskaDokumentacijaId);
             if (!medicinskaDokumentacijaExists)
             {
                 throw new Exception("Medicinska dokumentacija sa zadanim ID-om ne postoji");
             }
             base.BeforeInsert(request, entity);
-        }
 
+            var baseUputnicaState = new BaseUputnicaState(Context,Mapper,ServiceProvider);
+            var state = baseUputnicaState.CreateState(uputnica.StateMachine);
+            state.Close(request.UputnicaId);
+        }
     }
 }

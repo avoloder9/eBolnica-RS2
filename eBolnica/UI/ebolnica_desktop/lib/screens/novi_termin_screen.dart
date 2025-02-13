@@ -67,9 +67,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   }
 
   void fetchPacijente() async {
-    final result = await pacijentProvider.get();
+    final result = await pacijentProvider.getPacijentSaDokumentacijom();
     setState(() {
-      pacijenti = result.result;
+      pacijenti = result;
     });
   }
 

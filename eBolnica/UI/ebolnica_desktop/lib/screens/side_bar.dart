@@ -1,8 +1,9 @@
 import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
+import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
-import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
+import 'package:ebolnica_desktop/screens/doktor_pregledi_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
 import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
@@ -50,8 +51,8 @@ class SideBar extends StatelessWidget {
           ] else if (userType == 'doktor') ...[
             _buildListTile(context, 'Zakazani termini',
                 DoktorTerminiScreen(userId: userId)),
-            _buildListTile(
-                context, 'Historija pregleda', '/historija-pregledi'),
+            _buildListTile(context, 'Historija pregleda',
+                DoktorPreglediScreen(userId: userId)),
             _buildListTile(context, 'Pacijenti',
                 PacijentListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Operacije', '/operacije'),
@@ -62,7 +63,8 @@ class SideBar extends StatelessWidget {
           ] else if (userType == 'pacijent') ...[
             _buildListTile(
                 context, 'Medicinska dokumentacija', '/dokumentacija'),
-            _buildListTile(context, 'Pregledi', PreglediScreen(userId: userId)),
+            _buildListTile(
+                context, 'Pregledi', PacijentPreglediScreen(userId: userId)),
             _buildListTile(context, 'Termini', TerminiScreen(userId: userId)),
             _buildListTile(context, 'Nalazi', '/nalazi'),
             _buildListTile(context, 'Postavke',
