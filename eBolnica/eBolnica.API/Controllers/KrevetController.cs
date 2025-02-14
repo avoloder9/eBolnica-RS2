@@ -16,12 +16,27 @@ namespace eBolnica.API.Controllers
 
             krevetService = service;
         }
+
         [HttpGet("GetKrevetBySobaId")]
-        public IActionResult GetSobaByOdjelId(int sobaId)
+        public IActionResult GetKrevetBySobaId(int sobaId)
         {
             try
             {
                 var kreveti = krevetService.GetKrevetBySobaId(sobaId);
+                return Ok(kreveti);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetSlobodanKrevetBySobaId")]
+        public IActionResult GetSlobodanKrevetBySobaId(int sobaId)
+        {
+            try
+            {
+                var kreveti = krevetService.GetSlobodanKrevetBySobaId(sobaId);
                 return Ok(kreveti);
             }
             catch (Exception ex)

@@ -58,5 +58,19 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetOperacijeByDoktorId/{doktorId}")]
+        public IActionResult GetOperacijeByDoktorId(int doktorId)
+        {
+            try
+            {
+                var operacije = _doktorService.GetOperacijaByDoktorId(doktorId);
+                return Ok(operacije);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

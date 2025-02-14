@@ -92,6 +92,31 @@ namespace eBolnica.Services.Services
             }).ToList();
             return sobaModel;
         }
+        public List<Model.Models.Soba> GetSlobodneSobaByOdjelId(int odjelId)
+        {
+            var sobaDatabase = Context.Set<Database.Soba>().Include(s => s.Odjel).Where(x => x.OdjelId == odjelId && x.Zauzeta==false).ToList();
+            if (sobaDatabase.Count == 0)
+            {
+                throw new Exception("Nema slobodne sobe na ovom odjelu");
+            }
+            var sobaModel = sobaDatabase.Select(s => new Model.Models.Soba
+            {
+                OdjelId = s.OdjelId,
+                Naziv = s.Naziv,
+                SobaId = s.SobaId,
+                BrojKreveta = s.BrojKreveta,
+                Zauzeta = s.Zauzeta,
+                Odjel = new Model.Models.Odjel
+                {
+                    Naziv = s.Odjel.Naziv,
+                    OdjelId = s.Odjel.OdjelId,
+                    BrojKreveta = s.Odjel.BrojKreveta,
+                    BrojSlobodnihKreveta = s.Odjel.BrojSlobodnihKreveta,
+                    BrojSoba = s.Odjel.BrojSoba
+                }
+            }).ToList();
+            return sobaModel;
+        }
     }
 
 }

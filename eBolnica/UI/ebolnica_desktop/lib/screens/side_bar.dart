@@ -1,5 +1,6 @@
 import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
+import 'package:ebolnica_desktop/screens/operacije_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
@@ -15,7 +16,12 @@ import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
 class SideBar extends StatelessWidget {
   final String userType;
   final int userId;
-  const SideBar({super.key, required this.userType, required this.userId});
+  final String? nazivOdjela;
+  const SideBar(
+      {super.key,
+      required this.userType,
+      required this.userId,
+      this.nazivOdjela});
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +56,33 @@ class SideBar extends StatelessWidget {
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'doktor') ...[
             _buildListTile(context, 'Zakazani termini',
-                DoktorTerminiScreen(userId: userId)),
+                DoktorTerminiScreen(userId: userId, nazivOdjela: nazivOdjela)),
             _buildListTile(context, 'Historija pregleda',
-                DoktorPreglediScreen(userId: userId)),
-            _buildListTile(context, 'Pacijenti',
-                PacijentListScreen(userId: userId, userType: userType)),
-            _buildListTile(context, 'Operacije', '/operacije'),
+                DoktorPreglediScreen(userId: userId, nazivOdjela: nazivOdjela)),
+            _buildListTile(
+                context,
+                'Pacijenti',
+                PacijentListScreen(
+                    userId: userId,
+                    userType: userType,
+                    nazivOdjela: nazivOdjela)),
+            if (nazivOdjela == "Hirurgija")
+              _buildListTile(
+                  context,
+                  'Operacije',
+                  OperacijaScreen(
+                    userId: userId,
+                    userType: userType,
+                    nazivOdjela: nazivOdjela,
+                  )),
             _buildListTile(context, 'Hospitalizacije', '/hospitalizacije'),
-            _buildListTile(context, 'Postavke',
-                PostavkeScreen(userId: userId, userType: userType)),
+            _buildListTile(
+                context,
+                'Postavke',
+                PostavkeScreen(
+                    userId: userId,
+                    userType: userType,
+                    nazivOdjela: nazivOdjela)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'pacijent') ...[
             _buildListTile(

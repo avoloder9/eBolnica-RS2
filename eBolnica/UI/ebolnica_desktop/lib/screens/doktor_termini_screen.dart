@@ -12,7 +12,9 @@ import 'package:intl/intl.dart';
 
 class DoktorTerminiScreen extends StatefulWidget {
   final int userId;
-  const DoktorTerminiScreen({super.key, required this.userId});
+  final String? nazivOdjela;
+  const DoktorTerminiScreen(
+      {super.key, required this.userId, this.nazivOdjela});
   @override
   State<DoktorTerminiScreen> createState() => _DoktorTerminiScreenState();
 }
@@ -338,6 +340,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
       drawer: SideBar(
         userType: "doktor",
         userId: widget.userId,
+        nazivOdjela: widget.nazivOdjela,
       ),
       body: Column(
         children: [_buildResultView()],

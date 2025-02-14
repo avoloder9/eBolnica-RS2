@@ -111,14 +111,35 @@ namespace eBolnica.Services.Services
             }
             var krevetModel = krevetDatabase.Select(s => new Model.Models.Krevet
             {
-                SobaId =s.SobaId,
-                KrevetId=s.KrevetId,
-                Zauzet=s.Zauzet,
+                SobaId = s.SobaId,
+                KrevetId = s.KrevetId,
+                Zauzet = s.Zauzet,
                 Soba = new Model.Models.Soba
                 {
-                    Naziv=s.Soba.Naziv,
-                    BrojKreveta=s.Soba.BrojKreveta,
-                    Zauzeta=s.Soba.Zauzeta,
+                    Naziv = s.Soba.Naziv,
+                    BrojKreveta = s.Soba.BrojKreveta,
+                    Zauzeta = s.Soba.Zauzeta,
+                }
+            }).ToList();
+            return krevetModel;
+        }
+        public List<Model.Models.Krevet> GetSlobodanKrevetBySobaId(int sobaId)
+        {
+            var krevetDatabase = Context.Set<Database.Krevet>().Include(s => s.Soba).Where(x => x.SobaId == sobaId && x.Zauzet == false).ToList();
+            if (krevetDatabase.Count == 0)
+            {
+                throw new Exception("Nema slobodnog kreveta u ovoj sobi");
+            }
+            var krevetModel = krevetDatabase.Select(s => new Model.Models.Krevet
+            {
+                SobaId = s.SobaId,
+                KrevetId = s.KrevetId,
+                Zauzet = s.Zauzet,
+                Soba = new Model.Models.Soba
+                {
+                    Naziv = s.Soba.Naziv,
+                    BrojKreveta = s.Soba.BrojKreveta,
+                    Zauzeta = s.Soba.Zauzeta,
                 }
             }).ToList();
             return krevetModel;

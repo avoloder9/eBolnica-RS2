@@ -14,8 +14,12 @@ import 'package:intl/intl.dart';
 class PostavkeScreen extends StatefulWidget {
   final int userId;
   final String userType;
+  final String? nazivOdjela;
   const PostavkeScreen(
-      {super.key, required this.userId, required this.userType});
+      {super.key,
+      required this.userId,
+      required this.userType,
+      this.nazivOdjela});
 
   @override
   State<PostavkeScreen> createState() => _PostavkeScreenState();
@@ -244,7 +248,11 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Postavke")),
-      drawer: SideBar(userId: widget.userId, userType: widget.userType),
+      drawer: SideBar(
+        userId: widget.userId,
+        userType: widget.userType,
+        nazivOdjela: widget.nazivOdjela,
+      ),
       body: userData == null
           ? const Center(child: CircularProgressIndicator())
           : Padding(

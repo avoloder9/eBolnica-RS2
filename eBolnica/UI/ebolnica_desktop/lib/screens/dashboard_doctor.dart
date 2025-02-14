@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 class DashboardDoctor extends StatelessWidget {
   final int userId;
-
-  const DashboardDoctor({super.key, required this.userId});
+  final String nazivOdjela;
+  const DashboardDoctor(
+      {super.key, required this.userId, required this.nazivOdjela});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,6 +13,7 @@ class DashboardDoctor extends StatelessWidget {
       drawer: SideBar(
         userType: 'doktor',
         userId: userId,
+        nazivOdjela: nazivOdjela,
       ),
       body: const Center(
         child: Text(

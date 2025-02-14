@@ -173,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
         var responseBody = json.decode(response.body);
         String? userType = responseBody['userType'];
         int userId = responseBody['userId'];
-
+        final String? nazivOdjela = responseBody['odjel'];
         if (userType != null) {
           Widget dashboard;
           switch (userType) {
@@ -183,7 +183,10 @@ class _LoginScreenState extends State<LoginScreen> {
               );
               break;
             case 'doktor':
-              dashboard = DashboardDoctor(userId: userId);
+              dashboard = DashboardDoctor(
+                userId: userId,
+                nazivOdjela: nazivOdjela!,
+              );
               break;
             case 'medicinsko osoblje':
               dashboard = DashboardMedicalStaff(userId: userId);

@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 
 class DoktorPreglediScreen extends StatefulWidget {
   final int userId;
-  const DoktorPreglediScreen({super.key, required this.userId});
+  final String? nazivOdjela;
+  const DoktorPreglediScreen(
+      {super.key, required this.userId, this.nazivOdjela});
 
   @override
   _DoktorPreglediScreenState createState() => _DoktorPreglediScreenState();
@@ -53,6 +55,7 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
       drawer: SideBar(
         userId: widget.userId,
         userType: "doktor",
+        nazivOdjela: widget.nazivOdjela,
       ),
       body: Column(
         children: [_buildResultView()],

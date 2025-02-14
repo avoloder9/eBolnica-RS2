@@ -15,7 +15,9 @@ import 'package:intl/intl.dart';
 class PacijentListScreen extends StatefulWidget {
   final int userId;
   final String? userType;
-  const PacijentListScreen({super.key, required this.userId, this.userType});
+  final String? nazivOdjela;
+  const PacijentListScreen(
+      {super.key, required this.userId, this.userType, this.nazivOdjela});
 
   @override
   State<PacijentListScreen> createState() => _PacijentListScreenState();
@@ -61,6 +63,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
       drawer: SideBar(
         userType: widget.userType!,
         userId: widget.userId,
+        nazivOdjela: widget.nazivOdjela,
       ),
       body: Column(
         children: [
@@ -149,22 +152,24 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: DataTable(
-            columns: const [
-              DataColumn(label: Text("Ime")),
-              DataColumn(label: Text("Prezime")),
-              DataColumn(label: Text("E-mail")),
-              DataColumn(
+            columns: [
+              const DataColumn(label: Text("Ime")),
+              const DataColumn(label: Text("Prezime")),
+              const DataColumn(label: Text("E-mail")),
+              const DataColumn(
                   label: SizedBox(
                       width: 160,
                       child: Center(child: Text("Broj zdravstvene kartice")))),
-              DataColumn(label: Text("Telefon")),
-              DataColumn(label: SizedBox(width: 60, child: Text("Adresa"))),
-              DataColumn(
+              const DataColumn(label: Text("Telefon")),
+              const DataColumn(
+                  label: SizedBox(width: 60, child: Text("Adresa"))),
+              const DataColumn(
                   label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
-              DataColumn(label: Text("Spol")),
-              DataColumn(label: Text("Status")),
-              DataColumn(label: Text("Medicinska dokumentacija")),
-              DataColumn(label: Text("")),
+              const DataColumn(label: Text("Spol")),
+              const DataColumn(label: Text("Status")),
+              if (widget.userType == "medicinsko osoblje")
+                const DataColumn(label: Text("Medicinska dokumentacija")),
+              const DataColumn(label: Text("")),
             ],
             rows: result?.result
                     .map<DataRow>(
@@ -194,42 +199,45 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                           DataCell(Text(e.korisnik!.status == true
                               ? "Aktivan"
                               : "Neaktivan")),
-                          DataCell(
-                            FutureBuilder<MedicinskaDokumentacija?>(
-                              future: dokumentacijaProvider
-                                  .getMedicinskaDokumentacijaByPacijentId(
-                                      e.pacijentId!),
-                              builder: (context,
-                                  AsyncSnapshot<MedicinskaDokumentacija?>
-                                      snapshot) {
-                                if (!snapshot.hasData) {
-                                  return ElevatedButton(
-                                    child: const Text("Kreiraj dokumentaciju"),
-                                    onPressed: () {
-                                      kreirajMedicinskuDokumentaciju(
-                                        context,
-                                        MedicinskaDokumentacija(
-                                            pacijentId: e.pacijentId!),
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  return ElevatedButton(
-                                    child: const Text("Prikaži dokumentaciju"),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) =>
-                                            MedicinskaDokumentacijaScreen(
-                                          pacijentId: e.pacijentId!,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }
-                              },
+                          if (widget.userType == "medicinsko osoblje")
+                            DataCell(
+                              FutureBuilder<MedicinskaDokumentacija?>(
+                                future: dokumentacijaProvider
+                                    .getMedicinskaDokumentacijaByPacijentId(
+                                        e.pacijentId!),
+                                builder: (context,
+                                    AsyncSnapshot<MedicinskaDokumentacija?>
+                                        snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return ElevatedButton(
+                                      child:
+                                          const Text("Kreiraj dokumentaciju"),
+                                      onPressed: () {
+                                        kreirajMedicinskuDokumentaciju(
+                                          context,
+                                          MedicinskaDokumentacija(
+                                              pacijentId: e.pacijentId!),
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    return ElevatedButton(
+                                      child:
+                                          const Text("Prikaži dokumentaciju"),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              MedicinskaDokumentacijaScreen(
+                                            pacijentId: e.pacijentId!,
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
                             ),
-                          ),
                           DataCell(
                             widget.userType == "administrator"
                                 ? ElevatedButton(

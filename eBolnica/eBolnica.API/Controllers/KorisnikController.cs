@@ -6,17 +6,22 @@ using eBolnica.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using eBolnica.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
+using eBolnica.Services.Database;
+
 namespace eBolnica.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class KorisnikController : BaseCRUDController<Korisnik, KorisnikSearchObject, KorisnikInsertRequest, KorisnikUpdateRequest>
+    public class KorisnikController : BaseCRUDController<Model.Models.Korisnik, KorisnikSearchObject, KorisnikInsertRequest, KorisnikUpdateRequest>
     {
 
         public readonly IKorisnikService korisnikService;
-        public KorisnikController(IKorisnikService service) : base(service)
+        private readonly EBolnicaContext Context;
+        public KorisnikController(IKorisnikService service, EBolnicaContext dbContext) : base(service)
         {
             korisnikService = service;
+            Context = dbContext;
         }
 
         [HttpPost("login")]
@@ -25,6 +30,7 @@ namespace eBolnica.API.Controllers
         {
             var authenticationResponse = await korisnikService.AuthenticateUser(request.Username, request.Password);
             String? userType;
+            string? odjelNaziv=null;
             switch (authenticationResponse.Result)
             {
                 case AuthenticationResult.Success:
@@ -33,6 +39,12 @@ namespace eBolnica.API.Controllers
                     if (korisnikService.isKorisnikDoktor((int)userId))
                     {
                         userType = "doktor";
+
+                        var doktor=await Context.Doktors.Include(x=>x.Odjel).FirstOrDefaultAsync(x=>x.KorisnikId== userId);
+                        if (doktor != null)
+                        {
+                            odjelNaziv = doktor.Odjel?.Naziv;
+                        }
                     }
                     else if (korisnikService.isKorisnikPacijent((int)userId))
                     {
@@ -57,7 +69,7 @@ namespace eBolnica.API.Controllers
                             return BadRequest("Administrator ne moze koristiti mobilnu aplikaciju");
                         }
                     }
-                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik });
+                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik, Odjel=odjelNaziv });
                 case AuthenticationResult.UserNotFound:
                     return BadRequest("Korisnik nije pronadjen.");
                 default:

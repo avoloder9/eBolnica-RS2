@@ -57,10 +57,14 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Pacijent sa zadanim ID-om ne postoji");
             }
-            var doktorExists = Context.Doktors.Any(d => d.DoktorId == request.DoktorId);
-            if (!doktorExists)
+            var doktor = Context.Doktors.Include(x=>x.Odjel).FirstOrDefault(d => d.DoktorId == request.DoktorId);
+            if (doktor==null)
             {
                 throw new Exception("Doktor sa zadanim ID-om ne postoji");
+            }
+            if(doktor.Odjel==null || doktor.Odjel.Naziv != "Hirurgija")
+            {
+                throw new Exception("Samo doktori sa odjela Hirurgija mogu dodavati operacije");
             }
             var terapijaExists = Context.Terapijas.Any(t => t.TerapijaId == request.TerapijaId);
             if (!terapijaExists)

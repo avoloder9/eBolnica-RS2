@@ -22,6 +22,11 @@ namespace eBolnica.API.Controllers
         {
             return (_service as IOperacijaService).Activate(id);
         }
+        [HttpPut("{id}/update")]
+        public Operacija Update(int id, OperacijaUpdateRequest request)
+        {
+            return (_service as IOperacijaService).Update(id, request);
+        }
         [HttpPut("{id}/edit")]
         public Operacija Edit(int id)
         {

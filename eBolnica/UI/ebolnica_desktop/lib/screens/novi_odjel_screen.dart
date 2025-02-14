@@ -9,8 +9,9 @@ import 'package:flutter/material.dart';
 
 class NoviOdjelScreen extends StatefulWidget {
   final int userId;
+  final String? userType;
 
-  const NoviOdjelScreen({super.key, required this.userId});
+  const NoviOdjelScreen({super.key, required this.userId, this.userType});
 
   @override
   _NoviOdjelScreenState createState() => _NoviOdjelScreenState();
@@ -140,6 +141,7 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                             MaterialPageRoute(
                                 builder: (context) => OdjelListScreen(
                                       userId: widget.userId,
+                                      userType: widget.userType,
                                     )),
                           ),
                         ]);

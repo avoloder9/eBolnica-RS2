@@ -30,6 +30,8 @@ namespace eBolnica.Model.Models
         public virtual Pacijent Pacijent { get; set; } = null!;
 
         public virtual Soba Soba { get; set; } = null!;
+        public virtual MedicinskaDokumentacija? MedicinskaDokumentacija { get; set; }
+
     }
 
 }

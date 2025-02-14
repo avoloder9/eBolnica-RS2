@@ -29,5 +29,18 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("GetSlobodnaSobaByOdjelId")]
+        public IActionResult GetSlobodnaSobaByOdjelId(int odjelId)
+        {
+            try
+            {
+                var sobe = sobaService.GetSlobodneSobaByOdjelId(odjelId);
+                return Ok(sobe);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

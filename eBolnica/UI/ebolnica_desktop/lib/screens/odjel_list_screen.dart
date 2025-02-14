@@ -124,6 +124,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                   builder: (BuildContext context) {
                     return NoviOdjelScreen(
                       userId: widget.userId,
+                      userType: widget.userType,
                     );
                   },
                 );

@@ -16,12 +16,12 @@ class Pregled {
   final Uputnica? uputnica;
 
   Pregled({
-    required this.pregledId,
-    required this.uputnicaId,
-    required this.glavnaDijagnoza,
-    required this.anamneza,
-    required this.zakljucak,
-    required this.medicinskaDokumentacijaId,
+    this.pregledId,
+    this.uputnicaId,
+    this.glavnaDijagnoza,
+    this.anamneza,
+    this.zakljucak,
+    this.medicinskaDokumentacijaId,
     this.medicinskaDokumentacija,
     this.uputnica,
   });

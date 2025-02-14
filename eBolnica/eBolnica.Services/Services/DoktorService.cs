@@ -105,7 +105,7 @@ namespace eBolnica.Services.Services
         public List<Model.Models.Pregled> GetPreglediByDoktorId(int doktorId)
         {
             var pregledi = Context.Set<Database.Pregled>().Where(x => x.Uputnica.Termin.DoktorId == doktorId)
-                .Include(u => u.Uputnica).ThenInclude(t => t.Termin).ThenInclude(x => x.Pacijent).ThenInclude(k=>k.Korisnik)
+                .Include(u => u.Uputnica).ThenInclude(t => t.Termin).ThenInclude(x => x.Pacijent).ThenInclude(k => k.Korisnik)
                 .OrderBy(x => x.Uputnica.DatumKreiranja).ToList();
             if (pregledi.Count == 0)
             {
@@ -121,7 +121,7 @@ namespace eBolnica.Services.Services
                 {
                     Termin = new Model.Models.Termin
                     {
-                        DatumTermina=p.Uputnica.Termin.DatumTermina,
+                        DatumTermina = p.Uputnica.Termin.DatumTermina,
                         Pacijent = new Model.Models.Pacijent
                         {
                             PacijentId = p.Uputnica.Termin.PacijentId,
@@ -137,8 +137,6 @@ namespace eBolnica.Services.Services
             }).ToList();
             return pregledModel;
         }
-
-
         public List<Model.Models.Termin> GetTerminByDoktorId(int doktorId)
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.DoktorId == doktorId)
@@ -188,5 +186,56 @@ namespace eBolnica.Services.Services
             }).ToList();
             return terminModel;
         }
+
+        public List<Model.Models.Operacija> GetOperacijaByDoktorId(int doktorId)
+        {
+            var operacije = Context.Set<Database.Operacija>().Where(x => x.DoktorId == doktorId)
+                .Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Doktor).ThenInclude(x => x.Odjel)
+                .Include(x => x.Terapija).Include(x => x.Pacijent).ThenInclude(x => x.Korisnik)
+                .Where(x => x.StateMachine != "closed").OrderBy(x => x.DatumOperacije).ToList();
+            if (!operacije.Any())
+            {
+               return new List<Model.Models.Operacija>();
+            }
+            var operacijeModel = operacije.Select(o => new Model.Models.Operacija
+            {
+                OperacijaId = o.OperacijaId,
+                DatumOperacije = o.DatumOperacije,
+                StateMachine = o.StateMachine,
+                Komentar = o.Komentar,
+                TipOperacije = o.TipOperacije,
+                DoktorId = o.DoktorId,
+                PacijentId = o.PacijentId,
+                TerapijaId = o.TerapijaId,
+                Doktor = new Model.Models.Doktor
+                {
+                    Odjel = new Model.Models.Odjel
+                    {
+                        Naziv = o.Doktor.Odjel.Naziv
+                    },
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = o.Doktor.Korisnik.Ime,
+                        Prezime = o.Doktor.Korisnik.Prezime
+                    }
+                },
+                Pacijent = new Model.Models.Pacijent
+                {
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = o.Pacijent.Korisnik.Ime,
+                        Prezime = o.Pacijent.Korisnik.Prezime
+                    }
+                },
+                Terapija = o.Terapija != null ? new Model.Models.Terapija
+                {
+                    Naziv = o.Terapija.Naziv,
+                    Opis = o.Terapija.Opis
+                } : null
+
+            }).ToList();
+            return operacijeModel;
+        }
+
     }
 }
