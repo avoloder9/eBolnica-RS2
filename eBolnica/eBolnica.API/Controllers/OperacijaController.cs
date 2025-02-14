@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,8 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class OperacijaController : BaseCRUDController<Operacija, OperacijaSearchObject, OperacijaInsertRequest, OperacijaUpdateRequest>
     {
-        public OperacijaController(IOperacijaService service) : base(service) { }
+        private readonly IOperacijaService _operacijaService;
+        public OperacijaController(IOperacijaService service) : base(service) { _operacijaService = service; }
         [HttpGet("GetByPacijentId")]
         public List<Model.Models.Operacija> GetOperacijaByPacijentId([FromQuery] int pacijentId)
         {
@@ -52,6 +54,13 @@ namespace eBolnica.API.Controllers
         public List<string> AllowedActions(int id)
         {
             return (_service as IOperacijaService).AllowedActions(id);
+        }
+
+        [HttpGet("zauzet-termin")]
+        public ActionResult<List<string>> ZauzetTermin(int doktorId, DateTime datumOperacije)
+        {
+            var zauzetiTermini = _operacijaService.ZauzetTermin(doktorId, datumOperacije);
+            return Ok(zauzetiTermini);
         }
     }
 }

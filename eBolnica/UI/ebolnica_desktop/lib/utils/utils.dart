@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 late PacijentProvider pacijentProvider;
@@ -69,4 +69,34 @@ String formattedTime(Duration time) {
   final hours = time.inHours.toString().padLeft(2, '0');
   final minutes = (time.inMinutes % 60).toString().padLeft(2, '0');
   return '$hours:$minutes';
+}
+
+Widget buildEmptyView(
+    {required BuildContext context,
+    required Widget screen,
+    required String message}) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.add_circle, size: 80, color: Colors.blue),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return screen;
+              },
+              barrierDismissible: false,
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+        Text(
+          message,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
 }

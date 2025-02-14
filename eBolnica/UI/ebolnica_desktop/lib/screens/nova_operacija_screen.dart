@@ -35,6 +35,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
   late DoktorProvider doktorProvider;
   DateTime? datumOperacije;
   DateTime selectedDate = DateTime.now();
+  List<String> zauzetiTermini = [];
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
     operacijaProvider = OperacijaProvider();
     doktorProvider = DoktorProvider();
     fetchPacijenti();
+    loadZauzetiTermini();
   }
 
   Future<void> pickDate() async {
@@ -51,15 +53,33 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
       initialDate: selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
+      selectableDayPredicate: (DateTime day) {
+        String formattedDay = DateFormat('yyyy-MM-dd').format(day);
+        return !zauzetiTermini.contains(formattedDay); // Onemogućeni datumi
+      },
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
+        zauzetiTermini = [];
       });
+      loadZauzetiTermini();
     }
   }
 
-  fetchPacijenti() async {
+  Future<void> loadZauzetiTermini() async {
+    try {
+      var result = await operacijaProvider.getZauzetiTermini(
+          widget.doktorId!, selectedDate);
+      setState(() {
+        zauzetiTermini = result;
+      });
+    } catch (e) {
+      debugPrint('Greška pri učitavanju zauzetih termina: $e');
+    }
+  }
+
+  Future<void> fetchPacijenti() async {
     try {
       var result = await pacijentProvider.getPacijentSaDokumentacijom();
       setState(() {
@@ -73,7 +93,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(5.0),
+      contentPadding: const EdgeInsets.all(20.0),
       title: const Center(
         child: Text(
           "Nova operacija",
@@ -91,13 +111,13 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                 pacijentId != null
                     ? Container()
                     : Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: DropdownButtonFormField<Pacijent>(
                           value: odabraniPacijent,
                           decoration: InputDecoration(
                             labelText: 'Pacijent',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
                             prefixIcon: const Icon(Icons.person),
                           ),
@@ -142,7 +162,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: TextFormField(
                     controller: tipOperacijeController,
                     decoration: InputDecoration(
@@ -150,7 +170,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      prefixIcon: const Icon(Icons.person),
+                      prefixIcon: const Icon(Icons.medical_services),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -164,7 +184,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: TextFormField(
                     controller: komentarController,
                     decoration: InputDecoration(
@@ -172,7 +192,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      prefixIcon: const Icon(Icons.person),
+                      prefixIcon: const Icon(Icons.comment),
                     ),
                   ),
                 ),
@@ -199,7 +219,6 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                               "komentar": komentarController.text,
                               "stateMachine": "draft"
                             };
-                            print(novaOperacija);
                             try {
                               await operacijaProvider.insert(novaOperacija);
                               await Flushbar(
@@ -213,15 +232,21 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                                   odabraniPacijent = null;
                                 });
                               }
+                              _formKey.currentState?.reset();
                               if (mounted) {
-                                Navigator.pushReplacement(context,
+                                await Future.wait([
+                                  Future.delayed(const Duration(seconds: 1)),
+                                  Navigator.pushReplacement(
+                                    context,
                                     MaterialPageRoute(builder: (context) {
-                                  return OperacijaScreen(
-                                    userId: widget.userId,
-                                    nazivOdjela: widget.nazivOdjela,
-                                    userType: widget.userType,
-                                  );
-                                }));
+                                      return OperacijaScreen(
+                                        userId: widget.userId,
+                                        nazivOdjela: widget.nazivOdjela,
+                                        userType: widget.userType,
+                                      );
+                                    }),
+                                  )
+                                ]);
                                 return;
                               }
                             } catch (e) {

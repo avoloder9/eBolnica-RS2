@@ -77,35 +77,11 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
           nazivOdjela: widget.nazivOdjela,
         ),
         body: operacije == null || operacije!.isEmpty
-            ? _buildEmptyView()
-            : _buildResultView());
-  }
-
-  Widget _buildEmptyView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add_circle, size: 80, color: Colors.blue),
-            onPressed: () {
-              showDialog(
+            ? buildEmptyView(
                 context: context,
-                builder: (BuildContext context) {
-                  return NovaOperacijaScreen(userId: widget.userId);
-                },
-                barrierDismissible: false,
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            "Nema zakazanih operacija",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
+                screen: NovaOperacijaScreen(userId: widget.userId),
+                message: "Nema zakazanih operacija")
+            : _buildResultView());
   }
 
   Widget _buildResultView() {
@@ -128,20 +104,18 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
                       DataCell(Text(formattedDate(e.datumOperacije))),
                       DataCell(Text(e.tipOperacije!)),
                       DataCell(Text(e.komentar!)),
-                      DataCell(buildActionButtons(e, () {
-                        setState(() {
-                          fetchOperacije();
-                        });
-                      }))
+                      DataCell(buildOperacijaButtons(context, e.operacijaId!))
                     ]))
                 .toList()),
       ),
     );
   }
 
-  Widget buildActionButtons(
-      Operacija operacija, VoidCallback onActionCompleted) {
-    return operacijaProvider.buildUputnicaButtons(
-        context, operacija.operacijaId!);
+  Widget buildOperacijaButtons(BuildContext context, int operacijaId) {
+    return operacijaProvider.buildOperacijaButtons(context, operacijaId, () {
+      fetchOperacije().then((_) {
+        setState(() {});
+      });
+    });
   }
 }

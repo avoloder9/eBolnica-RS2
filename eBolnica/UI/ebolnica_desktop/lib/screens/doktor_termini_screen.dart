@@ -349,6 +349,16 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
   }
 
   Widget _buildResultView() {
+    if (termini == null || termini!.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            "Nemate zakazanih termina",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

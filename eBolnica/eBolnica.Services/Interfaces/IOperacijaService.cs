@@ -18,5 +18,8 @@ namespace eBolnica.Services.Interfaces
         public Operacija Close(int id);
         public Operacija Cancelled(int id);
         public List<string> AllowedActions(int id);
+        public List<String> ZauzetTermin(int doktorId, DateTime datumOperacije);
+
+
     }
 }
