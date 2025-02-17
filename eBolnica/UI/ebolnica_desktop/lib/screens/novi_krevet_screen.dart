@@ -7,11 +7,14 @@ class NoviKrevetScreen extends StatefulWidget {
   final int sobaId;
   final int odjelId;
   final int userId;
+  final String? userType;
+
   const NoviKrevetScreen(
       {required this.sobaId,
       required this.odjelId,
-      super.key,
-      required this.userId});
+      required this.userId,
+      this.userType,
+      super.key});
   @override
   _NoviKrevetScreenState createState() => _NoviKrevetScreenState();
 }
@@ -54,6 +57,7 @@ class _NoviKrevetScreenState extends State<NoviKrevetScreen> {
                           sobaId: widget.sobaId,
                           odjelId: widget.odjelId,
                           userId: widget.userId,
+                          userType: widget.userType,
                         ),
                       ),
                       (route) => route.isFirst)

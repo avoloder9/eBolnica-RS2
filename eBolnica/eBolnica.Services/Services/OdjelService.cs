@@ -1,6 +1,7 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
+using eBolnica.Services.Database;
 using eBolnica.Services.Interfaces;
 using Mapster;
 using MapsterMapper;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services.Services
 {
-    public class OdjelService : BaseCRUDService<Odjel, OdjelSearchObject, Database.Odjel, OdjelInsertRequest, OdjelUpdateRequest>, IOdjelService
+    public class OdjelService : BaseCRUDService<Model.Models.Odjel, OdjelSearchObject, Database.Odjel, OdjelInsertRequest, OdjelUpdateRequest>, IOdjelService
     {
         public OdjelService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
         {
@@ -98,7 +99,7 @@ namespace eBolnica.Services.Services
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.OdjelId == odjelId).Include(p => p.Pacijent)
                 .ThenInclude(k => k.Korisnik).Include(d => d.Doktor).ThenInclude(k => k.Korisnik).Include(o => o.Odjel)
-                .Where(x => x.DatumTermina > DateTime.Now && x.Otkazano==false).OrderBy(x=>x.DatumTermina)
+                .Where(x => x.DatumTermina > DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina)
                 .ToList();
             if (termini.Count == 0)
             {
@@ -139,6 +140,12 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
             return terminModel;
+        }
+
+        public Database.Odjel? GetOdjelByDoktorId(int doktorId)
+        {
+            var doktor = Context.Doktors.Include(d => d.Odjel).FirstOrDefault(d => d.DoktorId == doktorId);
+            return doktor?.Odjel;
         }
     }
 }

@@ -146,9 +146,9 @@ namespace eBolnica.Services.Services
                .Where(x => x.Uputnicas.Any(u => u.StateMachine != "closed"))
                .OrderBy(x => x.DatumTermina).ToList();
 
-            if (termini.Count == 0)
+            if (!termini.Any())
             {
-                throw new Exception("Nema zakazanih termina kod ovog doktora");
+                return new List<Model.Models.Termin>();
             }
             var terminModel = termini.Select(p => new Model.Models.Termin
             {
@@ -195,7 +195,7 @@ namespace eBolnica.Services.Services
                 .Where(x => x.StateMachine != "closed").OrderBy(x => x.DatumOperacije).ToList();
             if (!operacije.Any())
             {
-               return new List<Model.Models.Operacija>();
+                return new List<Model.Models.Operacija>();
             }
             var operacijeModel = operacije.Select(o => new Model.Models.Operacija
             {
@@ -236,6 +236,5 @@ namespace eBolnica.Services.Services
             }).ToList();
             return operacijeModel;
         }
-
     }
 }

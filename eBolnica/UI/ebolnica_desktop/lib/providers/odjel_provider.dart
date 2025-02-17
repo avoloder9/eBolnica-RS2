@@ -52,4 +52,18 @@ class OdjelProvider extends BaseProvider<Odjel> {
     }
     throw Exception("Greska");
   }
+
+  Future<Odjel?> getOdjelByDoktorId(int doktorId) async {
+    var url = "${BaseProvider.baseUrl}Odjel/get-odjel/$doktorId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return Odjel.fromJson(data);
+    }
+    return null;
+  }
 }

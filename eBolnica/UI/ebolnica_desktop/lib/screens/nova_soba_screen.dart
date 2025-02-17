@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 class NovaSobaScreen extends StatefulWidget {
   final int odjelId;
   final int userId;
+  final String? userType;
+
   const NovaSobaScreen(
-      {required this.odjelId, super.key, required this.userId});
+      {required this.odjelId, super.key, required this.userId, this.userType});
 
   @override
   _NovaSobaScreenState createState() => _NovaSobaScreenState();
@@ -91,6 +93,7 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
                         builder: (context) => SobaListScreen(
                           odjelId: widget.odjelId,
                           userId: widget.userId,
+                          userType: widget.userType,
                         ),
                       ),
                       (route) => route.isFirst)

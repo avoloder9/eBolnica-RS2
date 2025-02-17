@@ -43,5 +43,16 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("get-odjel/{doktorId}")]
+        public IActionResult GetOdjelByDoktorId(int doktorId)
+        {
+            var odjel = odjelService.GetOdjelByDoktorId(doktorId);
+
+            if (odjel == null)
+                return NotFound("Odjel nije pronađen za datog doktora.");
+
+            return Ok(odjel);
+        }
+
     }
 }
