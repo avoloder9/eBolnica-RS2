@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/hospitalizacija_provider.dart';
 import 'package:ebolnica_desktop/screens/nova_hospitalizacija_screen.dart';
+import 'package:ebolnica_desktop/screens/novo_otpusno_pismo_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,8 @@ class _HospitalizacijaScreenState extends State<HospitalizacijaScreen> {
   }
 
   Future<void> fetchHospitalizacije() async {
-    hospitalizacije = await hospitalizacijaProvider.get();
+    hospitalizacije = await hospitalizacijaProvider
+        .get(filter: {'NazivOdjela': widget.nazivOdjela});
     setState(() {});
   }
 
@@ -70,6 +72,7 @@ class _HospitalizacijaScreenState extends State<HospitalizacijaScreen> {
         drawer: SideBar(
           userId: widget.userId,
           userType: widget.userType!,
+          nazivOdjela: widget.nazivOdjela,
         ),
         body: hospitalizacije == null || hospitalizacije!.count == 0
             ? buildEmptyView(
@@ -97,6 +100,7 @@ class _HospitalizacijaScreenState extends State<HospitalizacijaScreen> {
             DataColumn(label: Text("Odjel")),
             DataColumn(label: Text("Soba")),
             DataColumn(label: Text("Krevet")),
+            DataColumn(label: Text("")),
           ],
           rows: hospitalizacije?.result
                   .map<DataRow>(
@@ -110,6 +114,22 @@ class _HospitalizacijaScreenState extends State<HospitalizacijaScreen> {
                         DataCell(Text(e.odjel!.naziv.toString())),
                         DataCell(Text(e.soba!.naziv.toString())),
                         DataCell(Text(e.krevet!.krevetId.toString())),
+                        DataCell(ElevatedButton(
+                            onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return NovoOtpusnoPismoScreen(
+                                              userId: widget.userId,
+                                              hospitalizacijaId:
+                                                  e.hospitalizacijaId!,
+                                              nazivOdjela: widget.nazivOdjela,
+                                              userType: widget.userType);
+                                        },
+                                        barrierDismissible: false)
+                                    .then((value) {
+                                  fetchHospitalizacije();
+                                }),
+                            child: const Text("Otpusti pacijenta"))),
                       ],
                     ),
                   )

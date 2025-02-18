@@ -9,6 +9,7 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class PostavkeScreen extends StatefulWidget {
@@ -261,9 +262,9 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Row(
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ClipRRect(

@@ -39,8 +39,6 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
   late MedicinskaDokumentacijaProvider dokumentacijaProvider;
   Pacijent? odabraniPacijent;
   List<Pacijent> pacijenti = [];
-  // Odjel? odabraniOdjel;
-  //List<Odjel> odjeli = [];
   int? odjelId;
   Soba? odabranaSoba;
   List<Soba> sobe = [];
@@ -62,7 +60,7 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
   }
 
   Future<void> fetchPacijenti() async {
-    var result = await pacijentProvider.getPacijentSaDokumentacijom();
+    var result = await pacijentProvider.getPacijentiZaHospitalizaciju();
     setState(() {
       pacijenti = result;
     });
@@ -224,6 +222,9 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
                           child: const Text("Odustani")),
                       ElevatedButton(
                           onPressed: () async {
+                            if (!(_formKey.currentState?.validate() ?? false)) {
+                              return;
+                            }
                             var dokumentacija = await dokumentacijaProvider
                                 .getMedicinskaDokumentacijaByPacijentId(
                                     odabraniPacijent!.pacijentId!);

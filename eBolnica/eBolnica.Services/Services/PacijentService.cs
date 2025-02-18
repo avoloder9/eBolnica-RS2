@@ -193,7 +193,19 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
         }
-
+        public List<Pacijent> GetPacijentiZaHospitalizaciju()
+        {
+            return Context.Pacijents.Where(p => Context.MedicinskaDokumentacijas.Any(d => d.PacijentId == p.PacijentId && d.Hospitalizovan == false)).Select(p => new Pacijent
+            {
+                PacijentId = p.PacijentId,
+                Korisnik = new Korisnik
+                {
+                    KorisnikId = p.KorisnikId,
+                    Ime = p.Korisnik.Ime,
+                    Prezime = p.Korisnik.Prezime
+                }
+            }).ToList();
+        }
 
 
     }

@@ -15,9 +15,9 @@ namespace eBolnica.Model.Models
 
         public DateTime DatumZavrsetka { get; set; }
 
-        public int PregledId { get; set; }
+        public int? PregledId { get; set; }
 
-        public virtual Pregled Pregled { get; set; } = null!;
+        public virtual Pregled? Pregled { get; set; } = null!;
     }
 
 }

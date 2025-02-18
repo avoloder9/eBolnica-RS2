@@ -67,5 +67,11 @@ namespace eBolnica.API.Controllers
             return Ok(_pacijentService.GetPacijentWithDokumentacija());
         }
 
+        [HttpGet("GetPacijentiZaHospitalizaciju")]
+        public ActionResult<List<Pacijent>> GetPacijentiZaHospitalizaciju()
+        {
+            return Ok(_pacijentService.GetPacijentiZaHospitalizaciju());
+        }
+
     }
 }

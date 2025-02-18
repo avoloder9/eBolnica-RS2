@@ -24,7 +24,6 @@ class _TerminiScreenState extends State<TerminiScreen> {
     super.initState();
     pacijentProvider = PacijentProvider();
     terminProvider = TerminProvider();
-    //   fetchTermini();
   }
 
   @override

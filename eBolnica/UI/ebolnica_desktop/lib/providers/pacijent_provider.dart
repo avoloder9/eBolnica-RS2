@@ -73,4 +73,25 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     }
     throw Exception("Greska");
   }
+
+  Future<List<Pacijent>> getPacijentiZaHospitalizaciju() async {
+    var url = "${BaseProvider.baseUrl}Pacijent/GetPacijentiZaHospitalizaciju";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      if (data is List) {
+        List<Pacijent> lista =
+            data.map((item) => Pacijent.fromJson(item)).toList();
+        return lista;
+      } else {
+        throw Exception("Ocekivana lista iz JSON odgovora");
+      }
+    }
+    throw Exception("Greska");
+  }
 }

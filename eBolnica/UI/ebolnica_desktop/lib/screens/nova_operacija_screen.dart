@@ -55,7 +55,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
       lastDate: DateTime(2101),
       selectableDayPredicate: (DateTime day) {
         String formattedDay = DateFormat('yyyy-MM-dd').format(day);
-        return !zauzetiTermini.contains(formattedDay); // Onemogućeni datumi
+        return !zauzetiTermini.contains(formattedDay);
       },
     );
     if (picked != null && picked != selectedDate) {
