@@ -72,6 +72,65 @@ namespace eBolnica.API.Controllers
         {
             return Ok(_pacijentService.GetPacijentiZaHospitalizaciju());
         }
-
+        [HttpGet("getPregledByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetPregledByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetPreglediByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Pregledi nisu pronadjeni" });
+            }
+            return Ok(pacijent);
+        }
+        [HttpGet("getHospitalizacijeByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetHospitalizacijeByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetHospitalizacijeByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Hospitlaizacije nisu pronadjene" });
+            }
+            return Ok(pacijent);
+        }
+        [HttpGet("getOtpusnaPismaByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetOtpusnaPismaByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetOtpusnaPismaByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Otpusna pisma nisu pronadjena" });
+            }
+            return Ok(pacijent);
+        }
+        [HttpGet("getTerapijaByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetTerapijaByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetTerapijaByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Terapije nisu pronadjene" });
+            }
+            return Ok(pacijent);
+        }
+        [HttpGet("getNalaziByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetNalaziByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetNalaziByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Nalazi nisu pronadjeni" });
+            }
+            return Ok(pacijent);
+        }
+        [HttpGet("getOperacijeByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetOperacijeByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetOperacijeByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Operacije nisu pronadjene" });
+            }
+            return Ok(pacijent);
+        }
     }
 }

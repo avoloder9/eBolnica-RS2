@@ -11,7 +11,7 @@ class MedicinskaDokumentacijaProvider
     return MedicinskaDokumentacija.fromJson(data);
   }
 
-  Future<MedicinskaDokumentacija> getMedicinskaDokumentacijaByPacijentId(
+  Future<MedicinskaDokumentacija?> getMedicinskaDokumentacijaByPacijentId(
       int pacijentId) async {
     var url =
         "${BaseProvider.baseUrl}MedicinskaDokumentacija/getMedicinskaDokumentacija/$pacijentId";
@@ -19,14 +19,13 @@ class MedicinskaDokumentacijaProvider
     var headers = createHeaders();
 
     var response = await http.get(uri, headers: headers);
-    if (isValidResponse(response)) {
+    if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (data != null) {
-        return MedicinskaDokumentacija.fromJson(data);
-      } else {
-        throw Exception("Ocekivana lista iz JSON odgovora");
-      }
+      return MedicinskaDokumentacija.fromJson(data);
+    } else if (response.statusCode == 404) {
+      return null;
+    } else {
+      throw Exception("Greška: ${response.statusCode}");
     }
-    throw Exception("Greska");
   }
 }

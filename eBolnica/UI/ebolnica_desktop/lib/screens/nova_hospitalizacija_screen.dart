@@ -239,7 +239,7 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
                                 "datumPrijema":
                                     DateTime.now().toIso8601String(),
                                 "medicinskaDokumentacijaId":
-                                    dokumentacija.medicinskaDokumentacijaId,
+                                    dokumentacija!.medicinskaDokumentacijaId,
                                 "sobaId": odabranaSoba!.sobaId,
                                 "krevetId": odabraniKrevet!.krevetId
                               };

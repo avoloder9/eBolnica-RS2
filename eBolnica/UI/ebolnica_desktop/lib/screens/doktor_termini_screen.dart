@@ -289,7 +289,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                         var pregled = await pregledProvider.insert({
                           "UputnicaId": uputnicaId,
                           "MedicinskaDokumentacijaId":
-                              dokumentacija.medicinskaDokumentacijaId,
+                              dokumentacija!.medicinskaDokumentacijaId,
                           "GlavnaDijagnoza": dijagnozaController.text,
                           "Anamneza": anamnezaController.text,
                           "Zakljucak": zakljucakController.text,

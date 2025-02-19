@@ -152,6 +152,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: DataTable(
+            showCheckboxColumn: false,
             columns: [
               const DataColumn(label: Text("Ime")),
               const DataColumn(label: Text("Prezime")),
@@ -174,91 +175,118 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
             rows: result?.result
                     .map<DataRow>(
                       (e) => DataRow(
-                        cells: [
-                          DataCell(Text(e.korisnik!.ime!)),
-                          DataCell(Text(e.korisnik!.prezime!)),
-                          DataCell(Text(e.korisnik!.email!)),
-                          DataCell(SizedBox(
-                              width: 160,
-                              child: Center(
+                          cells: [
+                            DataCell(Text(e.korisnik!.ime!)),
+                            DataCell(Text(e.korisnik!.prezime!)),
+                            DataCell(Text(e.korisnik!.email!)),
+                            DataCell(SizedBox(
+                                width: 160,
+                                child: Center(
+                                    child: Text(
+                                        e.brojZdravstveneKartice.toString())))),
+                            DataCell(Text(e.korisnik!.telefon ?? "-")),
+                            DataCell(Text(e.adresa ?? "-")),
+                            DataCell(
+                              SizedBox(
+                                width: 100,
+                                child: Center(
                                   child: Text(
-                                      e.brojZdravstveneKartice.toString())))),
-                          DataCell(Text(e.korisnik!.telefon ?? "-")),
-                          DataCell(Text(e.adresa ?? "-")),
-                          DataCell(
-                            SizedBox(
-                              width: 100,
-                              child: Center(
-                                child: Text(
-                                  formattedDate(e.korisnik!.datumRodjenja),
+                                    formattedDate(e.korisnik!.datumRodjenja),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          DataCell(Text(e.korisnik!.spol ?? "-")),
-                          DataCell(Text(e.korisnik!.status == true
-                              ? "Aktivan"
-                              : "Neaktivan")),
-                          if (widget.userType == "medicinsko osoblje")
+                            DataCell(Text(e.korisnik!.spol ?? "-")),
+                            DataCell(Text(e.korisnik!.status == true
+                                ? "Aktivan"
+                                : "Neaktivan")),
+                            if (widget.userType == "medicinsko osoblje")
+                              DataCell(
+                                FutureBuilder<MedicinskaDokumentacija?>(
+                                  future: dokumentacijaProvider
+                                      .getMedicinskaDokumentacijaByPacijentId(
+                                          e.pacijentId!),
+                                  builder: (context,
+                                      AsyncSnapshot<MedicinskaDokumentacija?>
+                                          snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return ElevatedButton(
+                                        child:
+                                            const Text("Kreiraj dokumentaciju"),
+                                        onPressed: () {
+                                          kreirajMedicinskuDokumentaciju(
+                                            context,
+                                            MedicinskaDokumentacija(
+                                                pacijentId: e.pacijentId!),
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return ElevatedButton(
+                                        child:
+                                            const Text("Prikaži dokumentaciju"),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                MedicinskaDokumentacijaScreen(
+                                              pacijentId: e.pacijentId!,
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
                             DataCell(
-                              FutureBuilder<MedicinskaDokumentacija?>(
-                                future: dokumentacijaProvider
-                                    .getMedicinskaDokumentacijaByPacijentId(
-                                        e.pacijentId!),
-                                builder: (context,
-                                    AsyncSnapshot<MedicinskaDokumentacija?>
-                                        snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return ElevatedButton(
-                                      child:
-                                          const Text("Kreiraj dokumentaciju"),
-                                      onPressed: () {
-                                        kreirajMedicinskuDokumentaciju(
-                                          context,
-                                          MedicinskaDokumentacija(
-                                              pacijentId: e.pacijentId!),
-                                        );
-                                      },
-                                    );
-                                  } else {
-                                    return ElevatedButton(
-                                      child:
-                                          const Text("Prikaži dokumentaciju"),
+                              widget.userType == "administrator"
+                                  ? ElevatedButton(
+                                      child: const Text("Ažuriraj podatke"),
                                       onPressed: () {
                                         showDialog(
                                           context: context,
                                           builder: (context) =>
-                                              MedicinskaDokumentacijaScreen(
+                                              EditPacijentScreen(
                                             pacijentId: e.pacijentId!,
+                                            onSave: () {
+                                              _loadInitialData();
+                                            },
                                           ),
                                         );
                                       },
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          DataCell(
-                            widget.userType == "administrator"
-                                ? ElevatedButton(
-                                    child: const Text("Ažuriraj podatke"),
-                                    onPressed: () {
+                                    )
+                                  : const SizedBox.shrink(),
+                            )
+                          ],
+                          onSelectChanged: widget.userType == "administrator" ||
+                                  widget.userType == "doktor"
+                              ? (selected) async {
+                                  if (selected != null && selected) {
+                                    final dokumentacija =
+                                        await dokumentacijaProvider
+                                            .getMedicinskaDokumentacijaByPacijentId(
+                                                e.pacijentId!);
+                                    if (dokumentacija == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              "Ovaj pacijent nema medicinsku dokumentaciju."),
+                                        ),
+                                      );
+                                    } else {
                                       showDialog(
                                         context: context,
                                         builder: (context) =>
-                                            EditPacijentScreen(
+                                            MedicinskaDokumentacijaScreen(
                                           pacijentId: e.pacijentId!,
-                                          onSave: () {
-                                            _loadInitialData();
-                                          },
                                         ),
                                       );
-                                    },
-                                  )
-                                : const SizedBox.shrink(),
-                          )
-                        ],
-                      ),
+                                    }
+                                  }
+                                }
+                              : null),
                     )
                     .toList() ??
                 [],

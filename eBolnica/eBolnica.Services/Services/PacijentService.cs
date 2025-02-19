@@ -206,7 +206,40 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
         }
-
+        public async Task<List<Database.Pregled>> GetPreglediByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Pregleds.Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Odjel)
+                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Pacijent).ThenInclude(x => x.Korisnik)
+                .Where(p => p.MedicinskaDokumentacija!.PacijentId == pacijentId)
+                .ToListAsync();
+        }
+        public async Task<List<Database.Hospitalizacija>> GetHospitalizacijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Hospitalizacijas.Include(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Odjel).Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Where(x => x.MedicinskaDokumentacija!.PacijentId == pacijentId)
+                .ToListAsync();
+        }
+        public async Task<List<Database.OtpusnoPismo>> GetOtpusnaPismaByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x.MedicinskaDokumentacija)
+                .Where(x => x.Hospitalizacija!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
+        }
+        public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
+        }
+        public async Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.LaboratorijskiNalazs.Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Pacijent)
+                .ThenInclude(x => x.Korisnik).Where(x => x.PacijentId == pacijentId).ToListAsync();
+        }
+        public async Task<List<Database.Operacija>> GetOperacijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Operacijas.Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).Include(x => x.Doktor)
+                .ThenInclude(x => x.Korisnik).Include(x => x.Terapija).Where(x => x.PacijentId == pacijentId).ToListAsync();
+        }
 
     }
 }
