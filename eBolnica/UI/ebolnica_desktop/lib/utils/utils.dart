@@ -4,6 +4,7 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 late PacijentProvider pacijentProvider;
 String formatNumber(dynamic) {
@@ -99,4 +100,40 @@ Widget buildEmptyView(
       ],
     ),
   );
+}
+
+class DurationConverter implements JsonConverter<Duration?, String?> {
+  const DurationConverter();
+
+  @override
+  Duration? fromJson(String? json) {
+    if (json == null) return null;
+    List<String> parts = json.split(':');
+    if (parts.length != 3) return null; // Ako format nije HH:mm:ss
+
+    int hours = int.tryParse(parts[0]) ?? 0;
+    int minutes = int.tryParse(parts[1]) ?? 0;
+    int seconds = int.tryParse(parts[2]) ?? 0;
+
+    return Duration(hours: hours, minutes: minutes, seconds: seconds);
+  }
+
+  @override
+  String? toJson(Duration? duration) {
+    if (duration == null) return null;
+    return "${duration.inHours.toString().padLeft(2, '0')}:"
+        "${(duration.inMinutes % 60).toString().padLeft(2, '0')}:"
+        "${(duration.inSeconds % 60).toString().padLeft(2, '0')}";
+  }
+}
+
+Duration? parseDuration(String? timeString) {
+  if (timeString == null) return null;
+  List<String> parts = timeString.split(':');
+  if (parts.length < 2) return null;
+
+  int hours = int.tryParse(parts[0]) ?? 0;
+  int minutes = int.tryParse(parts[1]) ?? 0;
+
+  return Duration(hours: hours, minutes: minutes);
 }

@@ -180,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
             case 'administrator':
               dashboard = DashboardAdmin(
                 userId: userId,
+                userType: userType,
               );
               break;
             case 'doktor':

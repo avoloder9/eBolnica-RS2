@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 
 class DashboardAdmin extends StatelessWidget {
   final int userId;
-
-  const DashboardAdmin({super.key, required this.userId});
+  final String? userType;
+  const DashboardAdmin({super.key, required this.userId, this.userType});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Administrator')),
       drawer: SideBar(
-        userType: 'administrator',
+        userType: userType!,
         userId: userId,
       ),
       body: const Center(

@@ -9,7 +9,8 @@ import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 
 class DoktorListScreen extends StatefulWidget {
   final int userId;
-  const DoktorListScreen({super.key, required this.userId});
+  final String? userType;
+  const DoktorListScreen({super.key, required this.userId, this.userType});
 
   @override
   _DoktorListScreenState createState() => _DoktorListScreenState();
@@ -118,6 +119,7 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                   builder: (BuildContext context) {
                     return NoviDoktorScreen(
                       userId: widget.userId,
+                      userType: widget.userType,
                     );
                   },
                   barrierDismissible: false);
@@ -127,7 +129,7 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
         ],
       ),
       drawer: SideBar(
-        userType: 'administrator',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: isLoading

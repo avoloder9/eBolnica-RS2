@@ -5,6 +5,7 @@ using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using Mapster;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,18 +21,31 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.RasporedSmjena> AddFilter(RasporedSmjenaSearchObject searchObject, IQueryable<Database.RasporedSmjena> query)
         {
-            query = base.AddFilter(searchObject, query);
+            query = base.AddFilter(searchObject, query)
+                .Include(x => x.Smjena)
+                .Include(x => x.Korisnik)
+                .OrderBy(x => x.Datum)
+                .ThenBy(x => x.SmjenaId);
 
             if (searchObject?.SmjenaId != null && searchObject.SmjenaId > 0)
             {
                 query = query.Where(x => x.SmjenaId == searchObject.SmjenaId);
             }
-            if (searchObject!.Datum.HasValue)
+            if (searchObject?.Datum.HasValue == true)
             {
                 query = query.Where(x => x.Datum.Date == searchObject.Datum.Value.Date);
             }
+            if (searchObject?.OdjelId != null && searchObject.OdjelId > 0)
+            {
+                query = query.Where(x =>
+                    Context.Doktors.Any(d => d.KorisnikId == x.KorisnikId && d.OdjelId == searchObject.OdjelId) ||
+                    Context.MedicinskoOsobljes.Any(m => m.KorisnikId == x.KorisnikId && m.OdjelId == searchObject.OdjelId)
+                );
+            }
+
             return query;
         }
+
         public override void BeforeInsert(RasporedSmjenaInsertRequest request, Database.RasporedSmjena entity)
         {
             var smjenaExists = Context.Smjenas.Any(s => s.SmjenaId == request.SmjenaId);
@@ -80,7 +94,6 @@ namespace eBolnica.Services.Services
 
             var random = new Random();
             var startDate = DateTime.Today;
-            var endDate = startDate.AddDays(7);
 
             var doktorSmjeneCount = doktori.ToDictionary(d => d, d => 0);
             var osobljeSmjeneCount = osoblje.ToDictionary(o => o, o => 0);
@@ -88,58 +101,65 @@ namespace eBolnica.Services.Services
             for (int day = 0; day < 7; day++)
             {
                 var date = startDate.AddDays(day);
-
-                var korisniciTrecaSmjenaJuce = new HashSet<int>();
-                if (day > 0)
-                {
-                    var yesterday = date.AddDays(-1);
-                    korisniciTrecaSmjenaJuce = Context.RasporedSmjenas
-                        .Where(r => r.Datum.Date == yesterday.Date && r.SmjenaId == 3)
-                        .Select(r => r.KorisnikId)
-                        .ToHashSet();
-                }
-
-                var slobodniDoktori = doktori
-                    .Where(d => doktorSmjeneCount[d] < 6 && !korisniciTrecaSmjenaJuce.Contains(d))
-                    .ToList();
-
-                var slobodnoOsoblje = osoblje
-                    .Where(o => osobljeSmjeneCount[o] < 6 && !korisniciTrecaSmjenaJuce.Contains(o))
-                    .ToList();
+                var yesterday = date.AddDays(-1);
 
                 foreach (var odjel in odjeli)
                 {
                     foreach (var smjena in smjene)
                     {
-                        var dostupniDoktori = slobodniDoktori.Where(d => !Context.RasporedSmjenas
-                            .Any(r => r.KorisnikId == d && r.Datum.Date == date.Date)).ToList();
+                        var dostupniDoktori = doktori
+                            .Where(d => !Context.SlobodniDans.Any(s => s.KorisnikId == d && s.Datum.Date == date.Date && (s.Status ?? false)))
+                            .OrderBy(d => doktorSmjeneCount[d])
+                            .ToList();
 
-                        var dostupnoOsoblje = slobodnoOsoblje.Where(o => !Context.RasporedSmjenas
-                            .Any(r => r.KorisnikId == o && r.Datum.Date == date.Date)).ToList();
+                        var dostupnoOsoblje = osoblje
+                            .Where(o => !Context.SlobodniDans.Any(s => s.KorisnikId == o && s.Datum.Date == date.Date && (s.Status ?? false)))
+                            .OrderBy(o => osobljeSmjeneCount[o])
+                            .ToList();
 
-                        if (dostupniDoktori.Count == 0 || dostupnoOsoblje.Count < 2)
-                            continue;
-
-                        var doktor = dostupniDoktori.OrderBy(d => doktorSmjeneCount[d]).First();
-                        var osoblje1 = dostupnoOsoblje.OrderBy(o => osobljeSmjeneCount[o]).First();
-                        dostupnoOsoblje.Remove(osoblje1);
-                        var osoblje2 = dostupnoOsoblje.OrderBy(o => osobljeSmjeneCount[o]).First();
-
-                        var korisniciSaTrecemSmjenomJuce = Context.RasporedSmjenas
-                            .Where(r => r.Datum.Date == date.AddDays(-1).Date && r.SmjenaId == 3)
-                            .Select(r => r.KorisnikId)
-                            .ToHashSet();
-
-                        if (korisniciSaTrecemSmjenomJuce.Contains(doktor) ||
-                            korisniciSaTrecemSmjenomJuce.Contains(osoblje1) ||
-                            korisniciSaTrecemSmjenomJuce.Contains(osoblje2))
+                        if (!dostupniDoktori.Any())
                         {
-                            continue;
+                            dostupniDoktori = Context.RasporedSmjenas
+                                .Where(r => r.Datum.Date == yesterday.Date)
+                                .Select(r => r.KorisnikId)
+                                .Distinct()
+                                .Where(d => doktori.Contains(d)) 
+                                .OrderBy(d => doktorSmjeneCount[d])
+                                .ToList();
                         }
-                        if (Context.RasporedSmjenas.Any(r => r.KorisnikId == doktor && r.Datum.Date == date.Date) ||
-                           Context.RasporedSmjenas.Any(r => r.KorisnikId == osoblje1 && r.Datum.Date == date.Date) ||
-                           Context.RasporedSmjenas.Any(r => r.KorisnikId == osoblje2 && r.Datum.Date == date.Date))
+
+                        if (dostupnoOsoblje.Count < 2)
                         {
+                            var jucerasnjeOsoblje = Context.RasporedSmjenas
+                                .Where(r => r.Datum.Date == yesterday.Date)
+                                .Select(r => r.KorisnikId)
+                                .Distinct()
+                                .Where(o => osoblje.Contains(o)) 
+                                .OrderBy(o => osobljeSmjeneCount[o])
+                                .ToList();
+
+                            foreach (var osoba in jucerasnjeOsoblje)
+                            {
+                                if (!dostupnoOsoblje.Contains(osoba) && dostupnoOsoblje.Count < 2)
+                                    dostupnoOsoblje.Add(osoba);
+                            }
+                        }
+
+                        var doktor = dostupniDoktori.FirstOrDefault();
+                        var osoblje1 = dostupnoOsoblje.FirstOrDefault();
+                        var osoblje2 = dostupnoOsoblje.Skip(1).FirstOrDefault();
+
+                        if (doktor == 0 || osoblje1 == 0 || osoblje2 == 0)
+                        {
+                            doktor = doktor != 0 ? doktor : doktori.OrderBy(d => doktorSmjeneCount[d]).FirstOrDefault();
+                            osoblje1 = osoblje1 != 0 ? osoblje1 : osoblje.OrderBy(o => osobljeSmjeneCount[o]).FirstOrDefault();
+                            osoblje2 = osoblje2 != 0 ? osoblje2 : osoblje.OrderBy(o => osobljeSmjeneCount[o]).Skip(1).FirstOrDefault();
+                        }
+
+
+                        if (doktor == null || osoblje1 == null || osoblje2 == null)
+                        {
+                            Console.WriteLine($"UPOZORENJE: Nedostaje doktora ili osoblja za smjenu {smjena.SmjenaId} na datum {date}");
                             continue;
                         }
 

@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 
 class NoviDoktorScreen extends StatefulWidget {
   final int userId;
-  const NoviDoktorScreen({super.key, required this.userId});
+  final String? userType;
+  const NoviDoktorScreen({super.key, required this.userId, this.userType});
   @override
   _NoviDoktorScreenState createState() => _NoviDoktorScreenState();
 }
@@ -372,6 +373,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                             MaterialPageRoute(
                                 builder: (context) => DoktorListScreen(
                                       userId: widget.userId,
+                                      userType: widget.userType,
                                     )),
                           ),
                         ]);

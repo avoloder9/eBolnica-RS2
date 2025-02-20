@@ -6,6 +6,7 @@ import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/doktor_pregledi_screen.dart';
+import 'package:ebolnica_desktop/screens/raspored_smjena_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
 import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
@@ -42,14 +43,30 @@ class SideBar extends StatelessWidget {
           if (userType == 'administrator') ...[
             _buildListTile(context, 'Bolnica', DashboardAdmin(userId: userId)),
             _buildListTile(
-                context, 'Doktori', DoktorListScreen(userId: userId)),
+                context,
+                'Doktori',
+                DoktorListScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
             _buildListTile(context, 'Pacijenti',
                 PacijentListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjeli',
                 OdjelListScreen(userId: userId, userType: userType)),
-            _buildListTile(context, 'Medicinsko osoblje',
-                MedicinskoOsobljeListScreen(userId: userId)),
-            _buildListTile(context, 'Smjene', '/smjene'),
+            _buildListTile(
+                context,
+                'Medicinsko osoblje',
+                MedicinskoOsobljeListScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
+            _buildListTile(
+                context,
+                'Smjene',
+                RasporedSmjenaScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
             _buildListTile(context, 'Pregledi', '/pregledi'),
             _buildListTile(context, 'Izvještaji', '/izvjestaji'),
             _buildListTile(context, 'Postavke',

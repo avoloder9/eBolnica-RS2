@@ -11,8 +11,9 @@ import 'package:flutter/services.dart';
 
 class NoviMedicinskoOsobljeScreen extends StatefulWidget {
   final int userId;
-
-  const NoviMedicinskoOsobljeScreen({super.key, required this.userId});
+  final String? userType;
+  const NoviMedicinskoOsobljeScreen(
+      {super.key, required this.userId, this.userType});
 
   @override
   _NoviMedicinskoOsobljeScreenState createState() =>
@@ -309,6 +310,7 @@ class _NoviMedicinskoOsobljeScreenState
                                 builder: (context) =>
                                     MedicinskoOsobljeListScreen(
                                       userId: widget.userId,
+                                      userType: widget.userType,
                                     )),
                           ),
                         ]);

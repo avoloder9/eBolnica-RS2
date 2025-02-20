@@ -9,5 +9,6 @@ namespace eBolnica.Model.SearchObjects
     {
         public int? SmjenaId { get; set; }
         public DateTime? Datum { get; set; }
+        public int OdjelId { get; set; }
     }
 }

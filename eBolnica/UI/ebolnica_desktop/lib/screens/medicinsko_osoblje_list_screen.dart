@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 
 class MedicinskoOsobljeListScreen extends StatefulWidget {
   final int userId;
-
-  const MedicinskoOsobljeListScreen({super.key, required this.userId});
+  final String? userType;
+  const MedicinskoOsobljeListScreen(
+      {super.key, required this.userId, this.userType});
   @override
   State<MedicinskoOsobljeListScreen> createState() =>
       _MedicinskoOsobljeListScreenState();
@@ -68,7 +69,7 @@ class _MedicinskoOsobljeListScreenState
         title: const Text("Medicinsko osoblje"),
       ),
       drawer: SideBar(
-        userType: 'administrator',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: Column(
@@ -103,8 +104,7 @@ class _MedicinskoOsobljeListScreenState
                 barrierDismissible: false,
                 builder: (BuildContext context) {
                   return NoviMedicinskoOsobljeScreen(
-                    userId: widget.userId,
-                  );
+                      userId: widget.userId, userType: widget.userType);
                 },
               );
             },
