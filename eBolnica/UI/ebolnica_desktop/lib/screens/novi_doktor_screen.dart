@@ -274,8 +274,8 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                           value: 'Specijalista psihijatrije',
                           child: Text('Psihijatrija')),
                       DropdownMenuItem(
-                          value: 'Specijalista dermatologije',
-                          child: Text('Dermatologija')),
+                          value: 'Specijalista neuropsihijatar',
+                          child: Text('Neurologija')),
                       DropdownMenuItem(
                           value: 'Specijalista oftamologije',
                           child: Text('Oftamologija')),
@@ -285,6 +285,9 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                       DropdownMenuItem(
                           value: 'Specijalista radiologije',
                           child: Text('Radiologija')),
+                      DropdownMenuItem(
+                          value: 'Specijalista urolog',
+                          child: Text('Urologija')),
                     ],
                     onChanged: (value) {
                       specijalizacija = value ?? '';

@@ -20,7 +20,7 @@ namespace eBolnica.Services.Services
         { }
         public override IQueryable<Database.MedicinskoOsoblje> AddFilter(MedicinskoOsobljeSearchObject searchObject, IQueryable<Database.MedicinskoOsoblje> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik).Include(y => y.Odjel);
+            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik).Include(y => y.Odjel).OrderBy(x=>x.Korisnik.Ime);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {

@@ -45,7 +45,7 @@ class _MedicinskoOsobljeListScreenState
     });
   }
 
-  void filterOsoblje(String query) {
+  void filterOsoblje(String query) async {
     final results = osoblje.where((osoblje) {
       final ime = osoblje.korisnik?.ime!.toLowerCase();
       final prezime = osoblje.korisnik?.prezime!.toLowerCase();
@@ -191,7 +191,10 @@ class _MedicinskoOsobljeListScreenState
                   page--;
                   result = await provider
                       .get(filter: {}, page: page, pageSize: pageSize);
-                  setState(() {});
+                  setState(() {
+                    osoblje = result!.result;
+                    filteredOsoblje = result!.result;
+                  });
                 }
               : null,
         ),
@@ -201,8 +204,7 @@ class _MedicinskoOsobljeListScreenState
           onPressed: result != null && result!.result.length == pageSize
               ? () async {
                   page++;
-                  result = await provider
-                      .get(filter: {}, page: page, pageSize: pageSize);
+                  await fetchOsoblje();
                   setState(() {});
                 }
               : null,
