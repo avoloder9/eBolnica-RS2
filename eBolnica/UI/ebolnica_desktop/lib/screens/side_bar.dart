@@ -6,6 +6,7 @@ import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/doktor_pregledi_screen.dart';
+import 'package:ebolnica_desktop/screens/pregledi_list_screen.dart';
 import 'package:ebolnica_desktop/screens/raspored_smjena_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
@@ -67,7 +68,13 @@ class SideBar extends StatelessWidget {
                   userId: userId,
                   userType: userType,
                 )),
-            _buildListTile(context, 'Pregledi', '/pregledi'),
+            _buildListTile(
+                context,
+                'Pregledi',
+                PreglediListScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
             _buildListTile(context, 'Izvještaji', '/izvjestaji'),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),

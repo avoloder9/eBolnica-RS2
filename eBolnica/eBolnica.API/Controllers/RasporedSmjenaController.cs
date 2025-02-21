@@ -15,11 +15,11 @@ namespace eBolnica.API.Controllers
         public RasporedSmjenaController(IRasporedSmjenaService service) : base(service) { rasporedSmjenaService = service; }
 
         [HttpPost("generisi-raspored")]
-        public async Task<IActionResult> GenerisiRaspored()
+        public async Task<IActionResult> GenerisiRaspored(DateTime startDate, DateTime endDate)
         {
             try
             {
-                await rasporedSmjenaService.GenerisiRasporedSmjena();
+                await rasporedSmjenaService.GenerisiRasporedSmjena(startDate, endDate);
                 return Ok("Raspored smjena uspješno generisan.");
             }
             catch (Exception ex)

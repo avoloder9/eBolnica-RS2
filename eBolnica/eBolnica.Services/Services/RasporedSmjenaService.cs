@@ -85,64 +85,41 @@ namespace eBolnica.Services.Services
             base.BeforeUpdate(request, entity);
         }
 
-        public async Task GenerisiRasporedSmjena()
+        public async Task GenerisiRasporedSmjena(DateTime startDate, DateTime endDate)
         {
-            var doktori = Context.Doktors.Select(d => d.KorisnikId).ToList();
-            var osoblje = Context.MedicinskoOsobljes.Select(o => o.KorisnikId).ToList();
-            var odjeli = Context.Odjels.ToList();
-            var smjene = Context.Smjenas.ToList();
+            var doktori = await Context.Doktors.AsNoTracking().Select(d => d.KorisnikId).ToListAsync();
+            var osoblje = await Context.MedicinskoOsobljes.AsNoTracking().Select(o => o.KorisnikId).ToListAsync();
+            var odjeli = await Context.Odjels.AsNoTracking().ToListAsync();
+            var smjene = await Context.Smjenas.AsNoTracking().ToListAsync();
 
-            var random = new Random();
-            var startDate = DateTime.Today;
 
             var doktorSmjeneCount = doktori.ToDictionary(d => d, d => 0);
             var osobljeSmjeneCount = osoblje.ToDictionary(o => o, o => 0);
 
-            for (int day = 0; day < 7; day++)
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                var date = startDate.AddDays(day);
                 var yesterday = date.AddDays(-1);
 
                 foreach (var odjel in odjeli)
                 {
                     foreach (var smjena in smjene)
                     {
-                        var dostupniDoktori = doktori
-                            .Where(d => !Context.SlobodniDans.Any(s => s.KorisnikId == d && s.Datum.Date == date.Date && (s.Status ?? false)))
-                            .OrderBy(d => doktorSmjeneCount[d])
-                            .ToList();
+                        var dostupniDoktori = DohvatiDostupneDoktore(doktori, date, doktorSmjeneCount);
+                        var dostupnoOsoblje = DohvatiDostupnoOsoblje(osoblje, date, osobljeSmjeneCount);
 
-                        var dostupnoOsoblje = osoblje
-                            .Where(o => !Context.SlobodniDans.Any(s => s.KorisnikId == o && s.Datum.Date == date.Date && (s.Status ?? false)))
-                            .OrderBy(o => osobljeSmjeneCount[o])
-                            .ToList();
-
-                        if (!dostupniDoktori.Any())
+                        if (!dostupniDoktori.Any() || dostupnoOsoblje.Count < 2)
                         {
-                            dostupniDoktori = Context.RasporedSmjenas
-                                .Where(r => r.Datum.Date == yesterday.Date)
-                                .Select(r => r.KorisnikId)
-                                .Distinct()
-                                .Where(d => doktori.Contains(d)) 
-                                .OrderBy(d => doktorSmjeneCount[d])
-                                .ToList();
+                            var jucerasnjiRadnici = DohvatiJučerašnjeRadnike(
+                                yesterday, doktori, osoblje, doktorSmjeneCount, osobljeSmjeneCount);
+
+                            dostupniDoktori = jucerasnjiRadnici.Where(d => doktori.Contains(d)).ToList();
+                            dostupnoOsoblje = jucerasnjiRadnici.Where(o => osoblje.Contains(o)).ToList();
                         }
+
 
                         if (dostupnoOsoblje.Count < 2)
                         {
-                            var jucerasnjeOsoblje = Context.RasporedSmjenas
-                                .Where(r => r.Datum.Date == yesterday.Date)
-                                .Select(r => r.KorisnikId)
-                                .Distinct()
-                                .Where(o => osoblje.Contains(o)) 
-                                .OrderBy(o => osobljeSmjeneCount[o])
-                                .ToList();
-
-                            foreach (var osoba in jucerasnjeOsoblje)
-                            {
-                                if (!dostupnoOsoblje.Contains(osoba) && dostupnoOsoblje.Count < 2)
-                                    dostupnoOsoblje.Add(osoba);
-                            }
+                            dostupnoOsoblje = DopuniOsobljeJučerašnjim(yesterday, dostupnoOsoblje, osoblje, osobljeSmjeneCount);
                         }
 
                         var doktor = dostupniDoktori.FirstOrDefault();
@@ -156,10 +133,14 @@ namespace eBolnica.Services.Services
                             osoblje2 = osoblje2 != 0 ? osoblje2 : osoblje.OrderBy(o => osobljeSmjeneCount[o]).Skip(1).FirstOrDefault();
                         }
 
-
                         if (doktor == null || osoblje1 == null || osoblje2 == null)
                         {
                             Console.WriteLine($"UPOZORENJE: Nedostaje doktora ili osoblja za smjenu {smjena.SmjenaId} na datum {date}");
+                            continue;
+                        }
+
+                        if (!ValidirajUnos(doktor, osoblje1, osoblje2, smjena, date))
+                        {
                             continue;
                         }
 
@@ -167,49 +148,75 @@ namespace eBolnica.Services.Services
                         osobljeSmjeneCount[osoblje1]++;
                         osobljeSmjeneCount[osoblje2]++;
 
-                        var smjenaExists = Context.Smjenas.Any(s => s.SmjenaId == smjena.SmjenaId);
-                        if (!smjenaExists)
-                        {
-                            throw new Exception("Smjena sa zadanim ID-om ne postoji");
-                        }
-
-                        var isKorisnik = Context.Korisniks.Any(k => k.KorisnikId == doktor || k.KorisnikId == osoblje1 || k.KorisnikId == osoblje2);
-                        if (!isKorisnik)
-                        {
-                            throw new Exception("Jedan od korisnika sa zadanim ID-om ne postoji");
-                        }
-
-                        var slobodanDan = Context.SlobodniDans.FirstOrDefault(s => (s.KorisnikId == doktor || s.KorisnikId == osoblje1 || s.KorisnikId == osoblje2)
-                            && s.Datum.Date == date.Date && s.Status == true);
-
-                        if (slobodanDan != null)
-                        {
-                            throw new Exception("Jedan od korisnika ima odobren slobodan dan na ovaj datum i ne može biti dodan u smjenu.");
-                        }
-
-                        Context.RasporedSmjenas.Add(new Database.RasporedSmjena
-                        {
-                            SmjenaId = smjena.SmjenaId,
-                            KorisnikId = doktor,
-                            Datum = date
-                        });
-                        Context.RasporedSmjenas.Add(new Database.RasporedSmjena
-                        {
-                            SmjenaId = smjena.SmjenaId,
-                            KorisnikId = osoblje1,
-                            Datum = date
-                        });
-                        Context.RasporedSmjenas.Add(new Database.RasporedSmjena
-                        {
-                            SmjenaId = smjena.SmjenaId,
-                            KorisnikId = osoblje2,
-                            Datum = date
-                        });
+                        Context.RasporedSmjenas.AddRange(new List<Database.RasporedSmjena>
+                {
+                    new Database.RasporedSmjena { SmjenaId = smjena.SmjenaId, KorisnikId = doktor, Datum = date },
+                    new Database.RasporedSmjena { SmjenaId = smjena.SmjenaId, KorisnikId = osoblje1, Datum = date },
+                    new Database.RasporedSmjena { SmjenaId = smjena.SmjenaId, KorisnikId = osoblje2, Datum = date }
+                });
                     }
                 }
-
-                await Context.SaveChangesAsync();
             }
+
+            await Context.SaveChangesAsync();
         }
+        private List<int> DohvatiDostupneDoktore(List<int> doktori, DateTime date, Dictionary<int, int> doktorSmjeneCount)
+        {
+            return doktori
+                .Where(d => !Context.SlobodniDans.Any(s => s.KorisnikId == d && s.Datum.Date == date.Date && (s.Status ?? false)))
+                .OrderBy(d => doktorSmjeneCount[d])
+                .ToList();
+        }
+        private List<int> DohvatiDostupnoOsoblje(List<int> osoblje, DateTime date, Dictionary<int, int> osobljeSmjeneCount)
+        {
+            return osoblje
+                .Where(o => !Context.SlobodniDans.Any(s => s.KorisnikId == o && s.Datum.Date == date.Date && (s.Status ?? false)))
+                .OrderBy(o => osobljeSmjeneCount[o])
+                .ToList();
+        }
+        private List<int> DohvatiJučerašnjeRadnike(DateTime yesterday, List<int> doktori, List<int> osoblje, Dictionary<int, int> doktorSmjeneCount, Dictionary<int, int> osobljeSmjeneCount)
+        {
+            return Context.RasporedSmjenas.Where(r => r.Datum.Date == yesterday.Date)
+                .Select(r => r.KorisnikId).Distinct()
+                .Where(d => doktori.Contains(d) || osoblje.Contains(d)) // Uključuje i doktore i osoblje
+                .OrderBy(d => doktori.Contains(d) ? (doktorSmjeneCount.ContainsKey(d) ? doktorSmjeneCount[d] : int.MaxValue) :
+                        (osobljeSmjeneCount.ContainsKey(d) ? osobljeSmjeneCount[d] : int.MaxValue)
+                ).ToList();
+        }
+        private List<int> DopuniOsobljeJučerašnjim(DateTime yesterday, List<int> dostupnoOsoblje, List<int> osoblje, Dictionary<int, int> osobljeSmjeneCount)
+        {
+            var jucerasnjeOsoblje = Context.RasporedSmjenas
+                .Where(r => r.Datum.Date == yesterday.Date)
+                .Select(r => r.KorisnikId)
+                .Distinct()
+                .Where(o => osoblje.Contains(o))
+                .OrderBy(o => osobljeSmjeneCount[o])
+                .ToList();
+
+            foreach (var osoba in jucerasnjeOsoblje)
+            {
+                if (!dostupnoOsoblje.Contains(osoba) && dostupnoOsoblje.Count < 2)
+                    dostupnoOsoblje.Add(osoba);
+            }
+
+            return dostupnoOsoblje;
+        }
+        private bool ValidirajUnos(int doktor, int osoblje1, int osoblje2, Database.Smjena smjena, DateTime date)
+        {
+            if (!Context.Smjenas.Any(s => s.SmjenaId == smjena.SmjenaId))
+                throw new Exception("Smjena sa zadanim ID-om ne postoji");
+
+            if (!Context.Korisniks.Any(k => k.KorisnikId == doktor || k.KorisnikId == osoblje1 || k.KorisnikId == osoblje2))
+                throw new Exception("Jedan od korisnika sa zadanim ID-om ne postoji");
+
+            if (Context.SlobodniDans.Any(s => (s.KorisnikId == doktor || s.KorisnikId == osoblje1 || s.KorisnikId == osoblje2)
+                && s.Datum.Date == date.Date && s.Status == true))
+            {
+                throw new Exception("Jedan od korisnika ima odobren slobodan dan na ovaj datum.");
+            }
+
+            return true;
+        }
+
     }
 }

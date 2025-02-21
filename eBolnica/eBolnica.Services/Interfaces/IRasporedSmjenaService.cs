@@ -11,7 +11,8 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IRasporedSmjenaService : ICRUDService<RasporedSmjena, RasporedSmjenaSearchObject, RasporedSmjenaInsertRequest, RasporedSmjenaUpdateRequest>
     {
-        public Task GenerisiRasporedSmjena();
+        public Task GenerisiRasporedSmjena(DateTime startDate, DateTime endDate);
+
 
     }
 }
