@@ -31,6 +31,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.SmjenaId == searchObject.SmjenaId);
             }
+            if (searchObject?.KorisnikId != null && searchObject.KorisnikId > 0)
+            {
+                query = query.Where(x => x.KorisnikId == searchObject.KorisnikId);
+            }
             if (searchObject?.Datum.HasValue == true)
             {
                 query = query.Where(x => x.Datum.Date == searchObject.Datum.Value.Date);

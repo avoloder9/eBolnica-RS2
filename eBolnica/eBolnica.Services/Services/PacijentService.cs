@@ -135,9 +135,9 @@ namespace eBolnica.Services.Services
                 .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d => d.Doktor)
                 .ThenInclude(k => k.Korisnik).Include(o => o.Odjel).Where(x => x.DatumTermina >= DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina).ToList();
 
-            if (termini.Count == 0)
+            if (!termini.Any())
             {
-                throw new Exception("Nema zakazanih termina za ovog pacijenta");
+            return new List<Model.Models.Termin>();
             }
             var terminModel = termini.Select(p => new Model.Models.Termin
             {
@@ -228,6 +228,7 @@ namespace eBolnica.Services.Services
         public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
         {
             return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
                 .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
         }
         public async Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId)

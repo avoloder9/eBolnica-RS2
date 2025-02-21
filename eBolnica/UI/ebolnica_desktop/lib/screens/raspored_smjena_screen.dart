@@ -225,6 +225,9 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
     if (selectedOdjelId != null) {
       filter["odjelId"] = selectedOdjelId.toString();
     }
+    if (widget.userType == "medicinsko osoblje") {
+      filter["korisnikId"] = widget.userId.toString();
+    }
     var result = await rasporedSmjenaProvider.get(filter: filter);
     return result.result;
   }
@@ -268,53 +271,55 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
         userType: widget.userType!,
       ),
       body: Column(children: [
-        Row(children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DropdownButtonFormField<int>(
-                value: selectedOdjelId,
-                decoration: InputDecoration(
-                  labelText: "Odjel",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.blue),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedOdjelId = newValue;
-                  });
-                },
-                items: (odjeli ?? []).map((odjel) {
-                  return DropdownMenuItem<int>(
-                    value: odjel.odjelId,
-                    child: Text(
-                      odjel.naziv ?? "Nepoznato",
-                      style: const TextStyle(fontSize: 16),
+        if (widget.userType != "medicinsko osoblje")
+          Row(children: [
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: DropdownButtonFormField<int>(
+                  value: selectedOdjelId,
+                  decoration: InputDecoration(
+                    labelText: "Odjel",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
-                  );
-                }).toList(),
-                hint: const Text("Odaberite odjel"),
-                isExpanded: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedOdjelId = newValue;
+                    });
+                  },
+                  items: (odjeli ?? []).map((odjel) {
+                    return DropdownMenuItem<int>(
+                      value: odjel.odjelId,
+                      child: Text(
+                        odjel.naziv ?? "Nepoznato",
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    );
+                  }).toList(),
+                  hint: const Text("Odaberite odjel"),
+                  isExpanded: true,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _showDateDialog,
-                  child: const Text("Generiši raspored"),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _showDateDialog,
+                    child: const Text("Generiši raspored"),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+          ]),
         TableCalendar(
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),
@@ -349,7 +354,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                 return const Center(
                     child: Text('Greška pri učitavanju podataka'));
               }
-
               List<RasporedSmjena> rasporedi = snapshot.data ?? [];
 
               List<RasporedSmjena> filteredRasporedi = rasporedi.where((r) {
@@ -377,28 +381,38 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                   return Card(
                     margin:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: ExpansionTile(
-                      leading: const Icon(Icons.schedule),
-                      title: Text(
-                          "${smjena?.nazivSmjene ?? "Nepoznata smjena"} smjena"),
-                      subtitle: Text(
-                        '${formatTime(smjena?.vrijemePocetka.toString())} - ${formatTime(smjena?.vrijemeZavrsetka.toString())}',
-                      ),
-                      children: korisnici.isNotEmpty
-                          ? korisnici.map((korisnik) {
-                              return ListTile(
-                                leading: const Icon(Icons.person),
-                                title: Text(
-                                    '${korisnik!.ime ?? "Nepoznato"} ${korisnik.prezime ?? "Nepoznato"}'),
-                              );
-                            }).toList()
-                          : [
-                              const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Text('Nema korisnika za ovu smjenu'),
-                              ),
-                            ],
-                    ),
+                    child: widget.userType == "medicinsko osoblje"
+                        ? ListTile(
+                            leading: const Icon(Icons.schedule),
+                            title: Text(
+                                "${smjena?.nazivSmjene ?? "Nepoznata smjena"} smjena"),
+                            subtitle: Text(
+                              '${formatTime(smjena?.vrijemePocetka.toString())} - ${formatTime(smjena?.vrijemeZavrsetka.toString())}',
+                            ),
+                          )
+                        : ExpansionTile(
+                            leading: const Icon(Icons.schedule),
+                            title: Text(
+                                "${smjena?.nazivSmjene ?? "Nepoznata smjena"} smjena"),
+                            subtitle: Text(
+                              '${formatTime(smjena?.vrijemePocetka.toString())} - ${formatTime(smjena?.vrijemeZavrsetka.toString())}',
+                            ),
+                            children: korisnici.isNotEmpty
+                                ? korisnici.map((korisnik) {
+                                    return ListTile(
+                                      leading: const Icon(Icons.person),
+                                      title: Text(
+                                          '${korisnik!.ime ?? "Nepoznato"} ${korisnik.prezime ?? "Nepoznato"}'),
+                                    );
+                                  }).toList()
+                                : [
+                                    const Padding(
+                                      padding: EdgeInsets.all(16),
+                                      child:
+                                          Text('Nema korisnika za ovu smjenu'),
+                                    ),
+                                  ],
+                          ),
                   );
                 }).toList(),
               );

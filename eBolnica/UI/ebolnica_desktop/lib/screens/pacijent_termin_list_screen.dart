@@ -9,7 +9,8 @@ import 'package:intl/intl.dart';
 
 class TerminiScreen extends StatefulWidget {
   final int userId;
-  const TerminiScreen({super.key, required this.userId});
+  final String? userType;
+  const TerminiScreen({super.key, required this.userId, this.userType});
   @override
   _TerminiScreenState createState() => _TerminiScreenState();
 }
@@ -87,7 +88,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
         ],
       ),
       drawer: SideBar(
-        userType: 'pacijent',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: Column(

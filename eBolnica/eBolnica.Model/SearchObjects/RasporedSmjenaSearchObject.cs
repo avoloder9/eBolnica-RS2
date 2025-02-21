@@ -8,6 +8,7 @@ namespace eBolnica.Model.SearchObjects
     public class RasporedSmjenaSearchObject : BaseSearchObject
     {
         public int? SmjenaId { get; set; }
+        public int? KorisnikId { get; set; }
         public DateTime? Datum { get; set; }
         public int OdjelId { get; set; }
     }

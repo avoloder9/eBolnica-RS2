@@ -3,9 +3,9 @@ import 'package:ebolnica_desktop/models/login_model.dart';
 import 'package:ebolnica_desktop/providers/auth_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/dashboard_doctor.dart';
-import 'package:ebolnica_desktop/screens/dashboard_patient.dart';
 import 'package:ebolnica_desktop/screens/dashboard_medical_staff.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
+import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
 import 'package:ebolnica_desktop/screens/registration.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -193,7 +193,10 @@ class _LoginScreenState extends State<LoginScreen> {
               dashboard = DashboardMedicalStaff(userId: userId);
               break;
             case 'pacijent':
-              dashboard = DashboardPatient(userId: userId);
+              dashboard = TerminiScreen(
+                userId: userId,
+                userType: userType,
+              );
               break;
             default:
               setState(() {
