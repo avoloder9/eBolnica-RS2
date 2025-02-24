@@ -1,6 +1,7 @@
 import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/hospitalizacija_screen.dart';
+import 'package:ebolnica_desktop/screens/nalazi_screen.dart';
 import 'package:ebolnica_desktop/screens/operacije_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_terapija_list_screen.dart';
@@ -157,7 +158,13 @@ class SideBar extends StatelessWidget {
                   userId: userId,
                   userType: userType,
                 )),
-            _buildListTile(context, 'Nalazi', '/nalazi'),
+            _buildListTile(
+                context,
+                'Nalazi',
+                NalaziScreen(
+                  userId: userId,
+                  userType: userType,
+                )),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
