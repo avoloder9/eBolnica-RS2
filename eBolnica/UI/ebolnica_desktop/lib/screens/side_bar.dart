@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/hospitalizacija_screen.dart';
 import 'package:ebolnica_desktop/screens/nalazi_screen.dart';
 import 'package:ebolnica_desktop/screens/operacije_screen.dart';
+import 'package:ebolnica_desktop/screens/pacijent_nalazi_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_pregledi_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_terapija_list_screen.dart';
 import 'package:ebolnica_desktop/screens/postavke_screen.dart';
@@ -45,13 +46,8 @@ class SideBar extends StatelessWidget {
           ),
           if (userType == 'administrator') ...[
             _buildListTile(context, 'Bolnica', DashboardAdmin(userId: userId)),
-            _buildListTile(
-                context,
-                'Doktori',
-                DoktorListScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
+            _buildListTile(context, 'Doktori',
+                DoktorListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Pacijenti',
                 PacijentListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjeli',
@@ -60,23 +56,11 @@ class SideBar extends StatelessWidget {
                 context,
                 'Medicinsko osoblje',
                 MedicinskoOsobljeListScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
-            _buildListTile(
-                context,
-                'Smjene',
-                RasporedSmjenaScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
-            _buildListTile(
-                context,
-                'Pregledi',
-                PreglediListScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
+                    userId: userId, userType: userType)),
+            _buildListTile(context, 'Smjene',
+                RasporedSmjenaScreen(userId: userId, userType: userType)),
+            _buildListTile(context, 'Pregledi',
+                PreglediListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Izvještaji', '/izvjestaji'),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),
@@ -98,18 +82,16 @@ class SideBar extends StatelessWidget {
                   context,
                   'Operacije',
                   OperacijaScreen(
-                    userId: userId,
-                    userType: userType,
-                    nazivOdjela: nazivOdjela,
-                  )),
+                      userId: userId,
+                      userType: userType,
+                      nazivOdjela: nazivOdjela)),
             _buildListTile(
                 context,
                 'Hospitalizacije',
                 HospitalizacijaScreen(
-                  userId: userId,
-                  userType: userType,
-                  nazivOdjela: nazivOdjela,
-                )),
+                    userId: userId,
+                    userType: userType,
+                    nazivOdjela: nazivOdjela)),
             _buildListTile(
                 context,
                 'Postavke',
@@ -123,48 +105,29 @@ class SideBar extends StatelessWidget {
                 PacijentPreglediScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Termini',
                 TerminiScreen(userId: userId, userType: userType)),
+            _buildListTile(context, 'Terapije',
+                TerapijaScreen(userId: userId, userType: userType)),
             _buildListTile(
                 context,
-                'Terapije',
-                TerapijaScreen(
+                'Nalazi',
+                PacijentNalaziScreen(
                   userId: userId,
                   userType: userType,
                 )),
-            _buildListTile(context, 'Nalazi', '/nalazi'),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),
           ] else if (userType == 'medicinsko osoblje') ...[
-            _buildListTile(
-                context,
-                'Odjeli',
-                OdjelListScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
+            _buildListTile(context, 'Odjeli',
+                OdjelListScreen(userId: userId, userType: userType)),
             _buildListTile(
                 context, 'Termini', OdjelTerminiScreen(userId: userId)),
-            _buildListTile(
-                context,
-                'Pacijenti',
-                PacijentListScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
-            _buildListTile(
-                context,
-                'Smjene',
-                RasporedSmjenaScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
-            _buildListTile(
-                context,
-                'Nalazi',
-                NalaziScreen(
-                  userId: userId,
-                  userType: userType,
-                )),
+            _buildListTile(context, 'Pacijenti',
+                PacijentListScreen(userId: userId, userType: userType)),
+            _buildListTile(context, 'Smjene',
+                RasporedSmjenaScreen(userId: userId, userType: userType)),
+            _buildListTile(context, 'Nalazi',
+                NalaziScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),

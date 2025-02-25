@@ -12,6 +12,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface INalazParametarService : ICRUDService<NalazParametar, NalazParametarSearchObject, NalazParametarInsertRequest, NalazParametarUpdateRequest>
     {
-        public Task<List<NalazParametarResponse>> GetNalazParametarValues(NalazParametarSearchObject search);
+        public Task<List<Model.Models.NalazParametar>> GetNalazParametarValues(NalazParametarSearchObject search);
+
     }
 }

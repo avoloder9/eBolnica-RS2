@@ -1,4 +1,5 @@
 import 'package:ebolnica_desktop/models/hospitalizacija_model.dart';
+import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
 import 'package:ebolnica_desktop/models/otpusno_pismo_model.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
@@ -179,5 +180,22 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     }
 
     throw Exception("Greška pri dobavljanju operacija.");
+  }
+
+  Future<List<LaboratorijskiNalaz>> GetNalaziByPacijentId(
+      int pacijentId) async {
+    var url =
+        "${BaseProvider.baseUrl}Pacijent/getNalaziByPacijentId/$pacijentId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body) as List;
+      return data.map((item) => LaboratorijskiNalaz.fromJson(item)).toList();
+    }
+
+    throw Exception("Greška pri dobavljanju nalaza.");
   }
 }

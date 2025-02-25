@@ -1,4 +1,5 @@
 import 'package:ebolnica_desktop/models/hospitalizacija_model.dart';
+import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/medicinska_dokumentacija_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
 import 'package:ebolnica_desktop/models/otpusno_pismo_model.dart';
@@ -6,6 +7,8 @@ import 'package:ebolnica_desktop/models/pregled_model.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
+import 'package:ebolnica_desktop/providers/terapija_provider.dart';
+import 'package:ebolnica_desktop/screens/nalaz_details_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -25,22 +28,41 @@ class _MedicinskaDokumentacijaScreenState
   List<OtpusnoPismo>? otpusnaPisma = [];
   List<Terapija>? terapije = [];
   List<Operacija>? operacije = [];
+  List<LaboratorijskiNalaz>? nalazi = [];
   MedicinskaDokumentacijaProvider dokumentacijaProvider =
       MedicinskaDokumentacijaProvider();
   bool isLoading = true;
   PacijentProvider pacijentProvider = PacijentProvider();
   MedicinskaDokumentacija? dokumentacija;
+  TerapijaProvider terapijaProvider = TerapijaProvider();
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
+    terapijaProvider = TerapijaProvider();
     fetchMedicinskaDokumentacija();
     fetchPregledi(widget.pacijentId);
     fetchHospitalizacije(widget.pacijentId);
     fetchOtpusnaPisma(widget.pacijentId);
     fetchTerapije(widget.pacijentId);
     fetchOperacije(widget.pacijentId);
+    fetchNalazi(widget.pacijentId);
+  }
+
+  void fetchNalazi(int pacijentId) async {
+    try {
+      var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId);
+      setState(() {
+        nalazi = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Greška: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void fetchPregledi(int pacijentId) async {
@@ -220,7 +242,9 @@ class _MedicinskaDokumentacijaScreenState
               ],
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {},
+            onTap: () {
+              showPregledDetailsDialog(context, pregled);
+            },
           ),
         );
       },
@@ -402,7 +426,49 @@ class _MedicinskaDokumentacijaScreenState
   }
 
   Widget _buildLaboratorijskiNalazi() {
-    return Center(child: Text("Lista laboratorijskih nalaza"));
+    if (nalazi == null || nalazi!.isEmpty) {
+      return const Center(child: Text("Nema dostupnih nalaza."));
+    }
+
+    return ListView.builder(
+      itemCount: nalazi!.length,
+      itemBuilder: (context, index) {
+        var nalaz = nalazi![index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(12),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _buildInfoItem(
+                    "Naručio",
+                    "${nalaz.doktor!.korisnik!.ime ?? ''} "
+                        "${nalaz.doktor!.korisnik!.prezime ?? ''}",
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildInfoItem(
+                    "Datum nalaza",
+                    formattedDate(nalaz.datumNalaza),
+                  ),
+                ),
+              ],
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      NalazDetaljiScreen(laboratorijskiNalaz: nalaz));
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildOperacije() {
@@ -472,5 +538,115 @@ class _MedicinskaDokumentacijaScreenState
     dokumentacija = await dokumentacijaProvider
         .getMedicinskaDokumentacijaByPacijentId(widget.pacijentId);
     return dokumentacija!;
+  }
+
+  void showPregledDetailsDialog(BuildContext context, Pregled pregled) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: FutureBuilder<Terapija?>(
+            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId!),
+            builder: (context, snapshot) {
+              bool hasTerapija = snapshot.hasData && snapshot.data != null;
+              double dialogHeight = hasTerapija
+                  ? MediaQuery.of(context).size.height * 0.57
+                  : MediaQuery.of(context).size.height * 0.35;
+
+              return Container(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Detalji pregleda",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailRow("Pacijent:",
+                                "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}"),
+                            _buildDetailRow(
+                                "Datum pregleda:",
+                                formattedDate(
+                                    pregled.uputnica!.termin!.datumTermina)),
+                            _buildDetailRow("Glavna dijagnoza:",
+                                pregled.glavnaDijagnoza.toString()),
+                            _buildDetailRow(
+                                "Anamneza:", pregled.anamneza.toString()),
+                            _buildDetailRow(
+                                "Zaključak:", pregled.zakljucak.toString()),
+                            if (hasTerapija) ...[
+                              const SizedBox(height: 20),
+                              const Text(
+                                "Terapija",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              const Divider(),
+                              _buildDetailRow("Naziv terapije:",
+                                  snapshot.data!.naziv.toString()),
+                              _buildDetailRow(
+                                  "Opis:", snapshot.data!.opis.toString()),
+                              _buildDetailRow("Datum početka:",
+                                  formattedDate(snapshot.data!.datumPocetka)),
+                              _buildDetailRow("Datum završetka:",
+                                  formattedDate(snapshot.data!.datumZavrsetka)),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Zatvori",
+                            style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$label ",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

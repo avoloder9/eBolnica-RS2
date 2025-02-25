@@ -20,6 +20,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
   late PacijentProvider pacijentProvider;
   late TerminProvider terminProvider;
   List<Termin>? termini = [];
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -47,6 +48,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
   Future<void> fetchTermini() async {
     setState(() {
       termini = [];
+      _isLoading = true;
     });
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
@@ -54,9 +56,14 @@ class _TerminiScreenState extends State<TerminiScreen> {
       var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
       setState(() {
         termini = result;
+        _isLoading = false;
       });
-    } else
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
       print("error");
+    }
   }
 
   @override
@@ -69,23 +76,25 @@ class _TerminiScreenState extends State<TerminiScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Termini"),
-        actions: [
-          ElevatedButton.icon(
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return NoviTerminScreen(
-                      pacijentId: pacijentId!,
-                      userId: widget.userId,
-                    );
+        actions: widget.userType == "pacijent"
+            ? null
+            : [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return NoviTerminScreen(
+                            pacijentId: pacijentId!,
+                            userId: widget.userId,
+                          );
+                        },
+                        barrierDismissible: false);
                   },
-                  barrierDismissible: false);
-            },
-            icon: const Icon(Icons.add),
-            label: const Text("Dodaj novi termin"),
-          ),
-        ],
+                  icon: const Icon(Icons.add),
+                  label: const Text("Dodaj novi termin"),
+                ),
+              ],
       ),
       drawer: SideBar(
         userType: widget.userType!,
@@ -98,6 +107,25 @@ class _TerminiScreenState extends State<TerminiScreen> {
   }
 
   Widget _buildResultView() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (termini == null || termini!.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            "Nema dostupnih termina",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
         child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,

@@ -18,6 +18,7 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
   late PacijentProvider pacijentProvider;
   late TerapijaProvider terapijaProvider;
   List<Terapija>? terapije = [];
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -34,6 +35,7 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
   Future<void> fetchTerapije() async {
     setState(() {
       terapije = [];
+      _isLoading = true;
     });
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
@@ -41,9 +43,14 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
       var result = await pacijentProvider.getTerapijaByPacijentId(pacijentId!);
       setState(() {
         terapije = result;
+        _isLoading = false;
       });
-    } else
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
       print("error");
+    }
   }
 
   @override
@@ -68,6 +75,25 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
   }
 
   Widget _buildResultView() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (terapije == null || terapije!.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            "Nema dostupnih terapija",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
         child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,

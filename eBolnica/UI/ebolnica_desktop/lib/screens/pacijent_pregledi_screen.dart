@@ -22,7 +22,7 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
   int? pacijentId;
   Terapija? terapija;
   List<Pregled>? pregledi = [];
-
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -41,6 +41,7 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
   Future<void> fetchPregledi() async {
     setState(() {
       pregledi = [];
+      _isLoading = true;
     });
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
@@ -48,9 +49,14 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
       var result = await pacijentProvider.getPreglediByPacijentId(pacijentId!);
       setState(() {
         pregledi = result;
+        _isLoading = false;
       });
-    } else
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
       print("error");
+    }
   }
 
   @override
@@ -70,6 +76,25 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
   }
 
   Widget _buildResultView() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (pregledi == null || pregledi!.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            "Nema obavljenih pregleda",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

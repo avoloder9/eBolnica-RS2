@@ -1,79 +1,59 @@
 import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/providers/laboratorijski_nalaz_provider.dart';
+import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/nalaz_details_screen.dart';
-import 'package:ebolnica_desktop/screens/novi_nalaz_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-class NalaziScreen extends StatefulWidget {
+class PacijentNalaziScreen extends StatefulWidget {
   final int userId;
   final String? userType;
-  const NalaziScreen({super.key, required this.userId, this.userType});
+  const PacijentNalaziScreen({super.key, required this.userId, this.userType});
 
   @override
-  _NalaziScreenState createState() => _NalaziScreenState();
+  _PacijentNalaziScreenState createState() => _PacijentNalaziScreenState();
 }
 
-class _NalaziScreenState extends State<NalaziScreen> {
+class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Lista nalaza"),
-        actions: [
-          ElevatedButton.icon(
-            onPressed: () async {
-              bool? rezultat = await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return NoviNalazScreen(
-                    userId: widget.userId,
-                    userType: widget.userType,
-                  );
-                },
-                barrierDismissible: false,
-              );
-              if (rezultat == true) {
-                fetchNalaz();
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: const Text("Dodaj nalaz"),
-          )
-        ],
       ),
       drawer: SideBar(
         userId: widget.userId,
         userType: widget.userType!,
       ),
-      body: nalazi == null || nalazi!.isEmpty
-          ? buildEmptyView(
-              context: context,
-              screen: NoviNalazScreen(
-                userId: widget.userId,
-                userType: widget.userType,
-              ),
-              message: "Nema kreiranih nalaza")
-          : _buildResultView(),
+      body: _buildResultView(),
     );
   }
 
   List<LaboratorijskiNalaz>? nalazi = [];
   late LaboratorijskiNalazProvider nalazProvider;
+  late PacijentProvider pacijentProvider;
+  int? pacijentId;
   @override
   void initState() {
     super.initState();
     nalazProvider = LaboratorijskiNalazProvider();
+    pacijentProvider = PacijentProvider();
     fetchNalaz();
   }
 
   Future<void> fetchNalaz() async {
     nalazi = [];
-    var result = await nalazProvider.get();
-    setState(() {
-      nalazi = result.result;
-    });
+    pacijentId =
+        await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
+    if (pacijentId != null) {
+      var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId!);
+      setState(() {
+        nalazi = result;
+      });
+    } else {
+      print("error");
+    }
   }
 
   Widget _buildResultView() {
@@ -83,7 +63,6 @@ class _NalaziScreenState extends State<NalaziScreen> {
         width: MediaQuery.of(context).size.width,
         child: DataTable(
             columns: const [
-              DataColumn(label: Text("Pacijent")),
               DataColumn(label: Text("Doktor")),
               DataColumn(label: Text("Datum nalaza")),
               DataColumn(label: Text("")),
@@ -92,8 +71,6 @@ class _NalaziScreenState extends State<NalaziScreen> {
                 .map<DataRow>(
                   (e) => DataRow(
                     cells: [
-                      DataCell(Text(
-                          "${e.pacijent!.korisnik!.ime} ${e.pacijent!.korisnik!.prezime}")),
                       DataCell(Text(
                           "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}")),
                       DataCell(Text(formattedDate(e.datumNalaza))),
