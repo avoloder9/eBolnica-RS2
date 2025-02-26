@@ -45,7 +45,8 @@ class SideBar extends StatelessWidget {
             ),
           ),
           if (userType == 'administrator') ...[
-            _buildListTile(context, 'Bolnica', DashboardAdmin(userId: userId)),
+            _buildListTile(context, 'Bolnica',
+                DashboardAdmin(userId: userId, userType: userType)),
             _buildListTile(context, 'Doktori',
                 DoktorListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Pacijenti',

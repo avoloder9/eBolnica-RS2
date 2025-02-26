@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
@@ -74,9 +77,9 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
 
       final specijalizacija = doctor.specijalizacija?.toLowerCase();
       final matchesSearchQuery =
-          (ime?.contains(query.toLowerCase()) ?? false) ||
-              (prezime?.contains(query.toLowerCase()) ?? false) ||
-              (specijalizacija?.contains(query.toLowerCase()) ?? false);
+          (ime?.startsWith(query.toLowerCase()) ?? false) ||
+              (prezime?.startsWith(query.toLowerCase()) ?? false) ||
+              (specijalizacija?.startsWith(query.toLowerCase()) ?? false);
 
       final matchesOdjel =
           selectedOdjelId == null || doctor.odjelId == selectedOdjelId;
@@ -141,7 +144,7 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Row(
                         children: odjeli.map((odjel) {
                           return Padding(
@@ -166,9 +169,9 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       int crossAxisCount = constraints.maxWidth > 1400 ? 4 : 3;
-
                       return GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 8.0),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 10.0,
@@ -178,11 +181,16 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                         itemCount: filteredDoctors.length,
                         itemBuilder: (context, index) {
                           final doctor = filteredDoctors[index];
+
                           return DoktorCard(
                             ime: doctor.korisnik?.ime ?? 'Nepoznato',
                             prezime: doctor.korisnik?.prezime ?? 'Nepoznato',
                             specijalizacija: doctor.specijalizacija ??
                                 'Nepoznata specijalizacija',
+                            slika: (doctor.korisnik!.slika != null &&
+                                    doctor.korisnik!.slika!.isNotEmpty)
+                                ? base64Decode(doctor.korisnik!.slika!)
+                                : null,
                           );
                         },
                       );
@@ -199,10 +207,12 @@ class DoktorCard extends StatelessWidget {
   final String ime;
   final String prezime;
   final String specijalizacija;
+  final Uint8List? slika;
   const DoktorCard(
       {required this.ime,
       required this.specijalizacija,
       required this.prezime,
+      this.slika,
       super.key});
 
   @override
@@ -213,13 +223,24 @@ class DoktorCard extends StatelessWidget {
       ),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/images/osoba.jpg'),
+              backgroundColor: Colors.grey[300],
+              child: ClipOval(
+                child: Image(
+                  image: slika != null && slika!.isNotEmpty
+                      ? MemoryImage(slika!)
+                      : const AssetImage('assets/images/osoba.jpg')
+                          as ImageProvider,
+                  width: 80,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Text(
