@@ -11,5 +11,6 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IMedicinskaDokumentacijaService : ICRUDService<MedicinskaDokumentacija, MedicinskaDokumentacijaSearchObject, MedicinskaDokumentacijaInsertRequest, MedicinskaDokumentacijaUpdateRequest>
     {
+        public Database.MedicinskaDokumentacija? GetByPacijentId(int pacijentId);
     }
 }

@@ -15,7 +15,7 @@ namespace eBolnica.Model.Requests
         public byte[]? SlikaThumb { get; set; }
         public string? Telefon { get; set; }
         public bool Status { get; set; } = true;
-        public string Adresa { get; set; } = null!;
+        public string? Adresa { get; set; } = null!;
         [JsonIgnore]
         public int? KorisnikID { get; set; }
     }

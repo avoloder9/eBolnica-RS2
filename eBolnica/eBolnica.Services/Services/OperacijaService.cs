@@ -57,17 +57,36 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Pacijent sa zadanim ID-om ne postoji");
             }
-            var doktorExists = Context.Doktors.Any(d => d.DoktorId == request.DoktorId);
-            if (!doktorExists)
+            var doktor = Context.Doktors.Include(x => x.Odjel).FirstOrDefault(d => d.DoktorId == request.DoktorId);
+            if (doktor == null)
             {
                 throw new Exception("Doktor sa zadanim ID-om ne postoji");
             }
-            var terapijaExists = Context.Terapijas.Any(t => t.TerapijaId == request.TerapijaId);
-            if (!terapijaExists)
+            if (doktor.Odjel == null || doktor.Odjel.Naziv != "Hirurgija")
             {
-                throw new Exception("Terapija sa zadanim ID-om ne postoji");
+                throw new Exception("Samo doktori sa odjela Hirurgija mogu dodavati operacije");
+            }
+            if (request.TerapijaId.HasValue)
+            {
+
+                var terapijaExists = Context.Terapijas.Any(t => t.TerapijaId == request.TerapijaId);
+                if (!terapijaExists)
+                {
+                    throw new Exception("Terapija sa zadanim ID-om ne postoji");
+                }
+            }
+            int brojOperacija = Context.Operacijas.Count(o => o.DoktorId == request.DoktorId && o.DatumOperacije.Date == request.DatumOperacije.Date);
+
+            if (brojOperacija >= 2)
+            {
+                throw new Exception("Doktor ne može imati više od dvije operacije na isti datum.");
             }
             base.BeforeInsert(request, entity);
+        }
+        public List<String> ZauzetTermin(int doktorId, DateTime datumOperacije)
+        {
+            return Context.Operacijas.GroupBy(x => x.DatumOperacije.Date).Where(g => g.Count(x => x.DoktorId == doktorId) >= 2)
+                .Select(g => g.Key.ToString("yyyy-MM-dd")).ToList();
         }
 
         public override void BeforeUpdate(OperacijaUpdateRequest request, Database.Operacija entity)
@@ -88,6 +107,8 @@ namespace eBolnica.Services.Services
         }
         public override Model.Models.Operacija Insert(OperacijaInsertRequest request)
         {
+            var entity = Mapper.Map<Database.Operacija>(request);
+            BeforeInsert(request, entity);
             var state = BaseOperacijaState.CreateState("initial");
             return state.Insert(request);
         }

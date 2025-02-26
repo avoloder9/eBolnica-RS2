@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IAdministratorService : ICRUDService<Administrator, AdministratorSearchObject, AdministratorInsertRequest, AdministratorUpdateRequest>
     {
+        public int GetAdministratorIdByKorisnikId(int korisnikId);
+
     }
 }

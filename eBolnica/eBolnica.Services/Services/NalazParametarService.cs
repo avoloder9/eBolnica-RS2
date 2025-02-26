@@ -34,6 +34,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.LaboratorijskiNalaz.Pacijent.Korisnik.Prezime.Contains(searchObject.PrezimePacijenta));
             }
+            if (searchObject?.LaboratorijskiNalazId != null && searchObject.LaboratorijskiNalazId > 0)
+            {
+                query = query.Where(x => x.LaboratorijskiNalazId == searchObject.LaboratorijskiNalazId);
+            }
             return base.AddFilter(searchObject, query);
         }
 
@@ -51,19 +55,22 @@ namespace eBolnica.Services.Services
             }
             base.BeforeInsert(request, entity);
         }
-        public Task<List<NalazParametarResponse>> GetNalazParametarValues(NalazParametarSearchObject search)
+        public Task<List<Model.Models.NalazParametar>> GetNalazParametarValues(NalazParametarSearchObject search)
         {
             var query = Context.NalazParametars.AsQueryable();
             query = AddFilter(search, query);
 
-            return query.Select(x => new NalazParametarResponse
+            return query.Select(x => new Model.Models.NalazParametar
             {
-               ImePacijenta=x.LaboratorijskiNalaz.Pacijent.Korisnik.Ime,
-                PrezimePacijenta = x.LaboratorijskiNalaz.Pacijent.Korisnik.Prezime,
-                NazivParametra = x.Parametar.Naziv,
-                MinVrijednost = x.Parametar.MinVrijednost,
-                MaxVrijednost = x.Parametar.MaxVrijednost,
-                Vrijednost = x.Vrijednost
+                Parametar = new Model.Models.Parametar
+                {
+                    Naziv = x.Parametar.Naziv,
+                    MaxVrijednost = x.Parametar.MaxVrijednost,
+                    MinVrijednost = x.Parametar.MinVrijednost,
+
+                },
+                Vrijednost = x.Vrijednost,
+                LaboratorijskiNalazId = x.LaboratorijskiNalazId
             }).ToListAsync();
         }
 

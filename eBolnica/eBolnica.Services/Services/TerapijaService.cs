@@ -3,6 +3,7 @@ using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +19,22 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(TerapijaInsertRequest request, Database.Terapija entity)
         {
-            var pregledExists = Context.Pregleds.Any(p => p.PregledId == request.PregledId);
-            if (!pregledExists)
+            if (request.PregledId.HasValue)
             {
-                throw new Exception("Pregled sa zadanim ID-om ne postoji");
+
+                var pregledExists = Context.Pregleds.Any(p => p.PregledId == request.PregledId);
+                if (!pregledExists)
+                {
+                    throw new Exception("Pregled sa zadanim ID-om ne postoji");
+                }
             }
             base.BeforeInsert(request, entity);
         }
+        public Database.Terapija? GetTerapijaByPregledId(int pregledId)
+        {
+            return Context.Terapijas.FirstOrDefault(t => t.PregledId == pregledId);
+
+        }
     }
+
 }

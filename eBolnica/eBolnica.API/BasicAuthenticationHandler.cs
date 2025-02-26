@@ -1,4 +1,5 @@
-﻿using eBolnica.Services.Interfaces;
+﻿using eBolnica.Services.Helpers;
+using eBolnica.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
@@ -28,9 +29,8 @@ namespace eBolnica.API
 
             var username = credentials[0];
             var password = credentials[1];
-
-            var user = _korisnikService.Login(username, password);
-            if (user == null)
+            var authenticationResponse = await _korisnikService.AuthenticateUser(username, password);
+            if (authenticationResponse.Result != AuthenticationResult.Success)
             {
                 return AuthenticateResult.Fail("Auth failed");
             }
@@ -38,8 +38,8 @@ namespace eBolnica.API
             {
                 var claims = new List<Claim>()
                 {
-                    new Claim(ClaimTypes.Name, user.Ime),
-                    new Claim(ClaimTypes.NameIdentifier, user.KorisnickoIme)
+                    new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.NameIdentifier, authenticationResponse.UserId.ToString())
                 };
 
                 var identity = new ClaimsIdentity(claims, Scheme.Name);

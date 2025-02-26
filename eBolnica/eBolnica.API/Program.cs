@@ -1,6 +1,7 @@
 using eBolnica.API;
 using eBolnica.API.Filters;
 using eBolnica.Model.Models;
+using eBolnica.Model.Requests;
 using eBolnica.Services.Database;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
@@ -11,6 +12,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -68,7 +70,18 @@ builder.Services.AddControllers(x =>
 }).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddMapster();
+TypeAdapterConfig<eBolnica.Services.Database.Doktor, eBolnica.Model.Models.Doktor>
+    .NewConfig() 
+    .PreserveReference(true) 
+    .MaxDepth(3);  
 
+TypeAdapterConfig<eBolnica.Services.Database.Odjel, eBolnica.Model.Models.Odjel>
+    .NewConfig()
+    .PreserveReference(true)
+    .MaxDepth(3);
+TypeAdapterConfig<PacijentInsertRequest, eBolnica.Model.Models.Pacijent>
+    .NewConfig()
+    .Ignore(dest => dest.PacijentId);
 TypeAdapterConfig<eBolnica.Services.Database.Hospitalizacija, eBolnica.Model.Models.Hospitalizacija>
     .NewConfig()
     .PreserveReference(true)
@@ -108,7 +121,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors(
+    options => options
+        .SetIsOriginAllowed(x => _ = true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials()
+);
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

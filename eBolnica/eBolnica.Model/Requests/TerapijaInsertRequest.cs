@@ -16,7 +16,7 @@ namespace eBolnica.Model.Requests
 
         public DateTime DatumZavrsetka { get; set; }
 
-        public int PregledId { get; set; }
+        public int? PregledId { get; set; }
 
     }
 }

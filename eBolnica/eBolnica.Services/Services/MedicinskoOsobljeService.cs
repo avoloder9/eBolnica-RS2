@@ -20,7 +20,7 @@ namespace eBolnica.Services.Services
         { }
         public override IQueryable<Database.MedicinskoOsoblje> AddFilter(MedicinskoOsobljeSearchObject searchObject, IQueryable<Database.MedicinskoOsoblje> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik);
+            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik).Include(y => y.Odjel).OrderBy(x=>x.Korisnik.Ime);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
@@ -135,6 +135,15 @@ namespace eBolnica.Services.Services
                 return null;
             }
             return Mapper.Map<MedicinskoOsoblje>(entity);
+        }
+        public int GetOsobljeIdByKorisnikId(int korisnikId)
+        {
+            var osoblje = Context.MedicinskoOsobljes.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return osoblje.MedicinskoOsobljeId;
+        }
+        public int? GetOdjelIdByOsobljeId(int osobljeId)
+        {
+            return Context.MedicinskoOsobljes.Where(o => o.MedicinskoOsobljeId == osobljeId).Select(x => x.OdjelId).FirstOrDefault();
         }
     }
 }

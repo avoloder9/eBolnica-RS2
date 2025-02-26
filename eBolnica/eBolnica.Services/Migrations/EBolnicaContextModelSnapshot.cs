@@ -17,7 +17,7 @@ namespace eBolnica.Services.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.13")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -608,13 +608,13 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<string>("Anamneza")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("GlavnaDijagnoza")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<int>("MedicinskaDokumentacijaId")
                         .HasColumnType("int")
@@ -626,8 +626,8 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<string>("Zakljucak")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.HasKey("PregledId")
                         .HasName("PK__Pregled__4A8CB6B49155168A");
@@ -819,6 +819,10 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasDefaultValueSql("((0))");
 
+                    b.Property<string>("Naziv")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
@@ -861,7 +865,7 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PregledId")
+                    b.Property<int?>("PregledId")
                         .HasColumnType("int")
                         .HasColumnName("PregledID");
 
@@ -1326,7 +1330,6 @@ namespace eBolnica.Services.Migrations
                     b.HasOne("eBolnica.Services.Database.Pregled", "Pregled")
                         .WithMany("Terapijas")
                         .HasForeignKey("PregledId")
-                        .IsRequired()
                         .HasConstraintName("Terapija_Pregled");
 
                     b.Navigation("Pregled");

@@ -130,5 +130,10 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<Model.Models.Administrator>(entity);
         }
+        public int GetAdministratorIdByKorisnikId(int korisnikId)
+        {
+            var admin = Context.Administrators.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return admin.AdministratorId;
+        }
     }
 }

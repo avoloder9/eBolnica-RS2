@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IKrevetService : ICRUDService<Krevet, KrevetSearchObject, KrevetInsertRequest, KrevetUpdateRequest>
     {
+        public List<Model.Models.Krevet> GetKrevetBySobaId(int sobaId);
+        public List<Model.Models.Krevet> GetSlobodanKrevetBySobaId(int sobaId);
     }
 }

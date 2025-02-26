@@ -405,11 +405,11 @@ public partial class EBolnicaContext : DbContext
             entity.ToTable("Pregled");
 
             entity.Property(e => e.PregledId).HasColumnName("PregledID");
-            entity.Property(e => e.Anamneza).HasMaxLength(100);
-            entity.Property(e => e.GlavnaDijagnoza).HasMaxLength(100);
+            entity.Property(e => e.Anamneza).HasMaxLength(400);
+            entity.Property(e => e.GlavnaDijagnoza).HasMaxLength(400);
             entity.Property(e => e.MedicinskaDokumentacijaId).HasColumnName("MedicinskaDokumentacijaID");
             entity.Property(e => e.UputnicaId).HasColumnName("UputnicaID");
-            entity.Property(e => e.Zakljucak).HasMaxLength(100);
+            entity.Property(e => e.Zakljucak).HasMaxLength(400);
 
             entity.HasOne(d => d.MedicinskaDokumentacija).WithMany(p => p.Pregleds)
                 .HasForeignKey(d => d.MedicinskaDokumentacijaId)

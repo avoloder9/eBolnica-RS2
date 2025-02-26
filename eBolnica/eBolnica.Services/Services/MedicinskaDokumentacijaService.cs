@@ -46,6 +46,14 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<MedicinskaDokumentacija>(entity);
         }
+        public Database.MedicinskaDokumentacija? GetByPacijentId(int pacijentId)
+        {
+            return Context.Set<Database.MedicinskaDokumentacija>()
+                    .Include(md => md.Pacijent).ThenInclude(md=>md.Korisnik)
+                    .Include(md => md.Pregleds)
+                    .Include(md => md.Hospitalizacijas)
+                    .FirstOrDefault(md => md.PacijentId == pacijentId);
+        }
     }
 }
 

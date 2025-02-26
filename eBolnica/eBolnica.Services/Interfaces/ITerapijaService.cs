@@ -11,5 +11,7 @@ namespace eBolnica.Services.Interfaces
 {
     public interface ITerapijaService : ICRUDService<Terapija, TerapijaSearchObject, TerapijaInsertRequest, TerapijaUpdateRequest>
     {
+        public Database.Terapija? GetTerapijaByPregledId(int pregledId);
+
     }
 }

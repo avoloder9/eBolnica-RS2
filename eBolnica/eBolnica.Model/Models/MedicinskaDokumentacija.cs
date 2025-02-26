@@ -16,5 +16,8 @@ namespace eBolnica.Model.Models
         public string? Napomena { get; set; }
 
         public virtual Pacijent Pacijent { get; set; } = null!;
+        public virtual ICollection<Hospitalizacija> Hospitalizacijas { get; } = new List<Hospitalizacija>();
+
+        public virtual ICollection<Pregled> Pregleds { get; } = new List<Pregled>();
     }
 }

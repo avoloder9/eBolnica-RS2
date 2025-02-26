@@ -15,11 +15,11 @@ public partial class Terapija
 
     public DateTime DatumZavrsetka { get; set; }
 
-    public int PregledId { get; set; }
+    public int? PregledId { get; set; }
 
     public virtual ICollection<Operacija> Operacijas { get; } = new List<Operacija>();
 
     public virtual ICollection<OtpusnoPismo> OtpusnoPismos { get; } = new List<OtpusnoPismo>();
 
-    public virtual Pregled Pregled { get; set; } = null!;
+    public virtual Pregled? Pregled { get; set; } = null!;
 }

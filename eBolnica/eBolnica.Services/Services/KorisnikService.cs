@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace eBolnica.Services.Services
 {
@@ -77,7 +78,6 @@ namespace eBolnica.Services.Services
             base.BeforeInsert(request, entity);
         }
 
-
         public override void BeforeUpdate(KorisnikUpdateRequest request, Database.Korisnik entity)
         {
             base.BeforeUpdate(request, entity);
@@ -108,20 +108,45 @@ namespace eBolnica.Services.Services
             }
         }
 
-        public Model.Models.Korisnik Login(string username, string password)
+        public async Task<AuthenticationResponse> AuthenticateUser(string username, string password)
         {
-            var entity = Context.Korisniks.FirstOrDefault(x => x.KorisnickoIme == username);
-            if (entity == null)
+            var user = Context.Korisniks.FirstOrDefault(u => u.KorisnickoIme == username);
+
+            if (user == null)
             {
-                return null;
-            }
-            var hash = HashGenerator.GenerateHash(entity.LozinkaSalt, password);
-            if (hash != entity.LozinkaHash)
-            {
-                return null;
+                return new AuthenticationResponse { Result = AuthenticationResult.UserNotFound };
             }
 
-            return Mapper.Map<Model.Models.Korisnik>(entity);
+            string hashedPassword = HashGenerator.GenerateHash(user.LozinkaSalt, password);
+
+            if (hashedPassword != user.LozinkaHash)
+            {
+                return new AuthenticationResponse { Result = AuthenticationResult.InvalidPassword };
+            }
+
+            return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId, Korisnik=user};
         }
+
+        public bool isKorisnikDoktor(int korisnikId)
+        {
+            var user=Context.Doktors.Any(x=>x.KorisnikId== korisnikId);
+            return user;
+        }
+        public bool isKorisnikAdministrator(int korisnikId)
+        {
+            var user = Context.Administrators.Any(x => x.KorisnikId == korisnikId);
+            return user;
+        }
+        public bool isKorisnikMedicinskoOsoblje(int korisnikId)
+        {
+            var user = Context.MedicinskoOsobljes.Any(x => x.KorisnikId == korisnikId);
+            return user;
+        }
+        public bool isKorisnikPacijent(int korisnikId)
+        {
+            var user = Context.Pacijents.Any(x => x.KorisnikId == korisnikId);
+            return user;
+        }
+
     }
 }

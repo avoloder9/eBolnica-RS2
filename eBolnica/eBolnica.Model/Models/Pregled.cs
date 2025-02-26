@@ -19,5 +19,7 @@ namespace eBolnica.Model.Models
         public virtual MedicinskaDokumentacija? MedicinskaDokumentacija { get; set; }
 
         public virtual Uputnica Uputnica { get; set; } = null!;
+        public virtual ICollection<Terapija> Terapijas { get; } = new List<Terapija>();
+
     }
 }
