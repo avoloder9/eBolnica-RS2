@@ -66,14 +66,15 @@ namespace eBolnica.API.Controllers
                     {
                         if (userType == "administrator" && request.DeviceType == "mobile")
                         {
-                            return BadRequest("Administrator ne moze koristiti mobilnu aplikaciju");
+                            return StatusCode(StatusCodes.Status403Forbidden, new { message = "Administrator ne može koristiti mobilnu aplikaciju." });
                         }
                     }
                     return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik, Odjel=odjelNaziv });
                 case AuthenticationResult.UserNotFound:
                     return BadRequest("Korisnik nije pronadjen.");
                 default:
-                    return StatusCode(500, "Doslo je do greske tokom autentifikacije");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do greške tokom autentifikacije." });
+
 
             }
         }
