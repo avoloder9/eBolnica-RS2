@@ -116,29 +116,46 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   bool isValidResponse(Response response) {
-    if (response.statusCode < 299) {
-      return true;
-    } else if (response.statusCode == 401) {
-      throw UserFriendlyException("Unauthorized");
-    } else if (response.statusCode == 403) {
-      final errorResponse = jsonDecode(response.body);
-      throw UserFriendlyException(
-          errorResponse['message'] ?? "Pristup odbijen.");
-    } else {
-      try {
-        final errorResponse = jsonDecode(response.body);
-        if (errorResponse is Map<String, dynamic> &&
-            errorResponse['errors'] != null &&
-            errorResponse['errors']['userError'] != null) {
-          throw UserFriendlyException(
-              errorResponse['errors']['userError'].join(', '));
-        } else {
-          throw UserFriendlyException(
-              "Something bad happened, please try again");
-        }
-      } catch (e) {
-        throw UserFriendlyException("Something bad happened, please try again");
+    try {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
       }
+
+      final errorResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 400) {
+        throw UserFriendlyException(
+            errorResponse['message'] ?? "Neispravan zahtjev.");
+      } else if (response.statusCode == 401) {
+        throw UserFriendlyException("Pogrešno korisničko ime ili lozinka");
+      } else if (response.statusCode == 403) {
+        throw UserFriendlyException(
+            errorResponse['message'] ?? "Pristup odbijen.");
+      } else if (response.statusCode == 404) {
+        if (response.body.contains("doktori")) {
+          throw UserFriendlyException(
+              "Potrebno je dodati doktore na ovaj odjel.");
+        }
+        throw UserFriendlyException("Traženi resurs nije pronađen.");
+      } else if (response.statusCode >= 500) {
+        throw UserFriendlyException("Greška na serveru. Pokušajte kasnije.");
+      }
+
+      if (errorResponse is Map<String, dynamic> &&
+          errorResponse['errors'] != null &&
+          errorResponse['errors']['userError'] != null) {
+        throw UserFriendlyException(
+            errorResponse['errors']['userError'].join(', '));
+      }
+
+      throw UserFriendlyException(
+          "Došlo je do neočekivane greške. Pokušajte ponovo.");
+    } catch (e) {
+      if (e is UserFriendlyException) {
+        throw e;
+      }
+      throw UserFriendlyException(
+          "Neuspjela obrada odgovora. Provjerite vezu i pokušajte ponovo.");
     }
   }
 

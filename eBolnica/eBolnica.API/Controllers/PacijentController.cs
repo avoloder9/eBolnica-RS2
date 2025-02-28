@@ -20,6 +20,8 @@ namespace eBolnica.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
+
+      
         public IActionResult Register([FromBody] PacijentInsertRequest request)
         {
             try
@@ -31,6 +33,11 @@ namespace eBolnica.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        [AllowAnonymous]
+        public override Pacijent Insert(PacijentInsertRequest request)
+        {
+            return base.Insert(request);
         }
 
         [HttpGet("GetTerminByPacijent")]

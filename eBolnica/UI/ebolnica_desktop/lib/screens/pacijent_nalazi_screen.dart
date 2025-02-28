@@ -34,6 +34,7 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
   late LaboratorijskiNalazProvider nalazProvider;
   late PacijentProvider pacijentProvider;
   int? pacijentId;
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -43,20 +44,47 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
   }
 
   Future<void> fetchNalaz() async {
-    nalazi = [];
+    setState(() {
+      nalazi = [];
+      _isLoading = true;
+    });
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
       var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId!);
       setState(() {
         nalazi = result;
+        _isLoading = false;
       });
     } else {
+      setState(() {
+        _isLoading = false;
+      });
       print("error");
     }
   }
 
   Widget _buildResultView() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (nalazi == null || nalazi!.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            "Nema dostupnih nalaza",
+            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SizedBox(

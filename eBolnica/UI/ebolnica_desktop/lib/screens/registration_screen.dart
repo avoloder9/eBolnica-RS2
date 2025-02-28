@@ -1,12 +1,10 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
+import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/utils/password_validator.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'dart:math';
-import 'package:ebolnica_desktop/api_constants.dart';
-import 'package:http/http.dart' as http;
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -27,6 +25,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       TextEditingController();
   final TextEditingController telefonController = TextEditingController();
   final TextEditingController adresaController = TextEditingController();
+  late PacijentProvider pacijentProvider;
+  @override
+  void initState() {
+    super.initState();
+    pacijentProvider = PacijentProvider();
+  }
 
   DateTime? datumRodjenja;
   String spol = '';
@@ -71,51 +75,37 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         dob: datumRodjenja != null ? _calculateAge(datumRodjenja!) : 0,
       );
 
-      var url = Uri.parse('${ApiConstants.baseUrl}/Pacijent/register');
       try {
-        var response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(pacijent.toJson()),
-        );
-
+        await pacijentProvider.insert(pacijent);
         Navigator.pop(context);
 
-        if (response.statusCode == 200) {
-          imeController.clear();
-          prezimeController.clear();
-          emailController.clear();
-          korisnickoImeController.clear();
-          lozinkaController.clear();
-          lozinkaPotvrdaController.clear();
-          telefonController.clear();
-          adresaController.clear();
-          datumRodjenja = null;
-          spol = '';
+        imeController.clear();
+        prezimeController.clear();
+        emailController.clear();
+        korisnickoImeController.clear();
+        lozinkaController.clear();
+        lozinkaPotvrdaController.clear();
+        telefonController.clear();
+        adresaController.clear();
+        datumRodjenja = null;
+        spol = '';
 
-          setState(() {});
-          await Flushbar(
-                  message: "Registracija uspješna.",
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 3))
-              .show(context);
+        setState(() {});
+        await Flushbar(
+                message: "Registracija uspješna.",
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3))
+            .show(context);
 
-          if (!mounted) return;
-          Future.delayed(const Duration(seconds: 3), () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LoginScreen(),
-              ),
-            );
-          });
-        } else {
-          await Flushbar(
-                  message: "Došlo je do greške. Pokušajte ponovo.",
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 3))
-              .show(context);
-        }
+        if (!mounted) return;
+        Future.delayed(const Duration(seconds: 3), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ),
+          );
+        });
       } catch (e) {
         Navigator.pop(context);
         await Flushbar(

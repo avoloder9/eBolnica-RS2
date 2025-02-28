@@ -61,7 +61,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
     } else {
       throw Exception("Unknown error");
     }
-    // print("response: ${response.request} ${response.statusCode}, ${response.body}");
   }
 
   Future<T> getById(int id) async {
@@ -71,17 +70,13 @@ abstract class BaseProvider<T> with ChangeNotifier {
     var headers = createHeaders();
 
     var response = await http.get(uri, headers: headers);
-    // throw new Exception("Greška");
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
 
-      // var result = data as T;
       return fromJson(data);
-      // return result;
     } else {
       throw Exception("Unknown error");
     }
-    // print("response: ${response.request} ${response.statusCode}, ${response.body}");
   }
 
   Future<T> insert(dynamic request) async {
@@ -121,40 +116,52 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   bool isValidResponse(Response response) {
-    if (response.statusCode < 299) {
-      return true;
-    } else if (response.statusCode == 401) {
-      throw UserFriendlyException("Unauthorized");
-    } else {
-      try {
-        final errorResponse = jsonDecode(response.body);
-        if (errorResponse is Map<String, dynamic> &&
-            errorResponse['errors'] != null &&
-            errorResponse['errors']['userError'] != null) {
-          throw UserFriendlyException(
-              errorResponse['errors']['userError'].join(', '));
-        } else if (response.statusCode == 404 &&
-            response.body.contains("doktori")) {
-          throw UserFriendlyException(
-              "Potrebno je dodati doktore na ovaj odjel");
-        } else {
-          throw UserFriendlyException(
-              "Something bad happened, please try again");
-        }
-      } catch (e) {
-        if (e is UserFriendlyException) {
-          throw e;
-        }
-        throw UserFriendlyException("Something bad happened, please try again");
+    try {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
       }
+
+      final errorResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 400) {
+        throw UserFriendlyException(
+            errorResponse['message'] ?? "Neispravan zahtjev.");
+      } else if (response.statusCode == 401) {
+        throw UserFriendlyException("Pogrešno korisničko ime ili lozinka");
+      } else if (response.statusCode == 403) {
+        throw UserFriendlyException(
+            errorResponse['message'] ?? "Pristup odbijen.");
+      } else if (response.statusCode == 404) {
+        if (response.body.contains("doktori")) {
+          throw UserFriendlyException(
+              "Potrebno je dodati doktore na ovaj odjel.");
+        }
+        throw UserFriendlyException("Traženi resurs nije pronađen.");
+      } else if (response.statusCode >= 500) {
+        throw UserFriendlyException("Greška na serveru. Pokušajte kasnije.");
+      }
+
+      if (errorResponse is Map<String, dynamic> &&
+          errorResponse['errors'] != null &&
+          errorResponse['errors']['userError'] != null) {
+        throw UserFriendlyException(
+            errorResponse['errors']['userError'].join(', '));
+      }
+
+      throw UserFriendlyException(
+          "Došlo je do neočekivane greške. Pokušajte ponovo.");
+    } catch (e) {
+      if (e is UserFriendlyException) {
+        throw e;
+      }
+      throw UserFriendlyException(
+          "Neuspjela obrada odgovora. Provjerite vezu i pokušajte ponovo.");
     }
   }
 
   Map<String, String> createHeaders() {
     String username = AuthProvider.username ?? "";
     String password = AuthProvider.password ?? "";
-
-    // print("passed creds: $username, $password");
 
     String basicAuth =
         "Basic ${base64Encode(utf8.encode('$username:$password'))}";

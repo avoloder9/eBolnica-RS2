@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_mobile/providers/auth_provider.dart';
 import 'package:ebolnica_mobile/providers/base_provider.dart';
@@ -5,7 +8,9 @@ import 'package:ebolnica_mobile/providers/korisnik_provider.dart';
 import 'package:ebolnica_mobile/screens/doktor_screen.dart';
 import 'package:ebolnica_mobile/screens/osoblje_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/registracija_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +34,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: Stack(
         children: [
@@ -96,7 +102,10 @@ class MainScreen extends StatelessWidget {
                     ),
                     backgroundColor: Colors.grey[300],
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const RegistrationScreen()));
+                  },
                   child: const Text(
                     "Registracija",
                     style: TextStyle(
@@ -145,6 +154,9 @@ class _LoginScreenState extends State<LoginScreen> {
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
           },
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -232,16 +244,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text("Nemate račun? "),
-                    Text(
-                      "Registrujte se",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                    )
-                  ],
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegistrationScreen()),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text("Nemate račun? "),
+                      Text(
+                        "Registrujte se",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 18),
+                      )
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.only(top: 100),
@@ -331,35 +352,48 @@ class _LoginScreenState extends State<LoginScreen> {
 
         _usernameController.clear();
         _passwordController.clear();
-
+        FocusScope.of(context).unfocus();
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => dashboard),
         );
       } else {
-        setState(() {
-          Flushbar(
-            message: "Pogrešno korisničko ime ili lozinka.",
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ).show(context);
-        });
-      }
-    } catch (e) {
-      setState(() {
-        String errorMessage;
-        if (e is UserFriendlyException) {
-          errorMessage = e.message;
-        } else {
-          errorMessage = "Došlo je do greške, pokušajte ponovo.";
-        }
-
-        Flushbar(
-          message: errorMessage,
+        if (mounted) return;
+        await Flushbar(
+          message: "Pogrešno korisničko ime ili lozinka.",
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ).show(context);
-      });
+      }
+    } catch (e) {
+      String errorMessage = "Greška u komunikaciji s serverom.";
+
+      if (e is SocketException) {
+        errorMessage = "Nema internet konekcije.";
+      } else if (e is UserFriendlyException) {
+        errorMessage = e.message;
+      } else if (e is FormatException) {
+        errorMessage = "Neispravan odgovor sa servera.";
+      } else if (e is http.ClientException) {
+        errorMessage = "Greška u mrežnoj komunikaciji.";
+      } else if (e is http.Response) {
+        if (e.statusCode == 400) {
+          errorMessage = "Pogrešno korisničko ime ili lozinka.";
+        } else if (e.statusCode == 403) {
+          final errorResponse = jsonDecode(e.body);
+          errorMessage = errorResponse['message'] ?? "Pristup odbijen.";
+        } else if (e.statusCode == 500) {
+          errorMessage = "Greška na serveru. Pokušajte kasnije.";
+        }
+      }
+
+      if (!mounted) return;
+      Flushbar(
+        message: errorMessage,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ).show(context);
     } finally {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });

@@ -55,11 +55,6 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (terapije == null || terapije!.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        fetchTerapije();
-      });
-    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Termini"),
@@ -84,14 +79,15 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
       );
     }
     if (terapije == null || terapije!.isEmpty) {
-      return const Center(
-        child: Padding(
+      return const Expanded(
+        child: Center(
+            child: Padding(
           padding: EdgeInsets.all(20.0),
           child: Text(
             "Nema dostupnih terapija",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
           ),
-        ),
+        )),
       );
     }
     return Expanded(

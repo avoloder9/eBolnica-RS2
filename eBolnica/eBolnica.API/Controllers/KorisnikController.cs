@@ -71,9 +71,13 @@ namespace eBolnica.API.Controllers
                     }
                     return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik, Odjel=odjelNaziv });
                 case AuthenticationResult.UserNotFound:
-                    return BadRequest("Korisnik nije pronadjen.");
+                    return Unauthorized(new { message = "Korisnik nije pronadjen." });
+
+                case AuthenticationResult.InvalidPassword:
+                    return Unauthorized(new { message = "Pogresno korisnicko ime ili lozinka." });
+
                 default:
-                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do greške tokom autentifikacije." });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do neocekivane greške." });
 
 
             }
