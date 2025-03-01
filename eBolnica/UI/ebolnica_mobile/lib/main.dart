@@ -79,10 +79,9 @@ class MainScreen extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()));
                   },
                   child: const Text(
                     "Prijava",
@@ -247,10 +246,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const RegistrationScreen()),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RegistrationScreen()));
                   },
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -335,13 +333,22 @@ class _LoginScreenState extends State<LoginScreen> {
         Widget dashboard;
         switch (userType) {
           case 'doktor':
-            dashboard = DoktorScreen(userId: userId);
+            dashboard = DoktorScreen(
+              userId: userId,
+              userType: userType,
+            );
             break;
           case 'medicinsko osoblje':
-            dashboard = OsobljeScreen(userId: userId);
+            dashboard = OsobljeScreen(
+              userId: userId,
+              userType: userType,
+            );
             break;
           case 'pacijent':
-            dashboard = PacijentScreen(userId: userId);
+            dashboard = PacijentScreen(
+              userId: userId,
+              userType: userType,
+            );
             break;
           default:
             setState(() {

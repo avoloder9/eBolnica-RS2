@@ -137,3 +137,28 @@ Duration? parseDuration(String? timeString) {
 
   return Duration(hours: hours, minutes: minutes);
 }
+
+void showCustomDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  String? imagePath,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      title: Text(title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (imagePath != null) Image.asset(imagePath, height: 80),
+          const SizedBox(height: 10),
+          Text(message),
+        ],
+      ),
+    ),
+  );
+}
