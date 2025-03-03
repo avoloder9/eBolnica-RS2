@@ -5,9 +5,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_mobile/providers/auth_provider.dart';
 import 'package:ebolnica_mobile/providers/base_provider.dart';
 import 'package:ebolnica_mobile/providers/korisnik_provider.dart';
-import 'package:ebolnica_mobile/screens/doktor_screen.dart';
-import 'package:ebolnica_mobile/screens/osoblje_screen.dart';
-import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/navBar.dart';
 import 'package:ebolnica_mobile/screens/registracija_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -330,32 +328,10 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
-        Widget dashboard;
-        switch (userType) {
-          case 'doktor':
-            dashboard = DoktorScreen(
-              userId: userId,
-              userType: userType,
-            );
-            break;
-          case 'medicinsko osoblje':
-            dashboard = OsobljeScreen(
-              userId: userId,
-              userType: userType,
-            );
-            break;
-          case 'pacijent':
-            dashboard = PacijentScreen(
-              userId: userId,
-              userType: userType,
-            );
-            break;
-          default:
-            setState(() {
-              usernameError = "Nepoznata uloga korisnika.";
-            });
-            return;
-        }
+        Widget dashboard = BottomNavBar(
+          userId: userId,
+          userType: userType,
+        );
 
         _usernameController.clear();
         _passwordController.clear();
