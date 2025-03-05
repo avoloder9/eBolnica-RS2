@@ -6,6 +6,7 @@ import 'package:ebolnica_mobile/models/termin_model.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/providers/terapija_provider.dart';
 import 'package:ebolnica_mobile/providers/termin_provider.dart';
+import 'package:ebolnica_mobile/screens/novi_termin_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -85,17 +86,49 @@ class _PacijentScreenState extends State<PacijentScreen> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: false,
             centerTitle: true,
-            title: const Text(
-              "Termini, pregledi i operacije",
-              style: TextStyle(fontWeight: FontWeight.bold),
+            automaticallyImplyLeading: false,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueAccent, Colors.deepPurple],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
             ),
-            bottom: const TabBar(tabs: [
-              Tab(text: "Termini"),
-              Tab(text: "Pregledi"),
-              Tab(text: "Operacije"),
-            ]),
+            actions: [
+              IconButton(
+                onPressed: pacijentId == null
+                    ? null
+                    : () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return NoviTerminScreen(
+                                pacijentId: pacijentId!,
+                                userId: widget.userId,
+                                userType: widget.userType,
+                              );
+                            },
+                            barrierDismissible: false);
+                      },
+                style: const ButtonStyle(
+                    iconColor: MaterialStatePropertyAll(Colors.white)),
+                icon: const Icon(Icons.add),
+              ),
+            ],
+            bottom: const TabBar(
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: Colors.white,
+                labelStyle:
+                    TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                tabs: [
+                  Tab(text: "Termini"),
+                  Tab(text: "Pregledi"),
+                  Tab(text: "Operacije"),
+                ]),
           ),
           body: TabBarView(
             children: [
@@ -331,8 +364,8 @@ class _PacijentScreenState extends State<PacijentScreen> {
             builder: (context, snapshot) {
               bool hasTerapija = snapshot.hasData && snapshot.data != null;
               double dialogHeight = hasTerapija
-                  ? MediaQuery.of(context).size.height * 0.75
-                  : MediaQuery.of(context).size.height * 0.65;
+                  ? MediaQuery.of(context).size.height * 0.7
+                  : MediaQuery.of(context).size.height * 0.55;
 
               return Container(
                 width: MediaQuery.of(context).size.width * 0.9,
@@ -383,7 +416,7 @@ class _PacijentScreenState extends State<PacijentScreen> {
                             _buildDetailRow(Icons.assignment, "Zaključak:",
                                 pregled.zakljucak ?? "N/A"),
                             if (hasTerapija) ...[
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 10),
                               const Text(
                                 "Terapija",
                                 style: TextStyle(
@@ -408,27 +441,6 @@ class _PacijentScreenState extends State<PacijentScreen> {
                                   formattedDate(snapshot.data!.datumZavrsetka)),
                             ],
                           ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          backgroundColor: Colors.blueAccent,
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 20),
-                          child: Text(
-                            "Zatvori",
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
                         ),
                       ),
                     ),

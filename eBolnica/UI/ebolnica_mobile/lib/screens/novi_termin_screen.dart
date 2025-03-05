@@ -8,6 +8,7 @@ import 'package:ebolnica_mobile/providers/odjel_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/providers/termin_provider.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -337,17 +338,26 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         showCustomDialog(
             context: context,
             title: "",
-            message: "Uspjesno kreiran novi termin",
+            message: "Uspješno zakazan novi termin",
             imagePath: "assets/images/success.png");
-
+        await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => OdjelTerminiScreen(
-                        userId: widget.userId,
-                        userType: widget.userType,
-                      )));
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                if (widget.odjelId != null) {
+                  return OdjelTerminiScreen(
+                    userId: widget.userId,
+                    userType: widget.userType,
+                  );
+                } else {
+                  return PacijentScreen(
+                      userId: widget.userId, userType: widget.userType);
+                }
+              },
+            ),
+          );
         }
       } catch (e) {
         await Flushbar(

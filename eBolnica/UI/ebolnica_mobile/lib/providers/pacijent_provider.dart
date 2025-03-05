@@ -166,6 +166,38 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     throw Exception("Greška pri dobavljanju terapija.");
   }
 
+  Future<List<Terapija>> getAktivneTerapijeByPacijentId(int pacijentId) async {
+    var url =
+        "${BaseProvider.baseUrl}Pacijent/getAktivneTerapijeByPacijentId/$pacijentId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body) as List;
+      return data.map((item) => Terapija.fromJson(item)).toList();
+    }
+
+    throw Exception("Greška pri dobavljanju terapija.");
+  }
+
+  Future<List<Terapija>> getGotoveTerapijeByPacijentId(int pacijentId) async {
+    var url =
+        "${BaseProvider.baseUrl}Pacijent/getGotoveTerapijeByPacijentId/$pacijentId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body) as List;
+      return data.map((item) => Terapija.fromJson(item)).toList();
+    }
+
+    throw Exception("Greška pri dobavljanju terapija.");
+  }
+
   Future<List<Operacija>> GetOperacijeByPacijentId(int pacijentId) async {
     var url =
         "${BaseProvider.baseUrl}Pacijent/getOperacijeByPacijentId/$pacijentId";

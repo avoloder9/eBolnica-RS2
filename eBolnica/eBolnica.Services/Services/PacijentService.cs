@@ -137,7 +137,7 @@ namespace eBolnica.Services.Services
 
             if (!termini.Any())
             {
-            return new List<Model.Models.Termin>();
+                return new List<Model.Models.Termin>();
             }
             var terminModel = termini.Select(p => new Model.Models.Termin
             {
@@ -227,9 +227,21 @@ namespace eBolnica.Services.Services
         }
         public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
         {
-            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
                 .Include(x => x.Pregled).ThenInclude(x => x.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
                 .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
+        }
+        public async Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId && x.DatumZavrsetka >= DateTime.Now).ToListAsync();
+        }
+        public async Task<List<Database.Terapija>> GetGotoveTerapijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId && x.DatumZavrsetka < DateTime.Now).ToListAsync();
         }
         public async Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId)
         {

@@ -1,5 +1,7 @@
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/terapije_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/postavke_screen.dart';
 
@@ -36,8 +38,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
         return [
           const Placeholder(),
           PacijentScreen(userId: widget.userId, userType: userType),
-          const Placeholder(),
-          const Placeholder(),
+          PacijentNalaziScreen(userId: widget.userId, userType: userType),
+          PacijentTerapijaScreen(userId: widget.userId, userType: userType),
           PostavkeScreen(userId: widget.userId, userType: userType),
         ];
       case 'medicinsko osoblje':

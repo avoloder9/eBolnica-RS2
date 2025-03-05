@@ -21,6 +21,7 @@ namespace eBolnica.Services.Interfaces
         public Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId);
         public Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId);
         public Task<List<Database.Operacija>> GetOperacijeByPacijentIdAsync(int pacijentId);
-
+        public Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId);
+        public Task<List<Database.Terapija>> GetGotoveTerapijeByPacijentIdAsync(int pacijentId);
     }
 }
