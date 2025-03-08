@@ -67,11 +67,19 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: 100,
         title: const Text("Zakazani termini",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+            style: TextStyle(color: Colors.white)),
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.deepPurple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -85,6 +93,8 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
               );
             },
             icon: const Icon(Icons.add),
+            style: const ButtonStyle(
+                iconColor: MaterialStatePropertyAll(Colors.white)),
           )
         ],
       ),
