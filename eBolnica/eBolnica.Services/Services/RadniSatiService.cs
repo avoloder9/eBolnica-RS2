@@ -19,7 +19,22 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.RadniSati> AddFilter(RadniSatiSearchObject search, IQueryable<Database.RadniSati> query)
         {
-            return base.AddFilter(search, query).Include(x => x.MedicinskoOsoblje).ThenInclude(k => k.Korisnik).Include(y => y.RasporedSmjena);
+            query = base.AddFilter(search, query)
+                .Include(x => x.MedicinskoOsoblje)
+                .ThenInclude(k => k.Korisnik)
+                .Include(y => y.RasporedSmjena);
+
+            if (search.RasporedSmjenaId != 0) 
+            {
+                query = query.Where(x => x.RasporedSmjenaId == search.RasporedSmjenaId);
+            }
+
+            query = query.Where(x => x.VrijemeOdlaska == null); 
+
+      
+            query = query.Where(x => x.VrijemeDolaska != null); 
+
+            return query;
         }
         public override void BeforeInsert(RadniSatiInsertRequest request, Database.RadniSati entity)
         {
@@ -36,6 +51,17 @@ namespace eBolnica.Services.Services
             if (!rasporedSmjene)
             {
                 throw new Exception("Smjena na taj dan ne postoji za tog korisnika.");
+            }
+            var postojiRadniSati = Context.RadniSatis
+       .Any(x => x.MedicinskoOsobljeId == request.MedicinskoOsobljeId &&
+                 x.RasporedSmjenaId == request.RasporedSmjenaId &&
+                 x.VrijemeDolaska.Hours == request.VrijemeDolaska.Hours &&  
+                 x.VrijemeDolaska.Minutes == request.VrijemeDolaska.Minutes &&  
+                 x.VrijemeDolaska.Seconds == request.VrijemeDolaska.Seconds); 
+
+            if (postojiRadniSati)
+            {
+                throw new Exception("Osoblje je već prijavilo dolazak na smjenu za taj dan.");
             }
 
             base.BeforeInsert(request, entity);

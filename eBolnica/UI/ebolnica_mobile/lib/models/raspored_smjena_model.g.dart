@@ -8,7 +8,7 @@ part of 'raspored_smjena_model.dart';
 
 RasporedSmjena _$RasporedSmjenaFromJson(Map<String, dynamic> json) =>
     RasporedSmjena(
-      rasporedSmjena: (json['rasporedSmjena'] as num?)?.toInt(),
+      rasporedSmjenaId: (json['rasporedSmjenaId'] as num?)?.toInt(),
       smjenaId: (json['smjenaId'] as num?)?.toInt(),
       korisnikId: (json['korisnikId'] as num?)?.toInt(),
       datum: json['datum'] == null
@@ -24,7 +24,7 @@ RasporedSmjena _$RasporedSmjenaFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RasporedSmjenaToJson(RasporedSmjena instance) =>
     <String, dynamic>{
-      'rasporedSmjena': instance.rasporedSmjena,
+      'rasporedSmjenaId': instance.rasporedSmjenaId,
       'smjenaId': instance.smjenaId,
       'korisnikId': instance.korisnikId,
       'datum': instance.datum?.toIso8601String(),

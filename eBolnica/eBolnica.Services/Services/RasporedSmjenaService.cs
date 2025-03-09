@@ -46,6 +46,7 @@ namespace eBolnica.Services.Services
                     Context.MedicinskoOsobljes.Any(m => m.KorisnikId == x.KorisnikId && m.OdjelId == searchObject.OdjelId)
                 );
             }
+            query = query.Where(x => !Context.RadniSatis.Any(rs => rs.RasporedSmjenaId == x.RasporedSmjenaId && rs.VrijemeOdlaska.HasValue));
 
             return query;
         }

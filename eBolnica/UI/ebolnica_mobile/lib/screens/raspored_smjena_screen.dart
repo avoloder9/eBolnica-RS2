@@ -1,4 +1,7 @@
+import 'package:ebolnica_mobile/models/radni_sati_model.dart';
 import 'package:ebolnica_mobile/models/raspored_smjena_model.dart';
+import 'package:ebolnica_mobile/providers/medicinsko_osoblje_provider.dart';
+import 'package:ebolnica_mobile/providers/radni_sati_provider.dart';
 import 'package:ebolnica_mobile/providers/raspored_smjena_provider.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +19,9 @@ class RasporedSmjenaScreen extends StatefulWidget {
 
 class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
   late RasporedSmjenaProvider rasporedSmjenaProvider;
+  late RadniSatiProvider radniSatiProvider;
+  late MedicinskoOsobljeProvider medicinskoOsobljeProvider;
+  int? radniSatiId;
 
   Future<List<RasporedSmjena>> fetchRaspored() async {
     var filter = {
@@ -30,6 +36,95 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
   void initState() {
     super.initState();
     rasporedSmjenaProvider = RasporedSmjenaProvider();
+    radniSatiProvider = RadniSatiProvider();
+    medicinskoOsobljeProvider = MedicinskoOsobljeProvider();
+  }
+
+  Future<void> showPrijavaDialog(
+      int rasporedSmjenaId, bool isDolazak, RadniSati? radniSati) async {
+    DateTime now = DateTime.now();
+    Duration duration = Duration(hours: now.hour, minutes: now.minute);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isDolazak ? 'Prijavi dolazak' : 'Prijavi odlazak'),
+          content: Text(isDolazak
+              ? 'Želite li prijaviti dolazak na smjenu?'
+              : 'Želite li prijaviti odlazak sa smjene?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Otkazati'),
+            ),
+            TextButton(
+              onPressed: () async {
+                var osobljeId = await medicinskoOsobljeProvider
+                    .getOsobljeByKorisnikId(widget.userId);
+
+                var request;
+
+                if (isDolazak) {
+                  // Ako je dolazak, šaljemo insert zahtjev
+                  request = {
+                    'medicinskoOsobljeId': osobljeId,
+                    'rasporedSmjenaId': rasporedSmjenaId,
+                    'vrijemeDolaska': duration.toString(),
+                    'vrijemeOdlaska': null,
+                  };
+                  var response = await radniSatiProvider.insert(request);
+
+                  if (response.radniSatiId != null) {
+                    radniSatiId = response.radniSatiId;
+                    showCustomDialog(
+                        context: context,
+                        title: "",
+                        message: "Uspješno prijavljen dolazak na smjenu",
+                        imagePath: "assets/images/success.png");
+                    await Future.delayed(const Duration(seconds: 2));
+
+                    setState(() {});
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Greška pri unosu radnih sati")),
+                    );
+                  }
+                } else {
+                  if (radniSatiId != null) {
+                    request = {
+                      'vrijemeOdlaska': duration.toString(),
+                    };
+                    await radniSatiProvider.update(radniSatiId!, request);
+                    showCustomDialog(
+                        context: context,
+                        title: "",
+                        message: "Uspješno prijavljen odlazak sa smjene",
+                        imagePath: "assets/images/success.png");
+                    await Future.delayed(const Duration(seconds: 2));
+                    setState(() {});
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Greška, radni sati nisu pronađeni")),
+                    );
+                  }
+                }
+
+                setState(() {});
+                Navigator.of(context).pop();
+              },
+              child: const Text('Potvrdi'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -85,56 +180,92 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
             var raspored = validRasporedi[index];
             var smjena = raspored.smjena;
             var datum = formattedDate(raspored.datum);
+            var filter = {
+              "rasporedSmjenaId": raspored.rasporedSmjenaId,
+            };
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Card(
-                elevation: 6,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                shadowColor: Colors.black.withOpacity(0.2),
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.schedule,
-                    color: Colors.blueAccent,
-                    size: 30,
-                  ),
-                  title: Text(
-                    "${smjena?.nazivSmjene ?? "Nepoznata smjena"} smjena",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.black,
+            Future<RadniSati?> getRadniSati() async {
+              var result = await radniSatiProvider.get(filter: filter);
+              return result.result.isNotEmpty ? result.result.first : null;
+            }
+
+            return FutureBuilder<RadniSati?>(
+              future: getRadniSati(),
+              builder: (context, radniSatiSnapshot) {
+                if (radniSatiSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                RadniSati? radniSati = radniSatiSnapshot.data;
+                bool isDolazak = radniSati?.vrijemeDolaska == null;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Card(
+                    elevation: 6,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.2),
+                    color: isDolazak ? Colors.green[100] : Colors.white,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.schedule,
+                        color: Colors.blueAccent,
+                        size: 30,
+                      ),
+                      title: Text(
+                        "${smjena?.nazivSmjene ?? "Nepoznata smjena"} smjena",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Datum: $datum',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(0.6),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${formattedTime(smjena!.vrijemePocetka!)} - ${formattedTime(smjena.vrijemeZavrsetka!)}',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(0.6),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          isDolazak ? Icons.check_circle : Icons.circle,
+                          color: isDolazak ? Colors.green : Colors.red,
+                        ),
+                        onPressed: () {
+                          showPrijavaDialog(
+                              raspored.rasporedSmjenaId!, true, radniSati);
+                        },
+                      ),
+                      onTap: () {
+                        showPrijavaDialog(
+                            raspored.rasporedSmjenaId!, false, radniSati);
+                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 16),
                     ),
                   ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Datum: $datum',
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(0.6),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${formattedTime(smjena!.vrijemePocetka!)} - ${formattedTime(smjena.vrijemeZavrsetka!)}',
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(0.6),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                ),
-              ),
+                );
+              },
             );
           },
         );

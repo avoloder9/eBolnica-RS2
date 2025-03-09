@@ -16,7 +16,5 @@ namespace eBolnica.Model.Requests
 
         public TimeSpan? VrijemeOdlaska { get; set; }
 
-        [JsonIgnore]
-        public virtual MedicinskoOsoblje? MedicinskoOsoblje { get; set; } = null!;
     }
 }
