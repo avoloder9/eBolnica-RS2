@@ -68,7 +68,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                 var request;
 
                 if (isDolazak) {
-                  // Ako je dolazak, šaljemo insert zahtjev
                   request = {
                     'medicinskoOsobljeId': osobljeId,
                     'rasporedSmjenaId': rasporedSmjenaId,

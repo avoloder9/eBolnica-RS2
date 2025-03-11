@@ -31,6 +31,11 @@ namespace eBolnica.Services.Services
                 query = query.Where(x => x.Pacijent.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
 
+            if (searchObject?.PacijentId != null)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId && Context.MedicinskaDokumentacijas.Any(md =>
+                        md.PacijentId == searchObject.PacijentId && md.Hospitalizovan == true));
+            }
             return query;
         }
         public override void BeforeInsert(VitalniParametriInsertRequest request, Database.VitalniParametri entity)

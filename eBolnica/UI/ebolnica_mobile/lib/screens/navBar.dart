@@ -1,3 +1,4 @@
+import 'package:ebolnica_mobile/screens/hospitalizacije_list_screen.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
@@ -50,7 +51,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
             userType: userType,
           ),
           RasporedSmjenaScreen(userId: widget.userId, userType: userType),
-          const Placeholder(),
+          HospitalizacijaListScreen(
+            userId: widget.userId,
+            userType: userType,
+            nazivOdjela: widget.nazivOdjela,
+          ),
           const Placeholder(),
           PostavkeScreen(userId: widget.userId, userType: userType),
         ];
