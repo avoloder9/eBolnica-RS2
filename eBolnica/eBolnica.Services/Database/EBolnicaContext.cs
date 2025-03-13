@@ -353,11 +353,11 @@ public partial class EBolnicaContext : DbContext
             entity.ToTable("OtpusnoPismo");
 
             entity.Property(e => e.OtpusnoPismoId).HasColumnName("OtpusnoPismoID");
-            entity.Property(e => e.Anamneza).HasMaxLength(50);
-            entity.Property(e => e.Dijagnoza).HasMaxLength(100);
+            entity.Property(e => e.Anamneza).HasMaxLength(400);
+            entity.Property(e => e.Dijagnoza).HasMaxLength(400);
             entity.Property(e => e.HospitalizacijaId).HasColumnName("HospitalizacijaID");
             entity.Property(e => e.TerapijaId).HasColumnName("TerapijaID");
-            entity.Property(e => e.Zakljucak).HasMaxLength(200);
+            entity.Property(e => e.Zakljucak).HasMaxLength(400);
 
             entity.HasOne(d => d.Hospitalizacija).WithMany(p => p.OtpusnoPismos)
                 .HasForeignKey(d => d.HospitalizacijaId)
@@ -548,7 +548,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.DatumPocetka).HasColumnType("date");
             entity.Property(e => e.DatumZavrsetka).HasColumnType("date");
             entity.Property(e => e.Naziv).HasMaxLength(50);
-            entity.Property(e => e.Opis).HasMaxLength(50);
+            entity.Property(e => e.Opis).HasMaxLength(100);
             entity.Property(e => e.PregledId).HasColumnName("PregledID");
 
             entity.HasOne(d => d.Pregled).WithMany(p => p.Terapijas)
@@ -612,7 +612,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.VitalniParametarId).HasColumnName("VitalniParametarID");
             entity.Property(e => e.DatumMjerenja).HasColumnType("date");
             entity.Property(e => e.PacijentId).HasColumnName("PacijentID");
-            entity.Property(e => e.Secer).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Secer).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Pacijent).WithMany(p => p.VitalniParametris)
                 .HasForeignKey(d => d.PacijentId)

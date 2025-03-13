@@ -14,6 +14,7 @@ namespace eBolnica.Model.Models
         public decimal Secer { get; set; }
 
         public DateTime DatumMjerenja { get; set; }
+        public TimeSpan VrijemeMjerenja { get; set; }
 
         public virtual Pacijent Pacijent { get; set; } = null!;
     }

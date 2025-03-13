@@ -16,6 +16,9 @@ VitalniParametri _$VitalniParametriFromJson(Map<String, dynamic> json) =>
       datumMjerenja: json['datumMjerenja'] == null
           ? null
           : DateTime.parse(json['datumMjerenja'] as String),
+      vrijemeMjerenja: json['vrijemeMjerenja'] == null
+          ? null
+          : Duration(microseconds: (json['vrijemeMjerenja'] as num).toInt()),
       pacijent: json['pacijent'] == null
           ? null
           : Pacijent.fromJson(json['pacijent'] as Map<String, dynamic>),
@@ -29,5 +32,6 @@ Map<String, dynamic> _$VitalniParametriToJson(VitalniParametri instance) =>
       'saturacija': instance.saturacija,
       'secer': instance.secer,
       'datumMjerenja': instance.datumMjerenja?.toIso8601String(),
+      'vrijemeMjerenja': instance.vrijemeMjerenja?.inMicroseconds,
       'pacijent': instance.pacijent,
     };

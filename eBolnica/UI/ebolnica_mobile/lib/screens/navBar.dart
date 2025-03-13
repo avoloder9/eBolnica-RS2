@@ -31,7 +31,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
     switch (userType) {
       case 'doktor':
         return [
-          const Placeholder(),
+          HospitalizacijaListScreen(
+            userId: widget.userId,
+            userType: userType,
+            nazivOdjela: widget.nazivOdjela,
+          ),
           const Placeholder(),
           const Placeholder(),
           PostavkeScreen(userId: widget.userId, userType: userType),

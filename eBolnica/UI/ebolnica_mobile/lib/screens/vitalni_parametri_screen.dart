@@ -21,14 +21,75 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
   final TextEditingController saturacijaController = TextEditingController();
   final TextEditingController secerController = TextEditingController();
   late VitalniParametriProvider vitalniParametriProvider;
+  List<dynamic> vitalniParametri = [];
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
     vitalniParametriProvider = VitalniParametriProvider();
+    if (widget.userType == "doktor") {
+      _fetchVitalniParametri();
+    }
+  }
+
+  Future<void> _fetchVitalniParametri() async {
+    var filter = {
+      "pacijentId": widget.pacijent!.pacijentId.toString(),
+    };
+    try {
+      var data = await vitalniParametriProvider.get(filter: filter);
+      setState(() {
+        vitalniParametri = data.result;
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Greška pri dohvaćanju podataka: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.userType == "doktor") {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : vitalniParametri.isEmpty
+                  ? const Text("Nema dostupnih vitalnih parametara.")
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: vitalniParametri.length,
+                      itemBuilder: (context, index) {
+                        var parametar = vitalniParametri[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                                "Datum: ${parametar.datumMjerenja.toString().split(' ')[0]}"),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    "Otkucaji srca: ${parametar.otkucajSrca}/min"),
+                                Text("Saturacija: ${parametar.saturacija}%"),
+                                Text("Šećer: ${parametar.secer} mmol/L"),
+                                Text(
+                                    "Vrijeme: ${formattedTime(parametar.vrijemeMjerenja)}"),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+        ),
+      );
+    }
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -98,26 +159,22 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
+                            var now = DateTime.now();
                             var vitalniParametri = {
                               "pacijentId": widget.pacijent!.pacijentId,
-                              "otkucajSrca": otkucajSrcaController.text,
-                              "saturacija": saturacijaController.text,
-                              "secer": secerController.text,
-                              "datumMjerenja": DateTime.now().toIso8601String()
+                              "otkucajSrca":
+                                  int.tryParse(otkucajSrcaController.text) ?? 0,
+                              "saturacija":
+                                  int.tryParse(saturacijaController.text) ?? 0,
+                              "secer":
+                                  double.tryParse(secerController.text) ?? 0.0,
+                              "datumMjerenja": now.toIso8601String(),
+                              "vrijemeMjerenja":
+                                  "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}"
                             };
                             try {
                               await vitalniParametriProvider
                                   .insert(vitalniParametri);
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                              );
-                              await Future.delayed(const Duration(seconds: 1));
                               if (mounted) {
                                 Navigator.pop(context);
                               }
@@ -127,10 +184,6 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
                                   message:
                                       "Uspješno uneseni vitalni parametri za ${widget.pacijent!.korisnik!.ime} ${widget.pacijent!.korisnik!.prezime}",
                                   imagePath: "assets/images/success.png");
-                              await Future.delayed(const Duration(seconds: 2));
-                              if (mounted) {
-                                Navigator.pop(context);
-                              }
                             } catch (e) {
                               await Flushbar(
                                 message:
@@ -138,9 +191,6 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
                                 backgroundColor: Colors.red,
                                 duration: const Duration(seconds: 2),
                               ).show(context);
-                            }
-                            if (mounted) {
-                              Navigator.pop(context);
                             }
                           }
                         },

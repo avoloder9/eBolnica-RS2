@@ -34,7 +34,7 @@ namespace eBolnica.Services.Services
             if (searchObject?.PacijentId != null)
             {
                 query = query.Where(x => x.PacijentId == searchObject.PacijentId && Context.MedicinskaDokumentacijas.Any(md =>
-                        md.PacijentId == searchObject.PacijentId && md.Hospitalizovan == true));
+                        md.PacijentId == searchObject.PacijentId && md.Hospitalizovan == true)).OrderByDescending(x => x.VrijemeMjerenja);
             }
             return query;
         }
