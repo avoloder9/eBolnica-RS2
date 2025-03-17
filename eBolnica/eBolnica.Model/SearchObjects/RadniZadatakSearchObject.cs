@@ -6,5 +6,6 @@ namespace eBolnica.Model.SearchObjects
 {
     public class RadniZadatakSearchObject : BaseSearchObject
     {
+        public int DoktorId { get; set; }
     }
 }

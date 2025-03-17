@@ -31,7 +31,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
-
+            if (!string.IsNullOrWhiteSpace(searchObject?.NazivOdjela))
+            {
+                query = query.Where(x => x.Odjel.Naziv.StartsWith(searchObject.NazivOdjela));
+            }
             return query;
         }
         public override void BeforeInsert(MedicinskoOsobljeInsertRequest request, Database.MedicinskoOsoblje entity)

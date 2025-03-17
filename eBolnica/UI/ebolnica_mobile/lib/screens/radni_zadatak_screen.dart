@@ -1,43 +1,51 @@
-import 'package:ebolnica_mobile/models/hospitalizacija_model.dart';
+import 'package:ebolnica_mobile/models/radni_zadatak_model.dart';
 import 'package:ebolnica_mobile/models/search_result.dart';
+import 'package:ebolnica_mobile/providers/doktor_provider.dart';
 import 'package:ebolnica_mobile/providers/hospitalizacija_provider.dart';
-import 'package:ebolnica_mobile/screens/vitalni_parametri_screen.dart';
+import 'package:ebolnica_mobile/providers/odjel_provider.dart';
+import 'package:ebolnica_mobile/providers/radni_zadatak_provider.dart';
+import 'package:ebolnica_mobile/screens/novi_radni_zadatak_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
 
-class HospitalizacijaListScreen extends StatefulWidget {
+class RadniZadatakScreen extends StatefulWidget {
   final int userId;
   final String? userType;
   final String? nazivOdjela;
-  const HospitalizacijaListScreen(
+  const RadniZadatakScreen(
       {super.key, required this.userId, this.userType, this.nazivOdjela});
-  @override
-  _HospitalizacijaListScreenState createState() =>
-      _HospitalizacijaListScreenState();
+
+  _RadniZadatakScreenState createState() => _RadniZadatakScreenState();
 }
 
-class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
+class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
+  late RadniZadatakProvider radniZadatakProvider;
+  late DoktorProvider doktorProvider;
   late HospitalizacijaProvider hospitalizacijaProvider;
-  SearchResult<Hospitalizacija>? hospitalizacije;
+  late OdjelProvider odjelProvider;
+  SearchResult<RadniZadatak>? radniZadaci;
+  int? doktorId;
+  Future<void> fetchRadniZadatak() async {
+    doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
+    radniZadaci =
+        await radniZadatakProvider.get(filter: {'doktorId': doktorId});
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
-    hospitalizacijaProvider = HospitalizacijaProvider();
-    fetchHospitalizacije();
-  }
-
-  Future<void> fetchHospitalizacije() async {
-    hospitalizacije = await hospitalizacijaProvider
-        .get(filter: {'odjel': widget.nazivOdjela});
-    setState(() {});
+    radniZadatakProvider = RadniZadatakProvider();
+    doktorProvider = DoktorProvider();
+    fetchRadniZadatak();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Hospitalizovani pacijenti",
-            style: TextStyle(color: Colors.white)),
+        title:
+            const Text("Radni zadaci", style: TextStyle(color: Colors.white)),
         centerTitle: true,
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
@@ -49,20 +57,42 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            style: const ButtonStyle(
+                iconColor: MaterialStatePropertyAll(Colors.white)),
+            onPressed: () async {
+              bool? rezultat = await showDialog(
+                context: context,
+                builder: (BuildContext context) => NoviRadniZadatakScreen(
+                  userId: widget.userId,
+                  userType: widget.userType,
+                  doktorId: doktorId!,
+                  nazivOdjela: widget.nazivOdjela,
+                ),
+              );
+              if (rezultat == true) {
+                await fetchRadniZadatak();
+                setState(() {});
+              }
+            },
+            icon: const Icon(Icons.add),
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(14.0),
-        child: hospitalizacije == null || hospitalizacije!.result.isEmpty
+        child: radniZadaci == null || radniZadaci!.result.isEmpty
             ? const Center(
                 child: Text(
-                  "Nema hospitalizovanih pacijenata.",
+                  "Nema radnih zadataka od strane ovog doktora.",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               )
             : ListView.builder(
-                itemCount: hospitalizacije!.result.length,
+                itemCount: radniZadaci!.result.length,
                 itemBuilder: (context, index) {
-                  var e = hospitalizacije!.result[index];
+                  var e = radniZadaci!.result[index];
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -120,7 +150,7 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            "Hospitalizovan: ${formattedDate(e.datumPrijema)}",
+                                            "Datum zadatka: ${formattedDate(e.datumZadatka)}",
                                             style: const TextStyle(
                                               color: Colors.black54,
                                               fontSize: 14,
@@ -136,37 +166,17 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    _buildDetailTile(Icons.meeting_room, "Soba",
-                                        izdvojiBrojSobe(e.soba?.naziv)),
-                                    _buildDetailTile(Icons.bed, "Krevet",
-                                        e.krevet?.krevetId),
+                                    _buildDetailTile(Icons.group, "Osoblje",
+                                        "${e.medicinskoOsoblje?.korisnik?.ime} ${e.medicinskoOsoblje?.korisnik?.prezime}"),
                                     _buildDetailTile(
-                                        Icons.local_hospital,
-                                        "Doktor",
-                                        "${e.doktor?.korisnik?.ime} ${e.doktor?.korisnik?.prezime}"),
+                                      Icons.assignment,
+                                      "Opis zadatka",
+                                      e.opis ?? "Nema opisa",
+                                    ),
                                   ],
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: IconButton(
-                            icon: const Icon(Icons.monitor_heart,
-                                color: Colors.redAccent, size: 28),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    VitalniParametriScreen(
-                                  userId: widget.userId,
-                                  pacijent: e.pacijent,
-                                  userType: widget.userType,
-                                ),
-                              );
-                            },
                           ),
                         ),
                       ],
@@ -176,13 +186,6 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
               ),
       ),
     );
-  }
-
-  String izdvojiBrojSobe(String? nazivSobe) {
-    if (nazivSobe == null) return "N/A";
-    RegExp regExp = RegExp(r'\d+');
-    Match? match = regExp.firstMatch(nazivSobe);
-    return match != null ? match.group(0)! : "N/A";
   }
 
   Widget _buildDetailTile(IconData icon, String label, dynamic value) {

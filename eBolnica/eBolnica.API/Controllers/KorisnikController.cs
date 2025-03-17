@@ -30,17 +30,17 @@ namespace eBolnica.API.Controllers
         {
             var authenticationResponse = await korisnikService.AuthenticateUser(request.Username, request.Password);
             String? userType;
-            string? odjelNaziv=null;
+            string? odjelNaziv = null;
             switch (authenticationResponse.Result)
             {
                 case AuthenticationResult.Success:
                     var userId = authenticationResponse.UserId;
-                    
+
                     if (korisnikService.isKorisnikDoktor((int)userId))
                     {
                         userType = "doktor";
 
-                        var doktor=await Context.Doktors.Include(x=>x.Odjel).FirstOrDefaultAsync(x=>x.KorisnikId== userId);
+                        var doktor = await Context.Doktors.Include(x => x.Odjel).FirstOrDefaultAsync(x => x.KorisnikId == userId);
                         if (doktor != null)
                         {
                             odjelNaziv = doktor.Odjel?.Naziv;
@@ -69,7 +69,7 @@ namespace eBolnica.API.Controllers
                             return StatusCode(StatusCodes.Status403Forbidden, new { message = "Administrator ne može koristiti mobilnu aplikaciju." });
                         }
                     }
-                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik, Odjel=odjelNaziv });
+                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik = authenticationResponse.Korisnik, Odjel = odjelNaziv });
                 case AuthenticationResult.UserNotFound:
                     return Unauthorized(new { message = "Korisnik nije pronadjen." });
 

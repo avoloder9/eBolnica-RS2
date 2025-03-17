@@ -6,6 +6,7 @@ using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,6 +48,11 @@ namespace eBolnica.Services.Services
         {
             query = base.AddFilter(searchObject, query).Include(d => d.Doktor).ThenInclude(k => k.Korisnik)
                 .Include(o => o.MedicinskoOsoblje).ThenInclude(x => x.Korisnik).Include(p => p.Pacijent).ThenInclude(y => y.Korisnik);
+
+            if (searchObject?.DoktorId != null && searchObject.DoktorId > 0)
+            {
+                query = query.Where(x => x.DoktorId == searchObject.DoktorId);
+            }            
             return query;
         }
 

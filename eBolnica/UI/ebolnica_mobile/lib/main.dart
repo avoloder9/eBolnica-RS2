@@ -328,11 +328,15 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
+        String? nazivOdjela;
+        if (userType == 'medicinsko osoblje' || userType == 'doktor') {
+          nazivOdjela = response['odjel'];
+        }
         Widget dashboard = BottomNavBar(
           userId: userId,
           userType: userType,
+          nazivOdjela: nazivOdjela,
         );
-
         _usernameController.clear();
         _passwordController.clear();
         FocusScope.of(context).unfocus();

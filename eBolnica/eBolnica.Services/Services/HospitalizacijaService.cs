@@ -25,7 +25,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.Hospitalizacija> AddFilter(HospitalizacijaSearchObject searchObject, IQueryable<Database.Hospitalizacija> query)
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Pacijent).ThenInclude(k => k.Korisnik).Include(d => d.Doktor).ThenInclude(a => a.Korisnik)
-                .Include(o => o.Odjel).Include(a => a.Soba).Include(b => b.Krevet).Include(x => x.MedicinskaDokumentacija).Where(x=>x.DatumOtpusta==null);
+                .Include(o => o.Odjel).Include(a => a.Soba).Include(b => b.Krevet).Include(x => x.MedicinskaDokumentacija).Where(x => x.DatumOtpusta == null);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {

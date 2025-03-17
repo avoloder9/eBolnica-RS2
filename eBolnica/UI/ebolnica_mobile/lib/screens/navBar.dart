@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/hospitalizacije_list_screen.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/radni_zadatak_screen.dart';
 import 'package:ebolnica_mobile/screens/raspored_smjena_screen.dart';
 import 'package:ebolnica_mobile/screens/terapije_list_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/postavke_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -25,56 +26,60 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
-  late List<Widget> _screens;
 
-  List<Widget> _getScreensForUser(String userType) {
-    switch (userType) {
+  List<Widget> _getScreensForUser() {
+    switch (widget.userType) {
       case 'doktor':
         return [
           HospitalizacijaListScreen(
+              userId: widget.userId,
+              userType: widget.userType,
+              nazivOdjela: widget.nazivOdjela),
+          const Placeholder(),
+          RadniZadatakScreen(
+              userId: widget.userId,
+              userType: widget.userType,
+              nazivOdjela: widget.nazivOdjela),
+          PostavkeScreen(
             userId: widget.userId,
-            userType: userType,
+            userType: widget.userType,
             nazivOdjela: widget.nazivOdjela,
           ),
-          const Placeholder(),
-          const Placeholder(),
-          PostavkeScreen(userId: widget.userId, userType: userType),
         ];
       case 'pacijent':
         return [
           const Placeholder(),
-          PacijentScreen(userId: widget.userId, userType: userType),
-          PacijentNalaziScreen(userId: widget.userId, userType: userType),
-          PacijentTerapijaScreen(userId: widget.userId, userType: userType),
-          PostavkeScreen(userId: widget.userId, userType: userType),
+          PacijentScreen(userId: widget.userId, userType: widget.userType),
+          PacijentNalaziScreen(
+              userId: widget.userId, userType: widget.userType),
+          PacijentTerapijaScreen(
+              userId: widget.userId, userType: widget.userType),
+          PostavkeScreen(userId: widget.userId, userType: widget.userType),
         ];
       case 'medicinsko osoblje':
         return [
-          OdjelTerminiScreen(
-            userId: widget.userId,
-            userType: userType,
-          ),
-          RasporedSmjenaScreen(userId: widget.userId, userType: userType),
+          OdjelTerminiScreen(userId: widget.userId, userType: widget.userType),
+          RasporedSmjenaScreen(
+              userId: widget.userId, userType: widget.userType),
           HospitalizacijaListScreen(
-            userId: widget.userId,
-            userType: userType,
-            nazivOdjela: widget.nazivOdjela,
-          ),
+              userId: widget.userId,
+              userType: widget.userType,
+              nazivOdjela: widget.nazivOdjela),
           const Placeholder(),
-          PostavkeScreen(userId: widget.userId, userType: userType),
+          PostavkeScreen(userId: widget.userId, userType: widget.userType),
         ];
       default:
         return [const Placeholder()];
     }
   }
 
-  List<BottomNavigationBarItem> _getNavBarItemsForUser(String userType) {
-    switch (userType) {
+  List<BottomNavigationBarItem> _getNavBarItemsForUser() {
+    switch (widget.userType) {
       case 'doktor':
         return const [
           BottomNavigationBarItem(icon: Icon(Icons.local_hospital), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.biotech), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.task), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
         ];
       case 'pacijent':
@@ -92,69 +97,75 @@ class _BottomNavBarState extends State<BottomNavBar> {
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.local_hospital), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.checklist), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Postavke'),
         ];
       default:
         return const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: ''),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard), label: 'Dashboard'),
         ];
     }
   }
 
   @override
-  void initState() {
-    super.initState();
-    _screens = _getScreensForUser(widget.userType);
+  Widget build(BuildContext context) {
+    List<Widget> screens = _getScreensForUser();
+
+    return Scaffold(
+      body: Stack(
+        children: List.generate(screens.length, (index) {
+          return Offstage(
+            offstage: _selectedIndex != index,
+            child: screens[index],
+          );
+        }),
+      ),
+      bottomNavigationBar: _buildBottomNavBar(),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color.fromARGB(255, 96, 148, 226),
-              Colors.blue.shade500
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.shade300,
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
+  Widget _buildBottomNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color.fromARGB(255, 96, 148, 226),
+            Colors.blue.shade500
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade300,
+            blurRadius: 10,
+            spreadRadius: 2,
           ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white.withOpacity(0.6),
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            currentIndex: _selectedIndex,
-            onTap: (index) {
-              if (mounted) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              }
-            },
-            elevation: 0,
-            items: _getNavBarItemsForUser(widget.userType),
-          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white.withOpacity(0.6),
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            if (mounted) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            }
+          },
+          elevation: 0,
+          items: _getNavBarItemsForUser(),
         ),
       ),
     );
