@@ -138,27 +138,41 @@ Duration? parseDuration(String? timeString) {
   return Duration(hours: hours, minutes: minutes);
 }
 
-void showCustomDialog({
+Future<bool> showCustomDialog({
   required BuildContext context,
   required String title,
   required String message,
   String? imagePath,
-}) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      title: Text(title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (imagePath != null) Image.asset(imagePath, height: 80),
-          const SizedBox(height: 10),
-          Text(message),
-        ],
-      ),
-    ),
-  );
+}) async {
+  return await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          Future.delayed(const Duration(seconds: 2), () {
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext, rootNavigator: true).pop(true);
+            }
+          });
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: title.isNotEmpty ? Text(title) : null,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (imagePath != null) Image.asset(imagePath, height: 80),
+                const SizedBox(height: 10),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        },
+      ) ??
+      false;
 }

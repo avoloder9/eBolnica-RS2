@@ -335,30 +335,32 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
 
       try {
         await terminProvider.insert(noviTermin);
+        if (!mounted) return;
         showCustomDialog(
             context: context,
             title: "",
             message: "Uspješno zakazan novi termin",
             imagePath: "assets/images/success.png");
         await Future.delayed(const Duration(seconds: 2));
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                if (widget.odjelId != null) {
-                  return OdjelTerminiScreen(
-                    userId: widget.userId,
-                    userType: widget.userType,
-                  );
-                } else {
-                  return PacijentScreen(
-                      userId: widget.userId, userType: widget.userType);
-                }
-              },
-            ),
-          );
-        }
+        if (!mounted) return;
+        Navigator.pop(context, true);
+        if (mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              if (widget.odjelId != null) {
+                return OdjelTerminiScreen(
+                  userId: widget.userId,
+                  userType: widget.userType,
+                );
+              } else {
+                return PacijentScreen(
+                    userId: widget.userId, userType: widget.userType);
+              }
+            },
+          ),
+        );
       } catch (e) {
         await Flushbar(
           message: "Došlo je do greške. Pokušajte ponovo.",

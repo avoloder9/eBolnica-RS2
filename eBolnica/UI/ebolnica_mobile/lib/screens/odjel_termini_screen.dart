@@ -82,8 +82,8 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              showDialog(
+            onPressed: () async {
+              bool rezultat = await showDialog(
                 context: context,
                 builder: (BuildContext context) => NoviTerminScreen(
                   userId: widget.userId,
@@ -91,6 +91,9 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                   userType: widget.userType,
                 ),
               );
+              if (rezultat == true) {
+                fetchTermini();
+              }
             },
             icon: const Icon(Icons.add),
             style: const ButtonStyle(

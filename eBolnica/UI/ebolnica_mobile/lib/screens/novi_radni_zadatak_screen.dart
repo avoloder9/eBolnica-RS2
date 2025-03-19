@@ -186,23 +186,23 @@ class _NoviRadniZadatakScreenState extends State<NoviRadniZadatakScreen> {
 
       try {
         await radniZadatakProvider.insert(noviZadatak);
+        if (!mounted) return;
         showCustomDialog(
             context: context,
             title: "",
             message: "Uspješno kreiran novi radni zadatak",
             imagePath: "assets/images/success.png");
         await Future.delayed(const Duration(seconds: 2));
-        Navigator.pop(context);
-
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
       } catch (e) {
         await Flushbar(
           message: "Došlo je do greške. Pokušajte ponovo.",
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ).show(context);
+      } finally {
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
       }
     }
   }

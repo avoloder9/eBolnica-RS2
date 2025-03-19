@@ -65,7 +65,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
               userId: widget.userId,
               userType: widget.userType,
               nazivOdjela: widget.nazivOdjela),
-          const Placeholder(),
+          RadniZadatakScreen(
+              userId: widget.userId,
+              userType: widget.userType,
+              nazivOdjela: widget.nazivOdjela),
           PostavkeScreen(userId: widget.userId, userType: widget.userType),
         ];
       default:

@@ -86,7 +86,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                     await Future.delayed(const Duration(seconds: 2));
 
                     setState(() {});
-                    Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -106,7 +105,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                         imagePath: "assets/images/success.png");
                     await Future.delayed(const Duration(seconds: 2));
                     setState(() {});
-                    Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

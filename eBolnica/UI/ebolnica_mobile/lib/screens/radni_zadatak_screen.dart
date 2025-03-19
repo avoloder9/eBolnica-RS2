@@ -1,8 +1,7 @@
 import 'package:ebolnica_mobile/models/radni_zadatak_model.dart';
 import 'package:ebolnica_mobile/models/search_result.dart';
 import 'package:ebolnica_mobile/providers/doktor_provider.dart';
-import 'package:ebolnica_mobile/providers/hospitalizacija_provider.dart';
-import 'package:ebolnica_mobile/providers/odjel_provider.dart';
+import 'package:ebolnica_mobile/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_mobile/providers/radni_zadatak_provider.dart';
 import 'package:ebolnica_mobile/screens/novi_radni_zadatak_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
@@ -21,14 +20,21 @@ class RadniZadatakScreen extends StatefulWidget {
 class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
   late RadniZadatakProvider radniZadatakProvider;
   late DoktorProvider doktorProvider;
-  late HospitalizacijaProvider hospitalizacijaProvider;
-  late OdjelProvider odjelProvider;
+  late MedicinskoOsobljeProvider osobljeProvider;
   SearchResult<RadniZadatak>? radniZadaci;
   int? doktorId;
-  Future<void> fetchRadniZadatak() async {
-    doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
-    radniZadaci =
-        await radniZadatakProvider.get(filter: {'doktorId': doktorId});
+  int? osobljeId;
+
+  Future<void> fetchRadniZadaci() async {
+    if (widget.userType == "doktor") {
+      doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
+      radniZadaci =
+          await radniZadatakProvider.get(filter: {'doktorId': doktorId});
+    } else if (widget.userType == "medicinsko osoblje") {
+      osobljeId = await osobljeProvider.getOsobljeByKorisnikId(widget.userId);
+      radniZadaci = await radniZadatakProvider
+          .get(filter: {'medicinskoOsobljeId': osobljeId});
+    }
     setState(() {});
   }
 
@@ -37,7 +43,14 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
     super.initState();
     radniZadatakProvider = RadniZadatakProvider();
     doktorProvider = DoktorProvider();
-    fetchRadniZadatak();
+    osobljeProvider = MedicinskoOsobljeProvider();
+    fetchRadniZadaci();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchRadniZadaci();
   }
 
   @override
@@ -58,26 +71,26 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            style: const ButtonStyle(
-                iconColor: MaterialStatePropertyAll(Colors.white)),
-            onPressed: () async {
-              bool? rezultat = await showDialog(
-                context: context,
-                builder: (BuildContext context) => NoviRadniZadatakScreen(
-                  userId: widget.userId,
-                  userType: widget.userType,
-                  doktorId: doktorId!,
-                  nazivOdjela: widget.nazivOdjela,
-                ),
-              );
-              if (rezultat == true) {
-                await fetchRadniZadatak();
-                setState(() {});
-              }
-            },
-            icon: const Icon(Icons.add),
-          )
+          if (widget.userType == "doktor")
+            IconButton(
+              style: const ButtonStyle(
+                  iconColor: MaterialStatePropertyAll(Colors.white)),
+              onPressed: () async {
+                bool rezultat = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) => NoviRadniZadatakScreen(
+                    userId: widget.userId,
+                    userType: widget.userType,
+                    doktorId: doktorId!,
+                    nazivOdjela: widget.nazivOdjela,
+                  ),
+                );
+                if (rezultat == true) {
+                  fetchRadniZadaci();
+                }
+              },
+              icon: const Icon(Icons.add),
+            )
         ],
       ),
       body: Padding(
@@ -85,7 +98,7 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
         child: radniZadaci == null || radniZadaci!.result.isEmpty
             ? const Center(
                 child: Text(
-                  "Nema radnih zadataka od strane ovog doktora.",
+                  "Nema aktivnih radnih zadataka.",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               )
@@ -166,8 +179,13 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    _buildDetailTile(Icons.group, "Osoblje",
-                                        "${e.medicinskoOsoblje?.korisnik?.ime} ${e.medicinskoOsoblje?.korisnik?.prezime}"),
+                                    _buildDetailTile(
+                                        Icons.group,
+                                        widget.userType == "doktor"
+                                            ? "Osoblje"
+                                            : "Doktor",
+                                        "${widget.userType == "doktor" ? e.medicinskoOsoblje?.korisnik?.ime : e.doktor?.korisnik?.ime} "
+                                        "${widget.userType == "doktor" ? e.medicinskoOsoblje?.korisnik?.prezime : e.doktor?.korisnik?.prezime}"),
                                     _buildDetailTile(
                                       Icons.assignment,
                                       "Opis zadatka",
@@ -179,6 +197,84 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
                             ),
                           ),
                         ),
+                        if (widget.userType == "medicinsko osoblje")
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: IconButton(
+                                icon: const Icon(Icons.check_circle,
+                                    color: Colors.green, size: 28),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Potvrda"),
+                                        content: const Text(
+                                            "Da li želite završiti zadatak?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              if (mounted) {
+                                                Navigator.of(context).pop();
+                                              }
+                                            },
+                                            child: const Text("Ne"),
+                                          ),
+                                          TextButton(
+                                            style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                        Colors.blue)),
+                                            onPressed: () async {
+                                              if (!mounted) return;
+
+                                              var request = {
+                                                "Status": false,
+                                                "Opis": e.opis
+                                              };
+
+                                              try {
+                                                await radniZadatakProvider
+                                                    .update(e.radniZadatakId!,
+                                                        request);
+
+                                                Navigator.of(context).pop();
+                                                showCustomDialog(
+                                                  context: context,
+                                                  title: "",
+                                                  message:
+                                                      "Uspješno završen radni zadatak",
+                                                  imagePath:
+                                                      "assets/images/success.png",
+                                                );
+                                                fetchRadniZadaci();
+                                              } catch (error) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          "Došlo je do greške. Pokušajte ponovo."),
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      duration:
+                                                          Duration(seconds: 3),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: const Text("Da",
+                                                style: TextStyle(
+                                                    color: Colors.white)),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }),
+                          ),
                       ],
                     ),
                   );

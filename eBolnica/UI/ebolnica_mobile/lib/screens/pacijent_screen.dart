@@ -101,8 +101,8 @@ class _PacijentScreenState extends State<PacijentScreen> {
               IconButton(
                 onPressed: pacijentId == null
                     ? null
-                    : () {
-                        showDialog(
+                    : () async {
+                        bool rezultat = await showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return NoviTerminScreen(
@@ -112,6 +112,9 @@ class _PacijentScreenState extends State<PacijentScreen> {
                               );
                             },
                             barrierDismissible: false);
+                        if (rezultat == true) {
+                          fetchTermini();
+                        }
                       },
                 style: const ButtonStyle(
                     iconColor: MaterialStatePropertyAll(Colors.white)),
