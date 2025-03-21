@@ -1,3 +1,4 @@
+import 'package:ebolnica_mobile/models/dnevnI_raspored_response.dart';
 import 'package:ebolnica_mobile/models/doktor_model.dart';
 import 'package:ebolnica_mobile/models/operacija_model.dart';
 import 'package:ebolnica_mobile/models/pregled_model.dart';
@@ -94,5 +95,19 @@ class DoktorProvider extends BaseProvider<Doktor> {
       }
     }
     throw Exception("Greska");
+  }
+
+  Future<DnevniRasporedResponse> getDnevniRaspored(int doktorId) async {
+    var url = "${BaseProvider.baseUrl}Doktor/GetDnevniRaspored/$doktorId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return DnevniRasporedResponse.fromJson(data);
+    }
+    throw Exception("Greška prilikom dohvata dnevnog rasporeda");
   }
 }

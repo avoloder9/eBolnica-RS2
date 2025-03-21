@@ -1,3 +1,4 @@
+import 'package:ebolnica_mobile/screens/dnevni_raspored_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/hospitalizacije_list_screen.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
@@ -35,7 +36,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
               userId: widget.userId,
               userType: widget.userType,
               nazivOdjela: widget.nazivOdjela),
-          const Placeholder(),
+          DnevniRasporedScreen(
+            userId: widget.userId,
+            userType: widget.userType,
+            nazivOdjela: widget.nazivOdjela,
+          ),
           RadniZadatakScreen(
               userId: widget.userId,
               userType: widget.userType,

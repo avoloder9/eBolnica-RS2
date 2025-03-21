@@ -3,6 +3,7 @@ using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
+using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -235,6 +236,21 @@ namespace eBolnica.Services.Services
 
             }).ToList();
             return operacijeModel;
+        }
+        public async Task<Model.Response.DnevniRasporedResponse> GetDnevniRasporedAsync(int doktorId)
+        {
+            var danas = DateTime.Today;
+            var termini = (await Context.Termins.Where(t => t.DoktorId == doktorId && t.DatumTermina.Date == danas)
+                .Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).ToListAsync()).Adapt<List<Model.Models.Termin>>();
+            var operacije = (await Context.Operacijas.Where(o => o.DoktorId == doktorId && o.DatumOperacije.Date == danas)
+                .Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).ToListAsync()).Adapt<List<Model.Models.Operacija>>();
+            return new Model.Response.DnevniRasporedResponse
+            {
+                DoktorId = doktorId,
+                Datum = danas,
+                Termini = termini,
+                Operacije = operacije
+            };
         }
     }
 }

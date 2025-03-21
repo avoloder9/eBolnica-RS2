@@ -47,7 +47,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.RadniZadatak> AddFilter(RadniZadatakSearchObject searchObject, IQueryable<Database.RadniZadatak> query)
         {
             query = base.AddFilter(searchObject, query).Include(d => d.Doktor).ThenInclude(k => k.Korisnik)
-                .Include(o => o.MedicinskoOsoblje).ThenInclude(x => x.Korisnik).Include(p => p.Pacijent).ThenInclude(y => y.Korisnik).Where(x=>x.Status==true);
+                .Include(o => o.MedicinskoOsoblje).ThenInclude(x => x.Korisnik).Include(p => p.Pacijent).ThenInclude(y => y.Korisnik);
 
             if (searchObject?.DoktorId != null && searchObject.DoktorId > 0)
             {
@@ -56,6 +56,10 @@ namespace eBolnica.Services.Services
             if (searchObject?.MedicinskoOsobljeId != null && searchObject.MedicinskoOsobljeId > 0)
             {
                 query = query.Where(x => x.MedicinskoOsobljeId == searchObject.MedicinskoOsobljeId);
+            }
+            if (searchObject?.Status.HasValue == true)
+            {
+                query = query.Where(x => x.Status == searchObject.Status);
             }
             return query;
         }
