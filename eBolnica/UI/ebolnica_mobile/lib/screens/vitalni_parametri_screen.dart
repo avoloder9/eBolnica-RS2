@@ -53,40 +53,39 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.userType == "doktor") {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : vitalniParametri.isEmpty
-                  ? const Text("Nema dostupnih vitalnih parametara.")
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: vitalniParametri.length,
-                      itemBuilder: (context, index) {
-                        var parametar = vitalniParametri[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            title: Text(
-                                "Datum: ${parametar.datumMjerenja.toString().split(' ')[0]}"),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    "Otkucaji srca: ${parametar.otkucajSrca}/min"),
-                                Text("Saturacija: ${parametar.saturacija}%"),
-                                Text("Šećer: ${parametar.secer} mmol/L"),
-                                Text(
-                                    "Vrijeme: ${formattedTime(parametar.vrijemeMjerenja)}"),
-                              ],
-                            ),
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : vitalniParametri.isEmpty
+                ? const Center(
+                    child: Text("Nema dostupnih vitalnih parametara."))
+                : ListView.builder(
+                    itemCount: vitalniParametri.length,
+                    itemBuilder: (context, index) {
+                      var parametar = vitalniParametri[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          title: Text(
+                            "Datum: ${parametar.datumMjerenja.toString().split(' ')[0]}",
                           ),
-                        );
-                      },
-                    ),
-        ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  "Otkucaji srca: ${parametar.otkucajSrca}/min"),
+                              Text("Saturacija: ${parametar.saturacija}%"),
+                              Text("Šećer: ${parametar.secer} mmol/L"),
+                              Text(
+                                "Vrijeme: ${formattedTime(parametar.vrijemeMjerenja)}",
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
       );
     }
 

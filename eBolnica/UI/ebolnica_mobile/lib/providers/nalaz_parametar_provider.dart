@@ -11,17 +11,28 @@ class NalazParametarProvider extends BaseProvider<NalazParametar> {
   }
 
   Future<List<NalazParametar>> getNalazParametarValues(
-      int laboratorijskiNalazId) async {
-    var url =
-        "${BaseProvider.baseUrl}NalazParametar/GetNalazParametarValues?LaboratorijskiNalazId=$laboratorijskiNalazId";
-    var uri = Uri.parse(url);
+      {int? laboratorijskiNalazId, int? hospitalizacijaId}) async {
+    var queryParams = <String, String>{};
+
+    if (laboratorijskiNalazId != null) {
+      queryParams["LaboratorijskiNalazId"] = laboratorijskiNalazId.toString();
+    }
+    if (hospitalizacijaId != null) {
+      queryParams["HospitalizacijaId"] = hospitalizacijaId.toString();
+    }
+
+    var url = Uri.parse(
+            "${BaseProvider.baseUrl}NalazParametar/GetNalazParametarValues")
+        .replace(queryParameters: queryParams);
+
     var headers = createHeaders();
-    var response = await http.get(uri, headers: headers);
+    var response = await http.get(url, headers: headers);
 
     if (isValidResponse(response)) {
       var data = json.decode(response.body) as List;
       return data.map((item) => NalazParametar.fromJson(item)).toList();
     }
+
     throw Exception("Failed to fetch NalazParametar values");
   }
 }

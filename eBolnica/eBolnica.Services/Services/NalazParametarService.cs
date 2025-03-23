@@ -59,6 +59,11 @@ namespace eBolnica.Services.Services
         {
             var query = Context.NalazParametars.AsQueryable();
             query = AddFilter(search, query);
+            if (search.HospitalizacijaId.HasValue)
+            {
+                query = query.Include(x=>x.LaboratorijskiNalaz).ThenInclude(x=>x.Pacijent).ThenInclude(x=>x.Hospitalizacijas).Where(x => x.LaboratorijskiNalaz.Pacijent.Hospitalizacijas.Any(h => h.HospitalizacijaId == search.HospitalizacijaId
+                && x.LaboratorijskiNalaz.DatumNalaza.Date >= h.DatumPrijema.Date && (h.DatumOtpusta == null || x.LaboratorijskiNalaz.DatumNalaza.Date <= h.DatumOtpusta)));
+            }
 
             return query.Select(x => new Model.Models.NalazParametar
             {
@@ -70,7 +75,10 @@ namespace eBolnica.Services.Services
 
                 },
                 Vrijednost = x.Vrijednost,
-                LaboratorijskiNalazId = x.LaboratorijskiNalazId
+                LaboratorijskiNalazId = x.LaboratorijskiNalazId,
+                NalazParametarId=x.NalazParametarId
+
+                
             }).ToListAsync();
         }
 

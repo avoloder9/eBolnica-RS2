@@ -1,3 +1,4 @@
+import 'package:ebolnica_mobile/models/hospitalizacija_model.dart';
 import 'package:ebolnica_mobile/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_mobile/providers/laboratorijski_nalaz_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
@@ -8,7 +9,9 @@ import 'package:flutter/material.dart';
 class PacijentNalaziScreen extends StatefulWidget {
   final int userId;
   final String? userType;
-  const PacijentNalaziScreen({super.key, required this.userId, this.userType});
+  final Hospitalizacija? hospitalizacija;
+  const PacijentNalaziScreen(
+      {super.key, required this.userId, this.userType, this.hospitalizacija});
 
   @override
   _PacijentNalaziScreenState createState() => _PacijentNalaziScreenState();
@@ -18,21 +21,23 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Historija nalaza",
-            style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.deepPurple],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
+      appBar: widget.userType == "pacijent"
+          ? AppBar(
+              title: const Text("Historija nalaza",
+                  style: TextStyle(color: Colors.white)),
+              centerTitle: true,
+              automaticallyImplyLeading: widget.userType == "doktor",
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.deepPurple],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: _buildResultView(),
     );
   }
@@ -56,8 +61,12 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
       nalazi = [];
       isLoading = true;
     });
-    pacijentId =
-        await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
+    if (widget.userType == "doktor") {
+      pacijentId = widget.hospitalizacija!.pacijentId;
+    } else {
+      pacijentId =
+          await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
+    }
     if (pacijentId != null) {
       var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId!);
       setState(() {
@@ -91,8 +100,10 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
                       onTap: () {
                         showDialog(
                           context: context,
-                          builder: (context) =>
-                              NalazDetaljiScreen(laboratorijskiNalaz: e),
+                          builder: (context) => NalazDetaljiScreen(
+                            laboratorijskiNalaz: e,
+                            hospizalizacija: widget.hospitalizacija,
+                          ),
                         );
                       },
                       contentPadding: const EdgeInsets.all(14),

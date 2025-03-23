@@ -1,6 +1,7 @@
 import 'package:ebolnica_mobile/models/hospitalizacija_model.dart';
 import 'package:ebolnica_mobile/models/search_result.dart';
 import 'package:ebolnica_mobile/providers/hospitalizacija_provider.dart';
+import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
 import 'package:ebolnica_mobile/screens/vitalni_parametri_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -157,13 +158,52 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
                             icon: const Icon(Icons.monitor_heart,
                                 color: Colors.redAccent, size: 28),
                             onPressed: () {
-                              showDialog(
+                              showModalBottomSheet(
                                 context: context,
-                                builder: (BuildContext context) =>
-                                    VitalniParametriScreen(
-                                  userId: widget.userId,
-                                  pacijent: e.pacijent,
-                                  userType: widget.userType,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                isScrollControlled: true,
+                                builder: (context) => SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.75,
+                                  child: DefaultTabController(
+                                    length: 2,
+                                    child: Column(
+                                      children: [
+                                        const TabBar(
+                                          labelColor: Colors.blueAccent,
+                                          unselectedLabelColor: Colors.black54,
+                                          indicatorColor: Colors.blueAccent,
+                                          tabs: [
+                                            Tab(
+                                                icon: Icon(Icons.monitor_heart),
+                                                text: "Vitalni Parametri"),
+                                            Tab(
+                                                icon: Icon(Icons.description),
+                                                text: "Nalazi"),
+                                          ],
+                                        ),
+                                        Expanded(
+                                          child: TabBarView(
+                                            children: [
+                                              VitalniParametriScreen(
+                                                userId: widget.userId,
+                                                pacijent: e.pacijent,
+                                                userType: widget.userType,
+                                              ),
+                                              PacijentNalaziScreen(
+                                                userId: widget.userId,
+                                                userType: widget.userType,
+                                                hospitalizacija: e,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               );
                             },

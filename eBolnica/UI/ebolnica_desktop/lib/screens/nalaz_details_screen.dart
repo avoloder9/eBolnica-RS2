@@ -37,7 +37,8 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
 
   Future<void> getNalazParametri() async {
     var result = await nalazParametarProvider.getNalazParametarValues(
-        widget.laboratorijskiNalaz.laboratorijskiNalazId!);
+        laboratorijskiNalazId:
+            widget.laboratorijskiNalaz.laboratorijskiNalazId!);
     setState(() {
       parametri = result;
       isLoading = false;

@@ -177,8 +177,8 @@ namespace eBolnica.Services.Services
         }
         public int GetPacijentIdByKorisnikId(int korisnikId)
         {
-            var admin = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return admin.PacijentId;
+            var pacijent = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return pacijent.PacijentId;
         }
         public List<Pacijent> GetPacijentWithDokumentacija()
         {

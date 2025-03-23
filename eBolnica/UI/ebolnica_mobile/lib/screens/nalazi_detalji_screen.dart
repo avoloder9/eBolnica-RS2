@@ -1,4 +1,5 @@
 import 'package:ebolnica_mobile/models/bolnica_model.dart';
+import 'package:ebolnica_mobile/models/hospitalizacija_model.dart';
 import 'package:ebolnica_mobile/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_mobile/models/nalaz_parametar_model.dart';
 import 'package:ebolnica_mobile/providers/bolnica_provider.dart';
@@ -8,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class NalazDetaljiScreen extends StatefulWidget {
-  final LaboratorijskiNalaz laboratorijskiNalaz;
-  const NalazDetaljiScreen({super.key, required this.laboratorijskiNalaz});
+  final LaboratorijskiNalaz? laboratorijskiNalaz;
+  final Hospitalizacija? hospizalizacija;
+  const NalazDetaljiScreen(
+      {super.key, this.laboratorijskiNalaz, this.hospizalizacija});
 
   @override
   _NalazDetaljiScreenState createState() => _NalazDetaljiScreenState();
@@ -36,8 +39,19 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
   }
 
   Future<void> getNalazParametri() async {
+    int? laboratorijskiNalazId =
+        widget.laboratorijskiNalaz?.laboratorijskiNalazId;
+    int? hospitalizacijaId = widget.hospizalizacija?.hospitalizacijaId;
+
+    if (laboratorijskiNalazId == null && hospitalizacijaId == null) {
+      throw Exception("Mora biti proslijeđen barem jedan parametar!");
+    }
+
     var result = await nalazParametarProvider.getNalazParametarValues(
-        widget.laboratorijskiNalaz.laboratorijskiNalazId!);
+      laboratorijskiNalazId: laboratorijskiNalazId,
+      hospitalizacijaId: hospitalizacijaId,
+    );
+
     setState(() {
       parametri = result;
       isLoading = false;
