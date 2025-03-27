@@ -6,6 +6,7 @@ using eBolnica.Services.Database;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.OperacijaStateMachine;
+using eBolnica.Services.RabbitMQ;
 using eBolnica.Services.Services;
 using eBolnica.Services.UputnicaStateMachine;
 using Mapster;
@@ -63,7 +64,7 @@ builder.Services.AddTransient<ClosedOperacijaState>();
 builder.Services.AddTransient<CancelledOperacijaState>();
 
 builder.Services.AddTransient<SobaHelper>();
-
+builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
 builder.Services.AddControllers(x =>
 {
     x.Filters.Add<ExceptionFilter>();

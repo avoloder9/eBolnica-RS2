@@ -46,6 +46,7 @@ namespace eBolnica.API.Controllers
                             odjelNaziv = doktor.Odjel?.Naziv;
                         }
                     }
+
                     else if (korisnikService.isKorisnikPacijent((int)userId))
                     {
                         userType = "pacijent";
@@ -57,6 +58,11 @@ namespace eBolnica.API.Controllers
                     else if (korisnikService.isKorisnikMedicinskoOsoblje((int)userId))
                     {
                         userType = "medicinsko osoblje";
+                        var osoblje = await Context.MedicinskoOsobljes.Include(x => x.Odjel).FirstOrDefaultAsync(x => x.KorisnikId == userId);
+                        if (osoblje != null)
+                        {
+                            odjelNaziv = osoblje.Odjel?.Naziv;
+                        }
                     }
                     else
                     {
