@@ -56,7 +56,9 @@ namespace eBolnica.Services.Services
                           .Where(p => p.PacijentId == request.PacijentId)
                           .Select(p => new
                           {
-                              p.Korisnik.Email, p.Korisnik.Ime,p.Korisnik.Prezime
+                              p.Korisnik.Email,
+                              p.Korisnik.Ime,
+                              p.Korisnik.Prezime
                           })
                           .FirstOrDefault();
 
@@ -65,7 +67,7 @@ namespace eBolnica.Services.Services
                 throw new Exception("E-mail pacijenta nije pronađen.");
             }
             var doktor = Context.Doktors
-                        .Where(d => d.DoktorId == request.DoktorId).Include(x=> x.Korisnik)
+                        .Where(d => d.DoktorId == request.DoktorId).Include(x => x.Korisnik)
                         .Select(d => new { d.Korisnik.Ime, d.Korisnik.Prezime })
                         .FirstOrDefault();
 
@@ -91,7 +93,7 @@ namespace eBolnica.Services.Services
                 Subject = "Vaš termin je uspješno zakazan",
                 Message = $"Poštovani, Vaš termin sa doktorom {doktor.Ime} {doktor.Prezime} je uspješno zakazan. Detalji:\n" +
                    $"Doktor: {doktor.Ime} {doktor.Prezime}\n" +
-                   $"Datum: {entity.DatumTermina}\n" +
+                   $"Datum: {entity.DatumTermina:dd.MM.yyyy}\n" +
                    $"Odjel: {odjel}",
                 ReceiverName = pacijent.Ime + " " + pacijent.Prezime,
             });
@@ -108,6 +110,46 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<Model.Models.Termin>(entity);
         }
+        public override void BeforeUpdate(TerminUpdateRequest request, Database.Termin entity)
+        {
+            var termin = Context.Termins.Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Odjel).FirstOrDefault(x => x.TerminId == entity.TerminId);
+            if (termin == null)
+            {
+                throw new Exception("Termin sa zadanim ID-om ne postoji.");
+            }
+
+            var pacijent = termin.Pacijent;
+            if (pacijent == null || pacijent.Korisnik == null || string.IsNullOrEmpty(pacijent.Korisnik.Email))
+            {
+                throw new Exception("E-mail pacijenta nije pronađen.");
+            }
+
+            var doktor = termin.Doktor;
+            if (doktor == null || doktor.Korisnik == null)
+            {
+                throw new Exception("Doktor sa zadanim ID-om nije pronađen.");
+            }
+
+            var odjel = termin.Odjel?.Naziv ?? "Nepoznat odjel";
+
+            _rabbitMQService.SendEmail(new Model.Messages.Email
+            {
+                EmailTo = pacijent.Korisnik.Email,
+                Subject = "Vaš termin je otkazan",
+                Message = $"Poštovani, obavještavamo Vas da je Vaš termin sa doktorom {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime} otkazan.\n" +
+               $"Molimo Vas da, ukoliko je potrebno, zakažete novi termin u skladu s Vašim potrebama.\n\n" +
+               $"Detalji otkazanog termina:\n" +
+               $"Doktor: {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime}\n" +
+               $"Datum: {entity.DatumTermina}\n" +
+               $"Odjel: {odjel}\n\n" +
+               $"Hvala Vam na razumijevanju.",
+                ReceiverName = pacijent.Korisnik.Ime + " " + pacijent.Korisnik.Prezime,
+            });
+
+
+            base.BeforeUpdate(request, entity);
+        }
+
         public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId)
         {
             return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId == doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
