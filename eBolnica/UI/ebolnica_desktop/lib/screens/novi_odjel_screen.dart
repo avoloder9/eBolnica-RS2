@@ -49,15 +49,17 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(16.0),
+      contentPadding: const EdgeInsets.all(20.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       title: const Center(
         child: Text(
           'Dodaj novi odjel',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 24, fontWeight: FontWeight.w600, color: Colors.black87),
         ),
       ),
       content: SizedBox(
-        width: 400,
+        width: 450,
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -65,15 +67,21 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: TextFormField(
                     controller: nazivController,
                     decoration: InputDecoration(
                       labelText: 'Naziv',
+                      labelStyle: TextStyle(color: Colors.black54),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      prefixIcon: const Icon(Icons.person),
+                      prefixIcon: const Icon(
+                        Icons.local_hospital,
+                        color: Colors.blue,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -87,15 +95,21 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: DropdownButtonFormField<Bolnica>(
                     value: odabranaBolnica,
                     decoration: InputDecoration(
                       labelText: 'Bolnica',
+                      labelStyle: const TextStyle(color: Colors.black54),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      prefixIcon: const Icon(Icons.local_hospital),
+                      prefixIcon: const Icon(
+                        Icons.local_hospital,
+                        color: Colors.blue,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
                     items: resultBolnica?.result
                         .map((bolnica) => DropdownMenuItem(
@@ -128,10 +142,10 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                       try {
                         await odjelProvider.insert(noviOdjel);
                         await Flushbar(
-                                message: "Odjel je uspješno dodan",
-                                backgroundColor: Colors.green,
-                                duration: const Duration(seconds: 3))
-                            .show(context);
+                          message: "Odjel je uspješno dodan",
+                          backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 3),
+                        ).show(context);
                         setState(() {});
                         _formKey.currentState?.reset();
                         await Future.wait([
@@ -139,26 +153,29 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => OdjelListScreen(
-                                      userId: widget.userId,
-                                      userType: widget.userType,
-                                    )),
+                              builder: (context) => OdjelListScreen(
+                                userId: widget.userId,
+                                userType: widget.userType,
+                              ),
+                            ),
                           ),
                         ]);
                       } catch (e) {
                         await Flushbar(
-                                message:
-                                    "Došlo je do greške. Pokušajte ponovo.",
-                                backgroundColor: Colors.red,
-                                duration: const Duration(seconds: 2))
-                            .show(context);
+                          message: "Došlo je do greške. Pokušajte ponovo.",
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 2),
+                        ).show(context);
                       }
                       Navigator.pop(context);
                     }
                   },
                   child: const Text(
                     "Dodaj odjel",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 )
               ],
@@ -168,10 +185,14 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
       ),
       actions: [
         TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Zatvori'))
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text(
+            'Zatvori',
+            style: TextStyle(color: Colors.blueAccent),
+          ),
+        ),
       ],
     );
   }

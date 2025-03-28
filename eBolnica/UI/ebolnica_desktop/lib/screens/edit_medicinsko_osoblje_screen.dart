@@ -78,19 +78,68 @@ class _EditMedicinskoOsobljeScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Potvrda"),
-          content: const Text("Da li ste sigurni da želite ažurirati podatke?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("Ne"),
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white.withOpacity(0.9),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 60,
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  const Text(
+                    "Ažurirati podatke?",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Da li ste sigurni da želite ažurirati podatke?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Odustani"),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text("Da"),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("Da"),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -121,8 +170,23 @@ class _EditMedicinskoOsobljeScreenState
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
       child: Container(
         width: 450,
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
@@ -130,30 +194,36 @@ class _EditMedicinskoOsobljeScreenState
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(
-                      controller: _imeController,
-                      decoration: const InputDecoration(labelText: "Ime"),
+                    const Text(
+                      "Ažuriranje podataka",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
                     ),
-                    TextField(
-                      controller: _prezimeController,
-                      decoration: const InputDecoration(labelText: "Prezime"),
-                    ),
-                    TextField(
-                      controller: _lozinkaController,
-                      decoration:
-                          const InputDecoration(labelText: "Nova lozinka"),
+                    const SizedBox(height: 16),
+                    _buildTextField(_imeController, "Ime", Icons.person),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                        _prezimeController, "Prezime", Icons.person_outline),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      _lozinkaController,
+                      "Nova lozinka",
+                      Icons.lock,
                       obscureText: true,
                     ),
-                    TextField(
-                      controller: _lozinkaPotvrdaController,
-                      decoration:
-                          const InputDecoration(labelText: "Potvrda lozinke"),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      _lozinkaPotvrdaController,
+                      "Potvrda lozinke",
+                      Icons.lock_outline,
                       obscureText: true,
                     ),
-                    TextField(
-                      controller: _telefonController,
-                      decoration: const InputDecoration(labelText: "Telefon"),
-                    ),
+                    const SizedBox(height: 12),
+                    _buildTextField(_telefonController, "Telefon", Icons.phone),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<int>(
                       value: _selectedOdjelId,
                       items: _odjeli
@@ -169,6 +239,7 @@ class _EditMedicinskoOsobljeScreenState
                       },
                       decoration: const InputDecoration(labelText: "Odjel"),
                     ),
+                    const SizedBox(height: 16),
                     SwitchListTile(
                       value: _status,
                       onChanged: (value) {
@@ -177,19 +248,17 @@ class _EditMedicinskoOsobljeScreenState
                         });
                       },
                       title: const Text("Status"),
+                      activeColor: Colors.blueAccent,
+                      contentPadding: EdgeInsets.zero,
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text("Odustani"),
-                        ),
-                        ElevatedButton(
-                          onPressed: _saveChanges,
-                          child: const Text("Sačuvaj"),
-                        ),
+                        _buildActionButton("Odustani",
+                            () => Navigator.of(context).pop(), Colors.grey),
+                        _buildActionButton(
+                            "Sačuvaj", _saveChanges, Colors.blueAccent),
                       ],
                     ),
                   ],
@@ -198,4 +267,45 @@ class _EditMedicinskoOsobljeScreenState
       ),
     );
   }
+}
+
+Widget _buildActionButton(String label, VoidCallback onPressed, Color color) {
+  return ElevatedButton(
+    onPressed: onPressed,
+    style: ElevatedButton.styleFrom(
+      foregroundColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 5,
+    ),
+    child: Text(label),
+  );
+}
+
+Widget _buildTextField(
+    TextEditingController controller, String label, IconData icon,
+    {bool obscureText = false}) {
+  return TextField(
+    controller: controller,
+    obscureText: obscureText,
+    decoration: InputDecoration(
+      prefixIcon: Icon(icon, color: Colors.blueAccent),
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.blueAccent),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
+      ),
+    ),
+  );
 }

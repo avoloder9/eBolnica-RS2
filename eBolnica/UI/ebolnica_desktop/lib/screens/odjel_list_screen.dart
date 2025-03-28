@@ -71,7 +71,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Lista odjela"),
+        title: const Text("Odjeli"),
       ),
       drawer: SideBar(
         userType: widget.userType!,
@@ -95,22 +95,10 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
             child: TextField(
               controller: _nazivEditingController,
               decoration: const InputDecoration(labelText: "Naziv odjela"),
+              onChanged: (value) async {
+                await _performSearch();
+              },
             ),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              var filter = <String, dynamic>{
-                'nazivGTE': _nazivEditingController.text.isNotEmpty
-                    ? _nazivEditingController.text
-                    : null
-              };
-              result = await provider.get(filter: filter);
-              setState(() {});
-            },
-            child: const Text("Pretraga"),
           ),
           const SizedBox(
             width: 8,
@@ -129,11 +117,23 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                   },
                 );
               },
-              child: const Text("Dodaj"),
+              child: const Text("Dodaj novi odjel"),
             ),
         ],
       ),
     );
+  }
+
+  Future<void> _performSearch() async {
+    var filter = <String, dynamic>{
+      'nazivGTE': _nazivEditingController.text.isNotEmpty
+          ? _nazivEditingController.text
+          : null
+    };
+    result = await provider.get(
+      filter: filter,
+    );
+    setState(() {});
   }
 
   Widget _buildResultView() {
@@ -144,88 +144,124 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
           width: MediaQuery.of(context).size.width,
           child: DataTable(
             columns: const [
-              DataColumn(label: Text("Naziv")),
-              DataColumn(label: SizedBox(width: 140, child: Text("Broj soba"))),
               DataColumn(
-                  label: SizedBox(width: 150, child: Text("Broj kreveta"))),
+                  label: Text("Naziv",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
               DataColumn(
-                  label: SizedBox(
-                      width: 160,
-                      child: Center(child: Text("Broj slobodnih kreveta")))),
-              DataColumn(label: Text("Glavni doktor")),
-              DataColumn(label: Text("")),
-              DataColumn(label: Text("")),
+                  label: Text("Broj soba",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
+              DataColumn(
+                  label: Text("Broj kreveta",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
+              DataColumn(
+                  label: Text("Broj slobodnih kreveta",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
+              DataColumn(
+                  label: Text("Glavni doktor",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
+              DataColumn(
+                  label: Text("Akcije",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black))),
             ],
             rows: result?.result
                     .map<DataRow>(
                       (e) => DataRow(
                         cells: [
-                          DataCell(Text(e.naziv.toString())),
+                          DataCell(Text(e.naziv.toString(),
+                              style: const TextStyle(fontSize: 16))),
+                          DataCell(Text(e.brojSoba.toString(),
+                              style: const TextStyle(fontSize: 16))),
+                          DataCell(Text(e.brojKreveta.toString(),
+                              style: const TextStyle(fontSize: 16))),
+                          DataCell(Text(e.brojSlobodnihKreveta.toString(),
+                              style: const TextStyle(fontSize: 16))),
                           DataCell(
-                            SizedBox(
-                              width: 50,
-                              child: Center(child: Text(e.brojSoba.toString())),
+                            Text(
+                              (e.glavniDoktor?.korisnik?.ime != null &&
+                                      e.glavniDoktor?.korisnik?.prezime != null)
+                                  ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
+                                  : "Nema doktora",
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.grey),
                             ),
                           ),
                           DataCell(
-                            SizedBox(
-                              width: 90,
-                              child:
-                                  Center(child: Text(e.brojKreveta.toString())),
-                            ),
-                          ),
-                          DataCell(
-                            SizedBox(
-                              width: 160,
-                              child: Center(
-                                child: Text(
-                                  e.brojSlobodnihKreveta.toString(),
-                                ),
-                              ),
-                            ),
-                          ),
-                          DataCell(Text(
-                            (e.glavniDoktor?.korisnik?.ime != null &&
-                                    e.glavniDoktor?.korisnik?.prezime != null)
-                                ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
-                                : "Nije određen glavni doktor",
-                          )),
-                          DataCell(
-                            widget.userType == "administrator"
-                                ? ElevatedButton(
-                                    child: const Text("Odredi glavnog doktora"),
-                                    onPressed: () {
-                                      _loadDoktori(e.odjelId!);
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) => setGlavniDoktor(
-                                              e.odjelId!,
-                                              e.naziv!,
-                                              (e.glavniDoktor?.korisnik?.ime !=
-                                                          null &&
-                                                      e.glavniDoktor?.korisnik
-                                                              ?.prezime !=
-                                                          null)
-                                                  ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
-                                                  : ""));
-                                    },
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                          DataCell(
-                            ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
+                            Row(
+                              children: [
+                                widget.userType == "administrator"
+                                    ? ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.teal,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          if (e.odjelId != null) {
+                                            _loadDoktori(e.odjelId!);
+                                          }
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => setGlavniDoktor(
+                                                e.odjelId!,
+                                                e.naziv!,
+                                                (e.glavniDoktor?.korisnik
+                                                                ?.ime !=
+                                                            null &&
+                                                        e.glavniDoktor?.korisnik
+                                                                ?.prezime !=
+                                                            null)
+                                                    ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
+                                                    : ""),
+                                          );
+                                        },
+                                        icon: Icon(e.glavniDoktor != null
+                                            ? Icons.update
+                                            : Icons.person_add),
+                                        label: Text(e.glavniDoktor != null
+                                            ? "Ažuriraj glavnog doktora"
+                                            : "Postavi doktora"),
+                                      )
+                                    : const SizedBox.shrink(),
+                                const SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightBlueAccent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => SobaListScreen(
-                                                odjelId: e.odjelId!,
-                                                userId: widget.userId,
-                                                userType: widget.userType,
-                                              )));
-                                },
-                                child: const Text("Detalji")),
-                          )
+                                        builder: (context) => SobaListScreen(
+                                          odjelId: e.odjelId!,
+                                          userId: widget.userId,
+                                          userType: widget.userType,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.visibility),
+                                  label: const Text("Detalji"),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -254,7 +290,6 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
               if (snapshot.error is UserFriendlyException) {
                 const errorMessage =
                     "Trenutno nije zaposlen nijedan doktor na ovom odjelu.";
-
                 return const Center(child: Text(errorMessage));
               }
 
@@ -283,26 +318,63 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       "Odaberi glavnog doktora",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
                     ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _nazivOdjelaController,
-                      decoration: const InputDecoration(labelText: "Naziv"),
+                      enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "Naziv",
+                        labelStyle: const TextStyle(color: Colors.teal),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Colors.grey, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Colors.grey, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     DropdownButtonFormField<int>(
-                      decoration:
-                          const InputDecoration(labelText: "Glavni doktor"),
+                      decoration: InputDecoration(
+                        labelText: "Glavni doktor",
+                        labelStyle: const TextStyle(color: Colors.teal),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Colors.teal, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
+                      ),
                       items: doktori
                           .map<DropdownMenuItem<int>>(
                             (doktor) => DropdownMenuItem<int>(
                               value: doktor.doktorId!,
                               child: Text(
-                                  "${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}"),
+                                "${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}",
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ),
                           )
                           .toList(),

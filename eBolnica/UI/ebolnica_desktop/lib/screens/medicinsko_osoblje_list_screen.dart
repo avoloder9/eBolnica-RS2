@@ -108,7 +108,7 @@ class _MedicinskoOsobljeListScreenState
                 },
               );
             },
-            child: const Text("Dodaj"),
+            child: const Text("Dodaj novo osoblje"),
           ),
         ],
       ),
@@ -157,20 +157,23 @@ class _MedicinskoOsobljeListScreenState
                         DataCell(Text(e.korisnik!.status == true
                             ? "Aktivan"
                             : "Neaktivan")),
-                        DataCell(ElevatedButton(
-                          child: const Text("Ažuriraj podatke"),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => EditMedicinskoOsobljeScreen(
-                                medicinskoOsobljeId: e.medicinskoOsobljeId!,
-                                onSave: () {
-                                  fetchOsoblje();
-                                },
-                              ),
-                            );
-                          },
-                        ))
+                        DataCell(
+                          ElevatedButton(
+                            child: const Text("Ažuriraj podatke"),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    EditMedicinskoOsobljeScreen(
+                                  medicinskoOsobljeId: e.medicinskoOsobljeId!,
+                                  onSave: () {
+                                    fetchOsoblje();
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        )
                       ],
                     ),
                   )

@@ -1,7 +1,6 @@
 import 'package:ebolnica_desktop/models/krevet_model.dart';
 import 'package:ebolnica_desktop/providers/krevet_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_krevet_screen.dart';
-import 'package:ebolnica_desktop/screens/soba_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -41,58 +40,45 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SobaListScreen(
-                odjelId: widget.odjelId,
-                userId: widget.userId,
-                userType: widget.userType),
-          ),
-        );
-        return false;
-      },
-      child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Lista kreveta"),
-            actions: [
-              if (widget.userType == "administrator")
-                ElevatedButton.icon(
-                  onPressed: () => showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return NoviKrevetScreen(
-                        sobaId: widget.sobaId,
-                        odjelId: widget.odjelId,
-                        userId: widget.userId,
-                        userType: widget.userType,
-                      );
-                    },
-                    barrierDismissible: false,
-                  ).then((value) {
-                    setState(() {
-                      widget.userType;
-                    });
-                    _fetchKreveti();
-                  }),
-                  icon: const Icon(Icons.add),
-                  label: const Text("Dodaj novi krevet"),
-                ),
-            ],
-          ),
-          body: kreveti == null || kreveti!.isEmpty
-              ? buildEmptyView(
-                  context: context,
-                  screen: NoviKrevetScreen(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Lista kreveta"),
+        actions: [
+          if (widget.userType == "administrator")
+            ElevatedButton.icon(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return NoviKrevetScreen(
                     sobaId: widget.sobaId,
                     odjelId: widget.odjelId,
                     userId: widget.userId,
                     userType: widget.userType,
-                  ),
-                  message: "Nema kreveta na ovom odjelu")
-              : _buildResultView()),
+                  );
+                },
+                barrierDismissible: false,
+              ).then((value) {
+                setState(() {
+                  widget.userType;
+                });
+                _fetchKreveti();
+              }),
+              icon: const Icon(Icons.add),
+              label: const Text("Dodaj novi krevet"),
+            ),
+        ],
+      ),
+      body: kreveti == null || kreveti!.isEmpty
+          ? buildEmptyView(
+              context: context,
+              screen: NoviKrevetScreen(
+                sobaId: widget.sobaId,
+                odjelId: widget.odjelId,
+                userId: widget.userId,
+                userType: widget.userType,
+              ),
+              message: "Nema kreveta na ovom odjelu")
+          : _buildResultView(),
     );
   }
 

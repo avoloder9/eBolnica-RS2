@@ -231,15 +231,19 @@ class DoktorCard extends StatelessWidget {
               radius: 60,
               backgroundColor: Colors.grey[300],
               child: ClipOval(
-                child: Image(
-                  image: slika != null && slika!.isNotEmpty
-                      ? MemoryImage(slika!)
-                      : const AssetImage('assets/images/osoba.jpg')
-                          as ImageProvider,
-                  width: 80,
-                  height: 120,
-                  fit: BoxFit.cover,
-                ),
+                child: slika != null && slika!.isNotEmpty
+                    ? Image(
+                        image: MemoryImage(slika!),
+                        width: 80,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      )
+                    : const Image(
+                        image: AssetImage('assets/images/osoba.jpg'),
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                      ),
               ),
             ),
             const SizedBox(height: 20),

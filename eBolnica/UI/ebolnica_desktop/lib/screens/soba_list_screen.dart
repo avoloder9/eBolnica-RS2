@@ -2,7 +2,6 @@ import 'package:ebolnica_desktop/models/soba_model.dart';
 import 'package:ebolnica_desktop/providers/soba_provider.dart';
 import 'package:ebolnica_desktop/screens/krevet_list_screen.dart';
 import 'package:ebolnica_desktop/screens/nova_soba_screen.dart';
-import 'package:ebolnica_desktop/screens/odjel_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -37,52 +36,39 @@ class _SobaListScreenState extends State<SobaListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OdjelListScreen(
-                userId: widget.userId,
-                userType: widget.userType,
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Lista soba"),
+          actions: [
+            if (widget.userType == "administrator")
+              ElevatedButton.icon(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return NovaSobaScreen(
+                        odjelId: widget.odjelId,
+                        userId: widget.userId,
+                        userType: widget.userType);
+                  },
+                  barrierDismissible: false,
+                ).then((value) {
+                  _fetchSobe();
+                }),
+                icon: const Icon(Icons.add),
+                label: const Text("Dodaj novu sobu"),
               ),
-            ),
-          );
-          return false;
-        },
-        child: Scaffold(
-            appBar: AppBar(
-              title: const Text("Lista soba"),
-              actions: [
-                if (widget.userType == "administrator")
-                  ElevatedButton.icon(
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return NovaSobaScreen(
-                            odjelId: widget.odjelId,
-                            userId: widget.userId,
-                            userType: widget.userType);
-                      },
-                      barrierDismissible: false,
-                    ).then((value) {
-                      _fetchSobe();
-                    }),
-                    icon: const Icon(Icons.add),
-                    label: const Text("Dodaj novu sobu"),
-                  ),
-              ],
-            ),
-            body: sobe == null || sobe!.isEmpty
-                ? buildEmptyView(
-                    context: context,
-                    screen: NovaSobaScreen(
-                      odjelId: widget.odjelId,
-                      userId: widget.userId,
-                      userType: widget.userType,
-                    ),
-                    message: "Nema soba na ovom odjelu")
-                : _buildResultView()));
+          ],
+        ),
+        body: sobe == null || sobe!.isEmpty
+            ? buildEmptyView(
+                context: context,
+                screen: NovaSobaScreen(
+                  odjelId: widget.odjelId,
+                  userId: widget.userId,
+                  userType: widget.userType,
+                ),
+                message: "Nema soba na ovom odjelu")
+            : _buildResultView());
   }
 
   Widget _buildResultView() {
