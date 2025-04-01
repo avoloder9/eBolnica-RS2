@@ -14,21 +14,21 @@ class Korisnik {
   final String? spol;
   final bool? status;
   String? slika;
-
+  bool? obrisano;
   String? slikaThumb;
-  Korisnik({
-    this.korisnikId,
-    this.ime,
-    this.prezime,
-    this.email,
-    this.korisnickoIme,
-    this.datumRodjenja,
-    this.telefon,
-    this.spol,
-    this.status,
-    this.slika,
-    this.slikaThumb,
-  });
+  Korisnik(
+      {this.korisnikId,
+      this.ime,
+      this.prezime,
+      this.email,
+      this.korisnickoIme,
+      this.datumRodjenja,
+      this.telefon,
+      this.spol,
+      this.status,
+      this.slika,
+      this.slikaThumb,
+      this.obrisano});
 
   factory Korisnik.fromJson(Map<String, dynamic> json) =>
       _$KorisnikFromJson(json);

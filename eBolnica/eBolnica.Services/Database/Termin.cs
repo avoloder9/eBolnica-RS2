@@ -1,9 +1,10 @@
-﻿using System;
+﻿using eBolnica.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace eBolnica.Services.Database;
 
-public partial class Termin
+public partial class Termin : ISoftDelete
 {
     public int TerminId { get; set; }
 
@@ -18,7 +19,8 @@ public partial class Termin
     public TimeSpan VrijemeTermina { get; set; }
 
     public bool? Otkazano { get; set; }
-
+    public bool Obrisano { get; set; }
+    public DateTime? VrijemeBrisanja { get; set; }
     public virtual Doktor Doktor { get; set; } = null!;
 
     public virtual Odjel Odjel { get; set; } = null!;

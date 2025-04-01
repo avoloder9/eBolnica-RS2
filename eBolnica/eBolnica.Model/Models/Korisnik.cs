@@ -18,5 +18,7 @@ namespace eBolnica.Model.Models
         public string? Telefon { get; set; }
         public string? Spol { get; set; }
         public bool Status { get; set; }
+        public bool Obrisano { get; set; }
+
     }
 }

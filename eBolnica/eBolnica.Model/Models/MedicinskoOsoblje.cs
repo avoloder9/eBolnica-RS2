@@ -11,6 +11,7 @@ namespace eBolnica.Model.Models
         public int KorisnikId { get; set; }
 
         public int OdjelId { get; set; }
+        public bool Obrisano { get; set; }
 
         public virtual Korisnik Korisnik { get; set; } = null!;
 

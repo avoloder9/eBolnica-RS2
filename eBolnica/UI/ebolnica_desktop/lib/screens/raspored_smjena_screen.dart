@@ -1,9 +1,13 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:ebolnica_desktop/models/raspored_smjena_model.dart';
+import 'package:ebolnica_desktop/models/search_result.dart';
+import 'package:ebolnica_desktop/models/slobodan_dan_model.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/providers/raspored_smjena_provider.dart';
+import 'package:ebolnica_desktop/providers/slobodan_dan_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +28,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
   DateTime? startDate;
   DateTime? endDate;
   late RasporedSmjenaProvider rasporedSmjenaProvider;
+  late SlobodniDanProvider slobodanDanProvider;
   late OdjelProvider odjelProvider;
   List<Odjel>? odjeli = [];
   int? selectedOdjelId;
@@ -34,7 +39,11 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
     super.initState();
     rasporedSmjenaProvider = RasporedSmjenaProvider();
     odjelProvider = OdjelProvider();
-    fetchOdjeli();
+    slobodanDanProvider = SlobodniDanProvider();
+
+    if (widget.userType == "administrator") {
+      fetchOdjeli();
+    }
   }
 
   Future<void> fetchOdjeli() async {
@@ -197,10 +206,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
   Future<void> _submitRaspored() async {
     if (startDate != null && endDate != null) {
       try {
-        print("Start Date: $startDate");
-        print("End Date: $endDate");
         await rasporedSmjenaProvider.generisiRaspored(startDate!, endDate!);
-
         await Flushbar(
                 message: "Raspored je uspješno dodan",
                 backgroundColor: Colors.green,
@@ -272,54 +278,329 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
       ),
       body: Column(children: [
         if (widget.userType != "medicinsko osoblje")
-          Row(children: [
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: DropdownButtonFormField<int>(
-                  value: selectedOdjelId,
-                  decoration: InputDecoration(
-                    labelText: "Odjel",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                  ),
-                  onChanged: (newValue) {
-                    setState(() {
-                      selectedOdjelId = newValue;
-                    });
-                  },
-                  items: (odjeli ?? []).map((odjel) {
-                    return DropdownMenuItem<int>(
-                      value: odjel.odjelId,
-                      child: Text(
-                        odjel.naziv ?? "Nepoznato",
-                        style: const TextStyle(fontSize: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: DropdownButtonFormField<int>(
+                    value: selectedOdjelId,
+                    decoration: InputDecoration(
+                      labelText: "Odjel",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.blue),
                       ),
-                    );
-                  }).toList(),
-                  hint: const Text("Odaberite odjel"),
-                  isExpanded: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                    ),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedOdjelId = newValue;
+                      });
+                    },
+                    items: (odjeli ?? []).map((odjel) {
+                      return DropdownMenuItem<int>(
+                        value: odjel.odjelId,
+                        child: Text(
+                          odjel.naziv ?? "Nepoznato",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }).toList(),
+                    hint: const Text("Odaberite odjel"),
+                    isExpanded: true,
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _showDateDialog,
-                    child: const Text("Generiši raspored"),
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _showDateDialog,
+                      child: const Text("Generiši raspored"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Zahtjevi za slobodne dane"),
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: FutureBuilder<SearchResult<SlobodniDan>>(
+                              future: slobodanDanProvider.get(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return const Center(
+                                      child: Text(
+                                          "Greška prilikom dohvatanja zahtjeva."));
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.result.isEmpty) {
+                                  return const Center(
+                                      child: Text("Nema zahtjeva."));
+                                }
+
+                                final zahtjevi = snapshot.data!.result;
+
+                                return ListView.builder(
+                                  itemCount: zahtjevi.length,
+                                  itemBuilder: (context, index) {
+                                    final request = zahtjevi[index];
+                                    return Card(
+                                      margin: const EdgeInsets.all(8),
+                                      child: ListTile(
+                                        title: Text(
+                                            "${request.korisnik!.ime} - ${request.korisnik!.prezime}"),
+                                        subtitle:
+                                            Text("Razlog: ${request.razlog}"),
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.check,
+                                                  color: Colors.green),
+                                              onPressed: () async {
+                                                await showCustomDialog(
+                                                  context: context,
+                                                  title: "Prihvati zahtjev",
+                                                  message:
+                                                      "Da li ste sigurni da želite prihvatiti ovaj zahtjev?",
+                                                  confirmText: "Prihvati",
+                                                  onConfirm: () async {
+                                                    var zahtjev = {
+                                                      "status": true
+                                                    };
+                                                    await slobodanDanProvider
+                                                        .update(
+                                                            request
+                                                                .slobodniDanId!,
+                                                            zahtjev);
+                                                    Navigator.pop(context);
+                                                    await Flushbar(
+                                                      message:
+                                                          "Zahtjev je uspješno odobren!",
+                                                      duration: const Duration(
+                                                          seconds: 3),
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                    ).show(context);
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.close,
+                                                  color: Colors.red),
+                                              onPressed: () async {
+                                                await showCustomDialog(
+                                                  context: context,
+                                                  title: "Odbij zahtjev",
+                                                  message:
+                                                      "Da li ste sigurni da želite odbiti ovaj zahtjev?",
+                                                  confirmText: "Odbij",
+                                                  onConfirm: () async {
+                                                    var zahtjev = {
+                                                      "status": false
+                                                    };
+                                                    await slobodanDanProvider
+                                                        .update(
+                                                            request
+                                                                .slobodniDanId!,
+                                                            zahtjev);
+                                                    Navigator.pop(context);
+                                                    await Flushbar(
+                                                      message:
+                                                          "Zahtjev je uspješno odbijen!",
+                                                      duration: const Duration(
+                                                          seconds: 3),
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                    ).show(context);
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Zatvori"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } catch (error) {
+                    await Flushbar(
+                      message: "Greška prilikom dohvatanja zahtjeva.",
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.red,
+                    ).show(context);
+                  }
+                },
+                child: const Text("Prikaži zahtjeve za slobodne dane"),
+              ),
+            ],
+          ),
+        Column(
+          children: [
+            if (widget.userType == "medicinsko osoblje") ...[
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            DateTime? _selectedDate;
+                            final TextEditingController razlogController =
+                                TextEditingController();
+                            final TextEditingController datumController =
+                                TextEditingController();
+                            final GlobalKey<FormState> _formKey =
+                                GlobalKey<FormState>();
+                            return AlertDialog(
+                              title: const Text("Zahtjev za slobodan dan",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              content: SizedBox(
+                                width: 400,
+                                child: Form(
+                                  key: _formKey,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextFormField(
+                                          controller: datumController,
+                                          readOnly: true,
+                                          decoration: InputDecoration(
+                                            labelText: "Odaberi datum",
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            suffixIcon: const Icon(
+                                                Icons.calendar_today),
+                                          ),
+                                          onTap: () async {
+                                            DateTime? pickedDate =
+                                                await showDatePicker(
+                                              context: context,
+                                              initialDate: DateTime.now(),
+                                              firstDate: DateTime.now(),
+                                              lastDate: DateTime.now().add(
+                                                  const Duration(days: 365)),
+                                            );
+                                            if (pickedDate != null) {
+                                              _selectedDate = pickedDate;
+                                              setState(() {
+                                                datumController.text =
+                                                    "${pickedDate.day}.${pickedDate.month}.${pickedDate.year}";
+                                              });
+                                            }
+                                          },
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TextFormField(
+                                          controller: razlogController,
+                                          maxLines: 3,
+                                          decoration: InputDecoration(
+                                            labelText: "Razlog",
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return "Unesite razlog zahtjeva";
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text("Otkaži",
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      var slobodanDan = {
+                                        "korisnikId": widget.userId,
+                                        "datum": DateFormat('yyyy-MM-dd')
+                                            .format(_selectedDate!),
+                                        "razlog": razlogController.text
+                                      };
+                                      print(slobodanDan);
+                                      try {
+                                        await slobodanDanProvider
+                                            .insert(slobodanDan);
+                                        await Flushbar(
+                                                message:
+                                                    "Zahtjev za slobodan dan je uspješno poslan",
+                                                backgroundColor: Colors.green,
+                                                duration:
+                                                    const Duration(seconds: 3))
+                                            .show(context);
+                                      } catch (e) {
+                                        await Flushbar(
+                                                message:
+                                                    "Došlo je do greške. Pokušajte ponovo.",
+                                                backgroundColor: Colors.red,
+                                                duration:
+                                                    const Duration(seconds: 2))
+                                            .show(context);
+                                      }
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: const Text("Pošalji zahtjev"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text("Zahtjev za slobodan dan"),
+                    ),
+                  ],
+                ),
+              ),
+            ]
+          ],
+        ),
         TableCalendar(
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),

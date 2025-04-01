@@ -1,9 +1,10 @@
-﻿using System;
+﻿using eBolnica.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace eBolnica.Services.Database;
 
-public partial class Bolnica
+public partial class Bolnica : ISoftDelete
 {
     public int BolnicaId { get; set; }
 
@@ -21,6 +22,7 @@ public partial class Bolnica
     public int? UkupanBrojKreveta { get; set; }
 
     public int? TrenutniBrojHospitalizovanih { get; set; }
-
+    public bool Obrisano { get; set; }
+    public DateTime? VrijemeBrisanja { get; set; }
     public virtual ICollection<Odjel> Odjels { get; } = new List<Odjel>();
 }

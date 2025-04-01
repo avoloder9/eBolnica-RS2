@@ -11,6 +11,6 @@ namespace eBolnica.Services.Interfaces
     {
         TModel Insert(TInsert model);
         TModel Update(int id, TUpdate request);
-
+        void Delete(int id);
     }
 }

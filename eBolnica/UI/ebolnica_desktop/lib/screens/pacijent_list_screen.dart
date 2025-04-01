@@ -8,6 +8,7 @@ import 'package:ebolnica_desktop/screens/edit_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/medicinska_dokumentacija_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_pacijent_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:intl/intl.dart';
@@ -183,6 +184,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                 if (widget.userType == "medicinsko osoblje")
                   const DataColumn(label: Text("Medicinska dokumentacija")),
                 const DataColumn(label: Text("")),
+                const DataColumn(label: Text("")),
               ],
               rows: result?.result
                       .map<DataRow>(
@@ -254,7 +256,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                 widget.userType == "administrator"
                                     ? ElevatedButton.icon(
                                         icon: const Icon(Icons.edit),
-                                        label: const Text("Azuriraj podatke"),
+                                        label: const Text("Ažuriraj podatke"),
                                         onPressed: () {
                                           showDialog(
                                             context: context,
@@ -269,7 +271,46 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                         },
                                       )
                                     : const SizedBox.shrink(),
-                              )
+                              ),
+                              DataCell(
+                                widget.userType == "administrator"
+                                    ? ElevatedButton.icon(
+                                        icon: const Icon(Icons.delete),
+                                        label: const Text("Ukloni pacijenta"),
+                                        onPressed: () async {
+                                          showCustomDialog(
+                                            context: context,
+                                            title: "Obrisati pacijenta?",
+                                            message:
+                                                "Da li ste sigurni da zelite ukloniti pacijenta",
+                                            confirmText: "Da",
+                                            onConfirm: () async {
+                                              try {
+                                                await provider
+                                                    .delete(e.pacijentId!);
+                                                await Flushbar(
+                                                  message:
+                                                      "Pacijent je uspješno uklonjen!",
+                                                  duration: const Duration(
+                                                      seconds: 3),
+                                                  backgroundColor: Colors.green,
+                                                ).show(context);
+                                              } catch (error) {
+                                                await Flushbar(
+                                                  message:
+                                                      "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                                  duration: const Duration(
+                                                      seconds: 3),
+                                                  backgroundColor: Colors.red,
+                                                ).show(context);
+                                              }
+                                              _loadInitialData();
+                                            },
+                                          );
+                                        },
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
                             ],
                             onSelectChanged:
                                 widget.userType == "administrator" ||

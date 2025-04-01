@@ -1,9 +1,10 @@
-﻿using System;
+﻿using eBolnica.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace eBolnica.Services.Database;
 
-public partial class Pregled
+public partial class Pregled : ISoftDelete
 {
     public int PregledId { get; set; }
 
@@ -16,7 +17,8 @@ public partial class Pregled
     public string Zakljucak { get; set; } = null!;
 
     public int MedicinskaDokumentacijaId { get; set; }
-
+    public bool Obrisano { get; set; }
+    public DateTime? VrijemeBrisanja { get; set; }
     public virtual MedicinskaDokumentacija? MedicinskaDokumentacija { get; set; }
 
     public virtual ICollection<Terapija> Terapijas { get; } = new List<Terapija>();

@@ -1,6 +1,7 @@
 ﻿using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Database;
+using eBolnica.Services.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
@@ -38,5 +39,26 @@ namespace eBolnica.Services.Services
             return Mapper.Map<TModel>(entity);
         }
         public virtual void BeforeUpdate(TUpdate request, TDbEntity entity) { }
+        public virtual void Delete(int id)
+        {
+            var entity = Context.Set<TDbEntity>().Find(id);
+            if (entity == null)
+            {
+                throw new Exception("Unesite postojeći id.");
+            }
+
+            if (entity is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.Obrisano = true;
+                softDeleteEntity.VrijemeBrisanja = DateTime.Now;
+                Context.Update(entity);
+            }
+            else
+            {
+                Context.Remove(entity);
+            }
+
+            Context.SaveChanges();
+        }
     }
 }

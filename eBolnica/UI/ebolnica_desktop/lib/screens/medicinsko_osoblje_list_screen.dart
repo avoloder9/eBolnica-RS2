@@ -1,9 +1,11 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/medicinsko_osoblje_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_desktop/screens/edit_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -133,6 +135,7 @@ class _MedicinskoOsobljeListScreenState
                 DataColumn(label: Text("Odjel")),
                 DataColumn(label: Text("Status")),
                 DataColumn(label: Text("")),
+                DataColumn(label: Text("")),
               ],
               rows: filteredOsoblje
                   .map<DataRow>(
@@ -158,8 +161,9 @@ class _MedicinskoOsobljeListScreenState
                             ? "Aktivan"
                             : "Neaktivan")),
                         DataCell(
-                          ElevatedButton(
-                            child: const Text("Ažuriraj podatke"),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.edit),
+                            label: const Text("Ažuriraj podatke"),
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -173,7 +177,38 @@ class _MedicinskoOsobljeListScreenState
                               );
                             },
                           ),
-                        )
+                        ),
+                        DataCell(ElevatedButton.icon(
+                          icon: const Icon(Icons.delete),
+                          label: const Text("Ukloni osoblje"),
+                          onPressed: () async {
+                            showCustomDialog(
+                              context: context,
+                              title: "Obrisati medicinsko osoblje?",
+                              message:
+                                  "Da li ste sigurni da zelite ukloniti odabrano osoblje",
+                              confirmText: "Da",
+                              onConfirm: () async {
+                                try {
+                                  await provider.delete(e.medicinskoOsobljeId!);
+                                  await Flushbar(
+                                    message: "Osoblje je uspješno uklonjeno!",
+                                    duration: const Duration(seconds: 3),
+                                    backgroundColor: Colors.green,
+                                  ).show(context);
+                                } catch (error) {
+                                  await Flushbar(
+                                    message:
+                                        "Došlo je do greške prilikom uklanjanja osoblja.",
+                                    duration: const Duration(seconds: 3),
+                                    backgroundColor: Colors.red,
+                                  ).show(context);
+                                }
+                                fetchOsoblje();
+                              },
+                            );
+                          },
+                        )),
                       ],
                     ),
                   )

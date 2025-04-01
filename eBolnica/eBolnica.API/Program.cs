@@ -44,7 +44,7 @@ builder.Services.AddTransient<IVitalniParametriService, VitalniParemetriService>
 builder.Services.AddTransient<IRadniZadatakService, RadniZadatakService>();
 builder.Services.AddTransient<ISmjenaService, SmjenaService>();
 builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
-builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
+builder.Services.AddTransient<ISlobodniDanService, SlobodniDanService>();
 builder.Services.AddTransient<IRadniSatiService, RadniSatiService>();
 builder.Services.AddTransient<IOtpusnoPismoService, OtpusnoPismoService>();
 
