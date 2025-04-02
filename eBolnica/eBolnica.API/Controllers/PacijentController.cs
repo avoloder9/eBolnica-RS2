@@ -167,5 +167,11 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+        [HttpGet("broj-pacijenata")]
+        public IActionResult GetBrojPacijenata()
+        {
+            var result = _pacijentService.GetBrojPacijenata();
+            return Ok(result);
+        }
     }
 }

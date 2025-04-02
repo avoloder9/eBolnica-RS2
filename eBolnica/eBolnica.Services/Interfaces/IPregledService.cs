@@ -11,6 +11,6 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IPregledService : ICRUDService<Pregled, PregledSearchObject, PregledInsertRequest, PregledUpdateRequest>
     {
-
+        public List<Model.Response.BrojPregledaPoDanuResponse> GetBrojPregledaPoDanu(int brojDana);
     }
 }

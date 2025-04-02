@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/models/Response/popunjenost_bolnice_response.dart';
 import 'package:ebolnica_desktop/models/krevet_model.dart';
 import 'package:ebolnica_desktop/providers/base_provider.dart';
 import 'package:http/http.dart' as http;
@@ -49,5 +50,19 @@ class KrevetProvider extends BaseProvider<Krevet> {
       }
     }
     throw Exception("Greska");
+  }
+
+  Future<PopunjenostBolniceResponse> getPopunjenostBolnice() async {
+    var url = "${BaseProvider.baseUrl}Krevet/popunjenost";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return PopunjenostBolniceResponse.fromJson(data);
+    }
+    throw Exception("Greška prilikom dohvaćanja podataka");
   }
 }

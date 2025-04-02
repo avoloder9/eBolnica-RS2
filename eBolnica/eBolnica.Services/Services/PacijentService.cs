@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
 using System.Security.Cryptography.X509Certificates;
+using eBolnica.Model.Response;
 
 namespace eBolnica.Services.Services
 {
@@ -72,7 +73,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
-            query = query.Include(x => x.Korisnik).Where(x=>x.Obrisano==false);
+            query = query.Include(x => x.Korisnik).Where(x => x.Obrisano == false);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
@@ -253,6 +254,33 @@ namespace eBolnica.Services.Services
             return await Context.Operacijas.Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).Include(x => x.Doktor)
                 .ThenInclude(x => x.Korisnik).Include(x => x.Terapija).Where(x => x.PacijentId == pacijentId).ToListAsync();
         }
+        public List<Model.Response.BrojZaposlenihPoOdjeluResponse> GetUkupanBrojZaposlenihPoOdjelima()
+        {
+            return Context.Odjels
+                .Select(o => new BrojZaposlenihPoOdjeluResponse
+                {
+                    OdjelId = o.OdjelId,
+                    NazivOdjela = o.Naziv,
+                    UkupanBrojZaposlenih = Context.Doktors.Count(d => d.OdjelId == o.OdjelId) +
+                                          Context.MedicinskoOsobljes.Count(m => m.OdjelId == o.OdjelId)
+                })
+                .OrderBy(o => o.NazivOdjela)
+                .ToList();
+        }
+        public BrojPacijenataResponse GetBrojPacijenata()
+        {
+            var ukupnoPacijenata = Context.Pacijents.Count(p => !p.Obrisano);
+            var brojHospitalizovanih = Context.Pacijents
+          .Where(p => !p.Obrisano)
+          .Count(p => Context.MedicinskaDokumentacijas
+              .Any(m => m.PacijentId == p.PacijentId && m.Hospitalizovan.HasValue && m.Hospitalizovan == true));
 
+
+            return new BrojPacijenataResponse
+            {
+                UkupanBrojPacijenata = ukupnoPacijenata,
+                BrojHospitalizovanih = brojHospitalizovanih
+            };
+        }
     }
 }

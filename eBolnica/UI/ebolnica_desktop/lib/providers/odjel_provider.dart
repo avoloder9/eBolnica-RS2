@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/models/Response/broj_zaposlenih_po_odjelu_response.dart';
 import 'package:ebolnica_desktop/models/doktor_model.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
@@ -65,5 +66,27 @@ class OdjelProvider extends BaseProvider<Odjel> {
       return Odjel.fromJson(data);
     }
     return null;
+  }
+
+  Future<List<BrojZaposlenihPoOdjeluResponse>>
+      getUkupanBrojZaposlenihPoOdjelima() async {
+    var url = "${BaseProvider.baseUrl}Odjel/broj-zaposlenih";
+
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      if (data is List) {
+        return data
+            .map((item) => BrojZaposlenihPoOdjeluResponse.fromJson(item))
+            .toList();
+      } else {
+        throw Exception("Očekivana lista iz JSON odgovora");
+      }
+    }
+    throw Exception("Greška prilikom dohvaćanja podataka");
   }
 }

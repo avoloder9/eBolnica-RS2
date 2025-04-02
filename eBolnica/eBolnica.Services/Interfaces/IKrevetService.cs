@@ -13,5 +13,6 @@ namespace eBolnica.Services.Interfaces
     {
         public List<Model.Models.Krevet> GetKrevetBySobaId(int sobaId);
         public List<Model.Models.Krevet> GetSlobodanKrevetBySobaId(int sobaId);
+        public Model.Response.PopunjenostBolniceResponse GetPopunjenostBolnice();
     }
 }

@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 
@@ -43,6 +44,7 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpGet("get-odjel/{doktorId}")]
         public IActionResult GetOdjelByDoktorId(int doktorId)
         {
@@ -54,5 +56,11 @@ namespace eBolnica.API.Controllers
             return Ok(odjel);
         }
 
+        [HttpGet("broj-zaposlenih")]
+        public IActionResult GetUkupanBrojZaposlenihPoOdjelima()
+        {
+            var result = odjelService.GetUkupanBrojZaposlenihPoOdjelima();
+            return Ok(result);
+        }
     }
 }
