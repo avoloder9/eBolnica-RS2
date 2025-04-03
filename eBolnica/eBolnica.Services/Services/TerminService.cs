@@ -30,7 +30,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.Termin> AddFilter(TerminSearchObject searchObject, IQueryable<Database.Termin> query)
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
-                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina >= DateTime.Now);
+                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina >= DateTime.Now).OrderBy(x=>x.DatumTermina);
 
             return base.AddFilter(searchObject, query);
         }
@@ -145,7 +145,6 @@ namespace eBolnica.Services.Services
                $"Hvala Vam na razumijevanju.",
                 ReceiverName = pacijent.Korisnik.Ime + " " + pacijent.Korisnik.Prezime,
             });
-
 
             base.BeforeUpdate(request, entity);
         }

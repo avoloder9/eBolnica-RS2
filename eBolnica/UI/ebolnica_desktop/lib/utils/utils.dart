@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -224,4 +226,178 @@ Future<bool?> showCustomDialog({
       );
     },
   );
+}
+
+class TerminiStackedBarChart extends StatelessWidget {
+  final List<TerminiPoMjesecima> terminiPoMesecima;
+
+  TerminiStackedBarChart({required this.terminiPoMesecima});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Dodavanje naslova na vrhu
+          const Text(
+            'Broj zakazanih termina po mjesecima',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: BarChart(
+              BarChartData(
+                gridData: FlGridData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 50,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Transform.rotate(
+                            angle: -0.4,
+                            child: Text(
+                              _getMonthName(value.toInt()),
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  rightTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        return const Text(
+                          '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: _buildStackedBarGroups(),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        '${rod.toY.toInt()}',
+                        const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          backgroundColor:
+                              Colors.transparent, // Prozirna pozadina
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<BarChartGroupData> _buildStackedBarGroups() {
+    return terminiPoMesecima.map((termin) {
+      return BarChartGroupData(
+        x: termin.mjesec,
+        barRods: [
+          BarChartRodData(
+            toY: termin.brojTermina.toDouble(),
+            width: 20,
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.blue,
+            rodStackItems: [
+              BarChartRodStackItem(
+                0,
+                termin.brojTermina.toDouble(),
+                Colors.blue,
+              ),
+            ],
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Januar',
+      'Februar',
+      'Mart',
+      'April',
+      'Maj',
+      'Juni',
+      'Juli',
+      'August',
+      'Septembar',
+      'Oktobar',
+      'Novembar',
+      'Decembar'
+    ];
+    return months[month - 1];
+  }
+}
+
+class TerminiPoMjesecima {
+  int godina;
+  int mjesec;
+  int brojTermina;
+
+  TerminiPoMjesecima({
+    required this.godina,
+    required this.mjesec,
+    required this.brojTermina,
+  });
+
+  factory TerminiPoMjesecima.fromJson(Map<String, dynamic> json) {
+    return TerminiPoMjesecima(
+      godina: json['godina'],
+      mjesec: json['mjesec'],
+      brojTermina: json['brojTermina'],
+    );
+  }
 }

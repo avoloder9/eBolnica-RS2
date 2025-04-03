@@ -1,3 +1,4 @@
+import 'package:ebolnica_desktop/models/Response/broj_pacijenata_response.dart';
 import 'package:ebolnica_desktop/models/hospitalizacija_model.dart';
 import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
@@ -197,5 +198,24 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     }
 
     throw Exception("Greška pri dobavljanju nalaza.");
+  }
+
+  Future<List<BrojPacijenataResponse>> getBrojPacijenata() async {
+    var url = "${BaseProvider.baseUrl}Pacijent/broj-pacijenata";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      if (data is Map<String, dynamic>) {
+        return [BrojPacijenataResponse.fromJson(data)];
+      } else {
+        throw Exception("Očekivana mapa iz JSON odgovora");
+      }
+    }
+    throw Exception("Greška prilikom dohvaćanja podataka");
   }
 }
