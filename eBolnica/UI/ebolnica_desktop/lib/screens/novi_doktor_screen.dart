@@ -26,7 +26,6 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
   final datumController = TextEditingController();
   final odjelController = TextEditingController();
   final specijalizacijaController = TextEditingController();
-  String specijalizacija = '';
   SearchResult<Doktor>? resultDoktor;
   SearchResult<Odjel>? resultOdjel;
 
@@ -240,62 +239,21 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: DropdownButtonFormField<String>(
-                    value: specijalizacija.isEmpty ? null : specijalizacija,
+                  child: TextFormField(
+                    controller: specijalizacijaController,
                     decoration: InputDecoration(
                       labelText: 'Specijalizacija',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      prefixIcon: const Icon(Icons.healing),
+                      prefixIcon: const Icon(Icons.medical_services_outlined),
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'Specijalista opće medicine',
-                          child: Text('Opća medicina')),
-                      DropdownMenuItem(
-                          value: 'Specijalista pedijatrije',
-                          child: Text('Pedijatrija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista ginekologije',
-                          child: Text('Ginekologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista hirurgije',
-                          child: Text('Hirurgija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista ortopedije',
-                          child: Text('Ortopedija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista kardiologije',
-                          child: Text('Kardiologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista pulmologije',
-                          child: Text('Pulmologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista psihijatrije',
-                          child: Text('Psihijatrija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista neuropsihijatar',
-                          child: Text('Neurologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista oftamologije',
-                          child: Text('Oftamologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista gastroenterologije',
-                          child: Text('Gastroenterologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista radiologije',
-                          child: Text('Radiologija')),
-                      DropdownMenuItem(
-                          value: 'Specijalista urolog',
-                          child: Text('Urologija')),
-                    ],
-                    onChanged: (value) {
-                      specijalizacija = value ?? '';
-                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Molimo odaberite specijalizaciju';
+                        return 'Molimo unesite specijalizaciju';
+                      }
+                      if (value[0] != value[0].toUpperCase()) {
+                        return 'Specijalizacija mora početi sa velikim slovom';
                       }
                       return null;
                     },
@@ -353,7 +311,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                         "lozinka": lozinka,
                         "lozinkaPotvrda": lozinkaPotvrda,
                         "dob": dob,
-                        "specijalizacija": specijalizacija,
+                        "specijalizacija": specijalizacijaController.text,
                         "odjelId": odabraniOdjel!.odjelId
                       };
 

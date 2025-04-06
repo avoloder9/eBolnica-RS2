@@ -24,15 +24,16 @@ namespace eBolnica.Services.Services
                 .ThenInclude(k => k.Korisnik)
                 .Include(y => y.RasporedSmjena);
 
-            if (search.RasporedSmjenaId != 0) 
+
+            if (search.RasporedSmjenaId.HasValue && search.RasporedSmjenaId.Value != 0)
             {
                 query = query.Where(x => x.RasporedSmjenaId == search.RasporedSmjenaId);
             }
 
-            query = query.Where(x => x.VrijemeOdlaska == null); 
-
-      
-            query = query.Where(x => x.VrijemeDolaska != null); 
+            if (search.AktivneSmjene == true)
+            {
+                query = query.Where(x => x.VrijemeDolaska != null && x.VrijemeOdlaska == null);
+            }
 
             return query;
         }
@@ -46,18 +47,22 @@ namespace eBolnica.Services.Services
                 throw new Exception("Medicinsko osoblje sa zadanim ID-om ne postoji ili nema povezanog korisnika.");
             }
             var rasporedSmjene = Context.RasporedSmjenas
-                .Any(x => x.RasporedSmjenaId == request.RasporedSmjenaId && x.KorisnikId == osoblje.Korisnik.KorisnikId);
+                .FirstOrDefault(x => x.RasporedSmjenaId == request.RasporedSmjenaId && x.KorisnikId == osoblje.Korisnik.KorisnikId);
 
-            if (!rasporedSmjene)
+            if (rasporedSmjene == null)
             {
-                throw new Exception("Smjena na taj dan ne postoji za tog korisnika.");
+                throw new Exception("Smjena ne postoji za tog korisnika.");
+            }
+            if (rasporedSmjene.Datum.Date != DateTime.Now.Date)
+            {
+                throw new Exception("Datum dolaska ne odgovara datumu smjene.");
             }
             var postojiRadniSati = Context.RadniSatis
        .Any(x => x.MedicinskoOsobljeId == request.MedicinskoOsobljeId &&
                  x.RasporedSmjenaId == request.RasporedSmjenaId &&
-                 x.VrijemeDolaska.Hours == request.VrijemeDolaska.Hours &&  
-                 x.VrijemeDolaska.Minutes == request.VrijemeDolaska.Minutes &&  
-                 x.VrijemeDolaska.Seconds == request.VrijemeDolaska.Seconds); 
+                 x.VrijemeDolaska.Hours == request.VrijemeDolaska.Hours &&
+                 x.VrijemeDolaska.Minutes == request.VrijemeDolaska.Minutes &&
+                 x.VrijemeDolaska.Seconds == request.VrijemeDolaska.Seconds);
 
             if (postojiRadniSati)
             {

@@ -6,6 +6,7 @@ namespace eBolnica.Model.SearchObjects
 {
     public class RadniSatiSearchObject : BaseSearchObject
     {
-        public int RasporedSmjenaId { get; set; }
+        public int? RasporedSmjenaId { get; set; }
+        public bool? AktivneSmjene { get; set; }
     }
 }

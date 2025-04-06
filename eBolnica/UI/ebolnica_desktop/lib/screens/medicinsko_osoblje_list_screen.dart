@@ -49,13 +49,14 @@ class _MedicinskoOsobljeListScreenState
   }
 
   void filterOsoblje(String query) async {
-    final results = osoblje.where((osoblje) {
-      final ime = osoblje.korisnik?.ime!.toLowerCase();
-      final prezime = osoblje.korisnik?.prezime!.toLowerCase();
+    final lowerQuery = query.toLowerCase().trim();
 
-      final matchesSearchQuery =
-          ('$ime $prezime'.contains(query.toLowerCase()) ||
-              '$prezime $ime'.contains(query.toLowerCase()));
+    final results = osoblje.where((osoblje) {
+      final ime = osoblje.korisnik?.ime!.toLowerCase() ?? '';
+      final prezime = osoblje.korisnik?.prezime!.toLowerCase() ?? '';
+
+      final matchesSearchQuery = '$ime $prezime'.startsWith(lowerQuery) ||
+          '$prezime $ime'.startsWith(lowerQuery);
 
       return matchesSearchQuery;
     }).toList();

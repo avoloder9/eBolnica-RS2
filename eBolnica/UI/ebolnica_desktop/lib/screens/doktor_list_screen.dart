@@ -71,18 +71,18 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
   }
 
   void filterDoctors(String query) {
-    final results = doktori.where((doctor) {
-      final ime = doctor.korisnik?.ime!.toLowerCase();
-      final prezime = doctor.korisnik?.prezime!.toLowerCase();
+    final lowerQuery = query.toLowerCase().trim();
+    final results = doktori.where((doktor) {
+      final ime = doktor.korisnik?.ime!.toLowerCase() ?? '';
+      final prezime = doktor.korisnik?.prezime!.toLowerCase() ?? '';
+      final specijalizacija = doktor.specijalizacija?.toLowerCase() ?? '';
 
-      final specijalizacija = doctor.specijalizacija?.toLowerCase();
-      final matchesSearchQuery =
-          (ime?.startsWith(query.toLowerCase()) ?? false) ||
-              (prezime?.startsWith(query.toLowerCase()) ?? false) ||
-              (specijalizacija?.startsWith(query.toLowerCase()) ?? false);
+      final matchesSearchQuery = (specijalizacija.startsWith(lowerQuery) ||
+          '$ime $prezime'.startsWith(lowerQuery) ||
+          '$prezime $ime'.startsWith(lowerQuery));
 
       final matchesOdjel =
-          selectedOdjelId == null || doctor.odjelId == selectedOdjelId;
+          selectedOdjelId == null || doktor.odjelId == selectedOdjelId;
       return matchesSearchQuery && matchesOdjel;
     }).toList();
 

@@ -45,7 +45,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
     DateTime now = DateTime.now();
     Duration duration = Duration(hours: now.hour, minutes: now.minute);
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -56,7 +56,9 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               },
               child: const Text('Otkazati'),
             ),
@@ -66,7 +68,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                     .getOsobljeByKorisnikId(widget.userId);
 
                 var request;
-
                 if (isDolazak) {
                   request = {
                     'medicinskoOsobljeId': osobljeId,
@@ -77,15 +78,16 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                   var response = await radniSatiProvider.insert(request);
 
                   if (response.radniSatiId != null) {
-                    radniSatiId = response.radniSatiId;
-                    showCustomDialog(
-                        context: context,
-                        title: "",
-                        message: "Uspješno prijavljen dolazak na smjenu",
-                        imagePath: "assets/images/success.png");
-                    await Future.delayed(const Duration(seconds: 2));
-
-                    setState(() {});
+                    if (mounted) {
+                      setState(() {
+                        radniSatiId = response.radniSatiId;
+                      });
+                      await showCustomDialog(
+                          context: context,
+                          title: "",
+                          message: "Uspješno prijavljen dolazak na smjenu",
+                          imagePath: "assets/images/success.png");
+                    }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -98,12 +100,12 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                       'vrijemeOdlaska': duration.toString(),
                     };
                     await radniSatiProvider.update(radniSatiId!, request);
-                    showCustomDialog(
+                    await showCustomDialog(
                         context: context,
                         title: "",
                         message: "Uspješno prijavljen odlazak sa smjene",
                         imagePath: "assets/images/success.png");
-                    await Future.delayed(const Duration(seconds: 2));
+                    fetchRaspored();
                     setState(() {});
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -112,9 +114,9 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                     );
                   }
                 }
-
-                setState(() {});
-                Navigator.of(context).pop();
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               },
               child: const Text('Potvrdi'),
             ),
@@ -197,6 +199,10 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                 RadniSati? radniSati = radniSatiSnapshot.data;
                 bool isDolazak = radniSati?.vrijemeDolaska == null;
 
+                bool danas = DateTime.now().day == raspored.datum!.day &&
+                    DateTime.now().month == raspored.datum!.month &&
+                    DateTime.now().year == raspored.datum!.year;
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Card(
@@ -248,15 +254,35 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                           isDolazak ? Icons.check_circle : Icons.circle,
                           color: isDolazak ? Colors.green : Colors.red,
                         ),
-                        onPressed: () {
-                          showPrijavaDialog(
-                              raspored.rasporedSmjenaId!, true, radniSati);
-                        },
+                        onPressed: danas
+                            ? () {
+                                showPrijavaDialog(raspored.rasporedSmjenaId!,
+                                    isDolazak, radniSati);
+                              }
+                            : () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Smjena nije za danas, nije moguće prijaviti radne sate"),
+                                        duration: Duration(seconds: 3),
+                                        backgroundColor:
+                                            Color.fromARGB(255, 114, 30, 148)));
+                              },
                       ),
-                      onTap: () {
-                        showPrijavaDialog(
-                            raspored.rasporedSmjenaId!, false, radniSati);
-                      },
+                      onTap: danas
+                          ? () {
+                              showPrijavaDialog(raspored.rasporedSmjenaId!,
+                                  !isDolazak, radniSati);
+                            }
+                          : () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "Smjena nije za danas, nije moguće odjaviti radne sate"),
+                                      duration: Duration(seconds: 3),
+                                      backgroundColor:
+                                          Color.fromARGB(255, 114, 30, 148)));
+                            },
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 16),
                     ),

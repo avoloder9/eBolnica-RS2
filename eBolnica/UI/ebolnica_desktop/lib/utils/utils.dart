@@ -250,7 +250,6 @@ class TerminiStackedBarChart extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Dodavanje naslova na vrhu
           const Text(
             'Broj zakazanih termina po mjesecima',
             style: TextStyle(
@@ -262,7 +261,7 @@ class TerminiStackedBarChart extends StatelessWidget {
           Expanded(
             child: BarChart(
               BarChartData(
-                gridData: FlGridData(show: false),
+                gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -272,7 +271,7 @@ class TerminiStackedBarChart extends StatelessWidget {
                       getTitlesWidget: (value, meta) {
                         return Text(
                           value.toInt().toString(),
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold),
                         );
                       },
@@ -284,12 +283,12 @@ class TerminiStackedBarChart extends StatelessWidget {
                       reservedSize: 40,
                       getTitlesWidget: (value, meta) {
                         return Padding(
-                          padding: EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.only(top: 8),
                           child: Transform.rotate(
                             angle: -0.4,
                             child: Text(
                               _getMonthName(value.toInt()),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -297,8 +296,8 @@ class TerminiStackedBarChart extends StatelessWidget {
                       },
                     ),
                   ),
-                  rightTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   topTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -325,8 +324,7 @@ class TerminiStackedBarChart extends StatelessWidget {
                         const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          backgroundColor:
-                              Colors.transparent, // Prozirna pozadina
+                          backgroundColor: Colors.transparent,
                         ),
                       );
                     },

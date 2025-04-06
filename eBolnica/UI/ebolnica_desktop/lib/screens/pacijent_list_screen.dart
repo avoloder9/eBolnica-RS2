@@ -185,6 +185,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                   const DataColumn(label: Text("Medicinska dokumentacija")),
                 const DataColumn(label: Text("")),
                 const DataColumn(label: Text("")),
+                const DataColumn(label: Text("")),
               ],
               rows: result?.result
                       .map<DataRow>(
@@ -268,6 +269,40 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                               },
                                             ),
                                           );
+                                        },
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
+                              DataCell(
+                                widget.userType == "administrator"
+                                    ? ElevatedButton.icon(
+                                        icon: const Icon(Icons.edit),
+                                        label: Text(e.korisnik!.status == false
+                                            ? "Aktiviraj"
+                                            : "Deaktiviraj"),
+                                        onPressed: () async {
+                                          bool noviStatus =
+                                              e.korisnik!.status == false;
+
+                                          var request = {
+                                            "ime": e.korisnik!.ime,
+                                            "prezime": e.korisnik!.prezime,
+                                            "telefon": e.korisnik!.telefon,
+                                            "adresa": e.adresa,
+                                            "status": noviStatus
+                                          };
+
+                                          provider.update(
+                                              e.pacijentId!, request);
+                                          await Flushbar(
+                                                  message:
+                                                      "Status su uspješno ažuriran",
+                                                  duration: const Duration(
+                                                      seconds: 3),
+                                                  backgroundColor: Colors.green)
+                                              .show(context);
+                                          _loadInitialData();
+                                          setState(() {});
                                         },
                                       )
                                     : const SizedBox.shrink(),
