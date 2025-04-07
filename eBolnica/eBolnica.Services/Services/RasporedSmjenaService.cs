@@ -25,7 +25,7 @@ namespace eBolnica.Services.Services
                 .Include(x => x.Smjena)
                 .Include(x => x.Korisnik)
                 .OrderBy(x => x.Datum)
-                .ThenBy(x => x.SmjenaId);
+                .ThenBy(x => x.SmjenaId).Where(x => x.Datum.Date >= DateTime.Now.Date);
 
             if (searchObject?.SmjenaId != null && searchObject.SmjenaId > 0)
             {
@@ -46,6 +46,7 @@ namespace eBolnica.Services.Services
                     Context.MedicinskoOsobljes.Any(m => m.KorisnikId == x.KorisnikId && m.OdjelId == searchObject.OdjelId)
                 );
             }
+            query = query.Where(x => !Context.RadniSatis.Any(rs => rs.RasporedSmjenaId == x.RasporedSmjenaId && rs.VrijemeOdlaska.HasValue));
 
             return query;
         }

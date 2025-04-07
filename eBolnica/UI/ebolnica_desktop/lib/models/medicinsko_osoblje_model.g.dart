@@ -17,6 +17,7 @@ MedicinskoOsoblje _$MedicinskoOsobljeFromJson(Map<String, dynamic> json) =>
       odjel: json['odjel'] == null
           ? null
           : Odjel.fromJson(json['odjel'] as Map<String, dynamic>),
+      obrisano: json['obrisano'] as bool?,
     );
 
 Map<String, dynamic> _$MedicinskoOsobljeToJson(MedicinskoOsoblje instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$MedicinskoOsobljeToJson(MedicinskoOsoblje instance) =>
       'odjelId': instance.odjelId,
       'korisnik': instance.korisnik,
       'odjel': instance.odjel,
+      'obrisano': instance.obrisano,
     };

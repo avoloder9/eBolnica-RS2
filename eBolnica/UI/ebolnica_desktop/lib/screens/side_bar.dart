@@ -62,7 +62,6 @@ class SideBar extends StatelessWidget {
                 RasporedSmjenaScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Pregledi',
                 PreglediListScreen(userId: userId, userType: userType)),
-            _buildListTile(context, 'Izvještaji', '/izvjestaji'),
             _buildListTile(context, 'Postavke',
                 PostavkeScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Odjava', const LoginScreen()),

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using eBolnica.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace eBolnica.Services.Database;
 
-public partial class Operacija
+public partial class Operacija : ISoftDelete
 {
     public int OperacijaId { get; set; }
 
@@ -12,7 +13,8 @@ public partial class Operacija
     public int DoktorId { get; set; }
 
     public DateTime DatumOperacije { get; set; }
-
+    public bool Obrisano { get; set; }
+    public DateTime? VrijemeBrisanja { get; set; }
     public int? TerapijaId { get; set; }
 
     public string TipOperacije { get; set; } = null!;

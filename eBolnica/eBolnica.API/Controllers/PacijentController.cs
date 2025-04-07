@@ -19,7 +19,7 @@ namespace eBolnica.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]
+        [HttpPost("register")]      
         public IActionResult Register([FromBody] PacijentInsertRequest request)
         {
             try
@@ -31,6 +31,12 @@ namespace eBolnica.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [AllowAnonymous]
+        public override Pacijent Insert(PacijentInsertRequest request)
+        {
+            return base.Insert(request);
         }
 
         [HttpGet("GetTerminByPacijent")]
@@ -46,6 +52,7 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpGet("GetPacijentIdByKorisnikId/{korisnikId}")]
         public IActionResult GetPacijentIdByKorisnikId(int korisnikId)
         {
@@ -72,6 +79,7 @@ namespace eBolnica.API.Controllers
         {
             return Ok(_pacijentService.GetPacijentiZaHospitalizaciju());
         }
+
         [HttpGet("getPregledByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetPregledByPacijentId(int pacijentId)
         {
@@ -82,6 +90,7 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
         [HttpGet("getHospitalizacijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetHospitalizacijeByPacijentId(int pacijentId)
         {
@@ -92,6 +101,7 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
         [HttpGet("getOtpusnaPismaByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetOtpusnaPismaByPacijentId(int pacijentId)
         {
@@ -102,6 +112,7 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
         [HttpGet("getTerapijaByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetTerapijaByPacijentId(int pacijentId)
         {
@@ -112,6 +123,29 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
+        [HttpGet("getAktivneTerapijeByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetAktivneTerapijeByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetAktivneTerapijeByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Terapije nisu pronadjene" });
+            }
+            return Ok(pacijent);
+        }
+
+        [HttpGet("getGotoveTerapijeByPacijentId/{pacijentId}")]
+        public async Task<IActionResult> GetGotoveTerapijeByPacijentId(int pacijentId)
+        {
+            var pacijent = await _pacijentService.GetGotoveTerapijeByPacijentIdAsync(pacijentId);
+            if (pacijent == null)
+            {
+                return NotFound(new { message = "Terapije nisu pronadjene" });
+            }
+            return Ok(pacijent);
+        }
+
         [HttpGet("getNalaziByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetNalaziByPacijentId(int pacijentId)
         {
@@ -122,6 +156,7 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
         [HttpGet("getOperacijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetOperacijeByPacijentId(int pacijentId)
         {
@@ -131,6 +166,12 @@ namespace eBolnica.API.Controllers
                 return NotFound(new { message = "Operacije nisu pronadjene" });
             }
             return Ok(pacijent);
+        }
+        [HttpGet("broj-pacijenata")]
+        public IActionResult GetBrojPacijenata()
+        {
+            var result = _pacijentService.GetBrojPacijenata();
+            return Ok(result);
         }
     }
 }

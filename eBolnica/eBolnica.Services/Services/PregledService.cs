@@ -1,5 +1,6 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.UputnicaStateMachine;
@@ -51,7 +52,7 @@ namespace eBolnica.Services.Services
         }
         public override void BeforeInsert(PregledInsertRequest request, Database.Pregled entity)
         {
-            var uputnica = Context.Uputnicas.Where(p => p.UputnicaId == request.UputnicaId ).Select(p => new { p.StateMachine, p.Termin.DatumTermina }).FirstOrDefault();
+            var uputnica = Context.Uputnicas.Where(p => p.UputnicaId == request.UputnicaId).Select(p => new { p.StateMachine, p.Termin.DatumTermina }).FirstOrDefault();
 
             if (uputnica == null)
             {
@@ -75,9 +76,26 @@ namespace eBolnica.Services.Services
             }
             base.BeforeInsert(request, entity);
 
-            var baseUputnicaState = new BaseUputnicaState(Context,Mapper,ServiceProvider);
+            var baseUputnicaState = new BaseUputnicaState(Context, Mapper, ServiceProvider);
             var state = baseUputnicaState.CreateState(uputnica.StateMachine);
             state.Close(request.UputnicaId);
+        }
+
+        public List<Model.Response.BrojPregledaPoDanuResponse> GetBrojPregledaPoDanu(int brojDana)
+        {
+            DateTime endDate = DateTime.Now;
+            DateTime startDate = endDate.AddDays(-brojDana);
+
+            return Context.Pregleds
+                .Where(p => p.Uputnica.Termin.DatumTermina >= startDate && p.Uputnica.Termin.DatumTermina <= endDate)
+                .GroupBy(p => p.Uputnica.Termin.DatumTermina.Date)
+                .Select(g => new BrojPregledaPoDanuResponse
+                {
+                    Datum = g.Key,
+                    BrojPregleda = g.Count()
+                })
+                .OrderBy(x => x.Datum)
+                .ToList();
         }
     }
 }

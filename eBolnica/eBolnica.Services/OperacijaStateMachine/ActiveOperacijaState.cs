@@ -18,7 +18,7 @@ namespace eBolnica.Services.OperacijaStateMachine
         {
             var set = Context.Set<Database.Operacija>();
             var entity = set.Find(id);
-            entity.StateMachine = "hidden";
+            entity!.StateMachine = "hidden";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Operacija>(entity);
         }
@@ -26,7 +26,7 @@ namespace eBolnica.Services.OperacijaStateMachine
         {
             var set = Context.Set<Database.Operacija>();
             var entity = set.Find(id);
-            entity.StateMachine = "closed";
+            entity!.StateMachine = "closed";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Operacija>(entity);
         }

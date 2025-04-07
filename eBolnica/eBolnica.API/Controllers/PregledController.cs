@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eBolnica.API.Controllers
@@ -10,6 +11,13 @@ namespace eBolnica.API.Controllers
     [Route("[controller]")]
     public class PregledController : BaseCRUDController<Pregled, PregledSearchObject, PregledInsertRequest, PregledUpdateRequest>
     {
-        public PregledController(IPregledService service) : base(service) { }
+        private readonly IPregledService _pregledService;
+        public PregledController(IPregledService service) : base(service) { _pregledService = service; }
+        [HttpGet("broj-pregleda")]
+        public IActionResult GetBrojPregledaPoDanu([FromQuery] int brojDana)
+        {
+            var result = _pregledService.GetBrojPregledaPoDanu(brojDana);
+            return Ok(result);
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace eBolnica.Services.Services
 
             if (!string.IsNullOrWhiteSpace(searchObject?.NazivSmjene))
             {
-                query = query.Where(x => x.NazivSmjene.StartsWith(searchObject.NazivSmjene));
+                query = query.Where(x => x.NazivSmjene!.StartsWith(searchObject.NazivSmjene));
             }
 
             return query;

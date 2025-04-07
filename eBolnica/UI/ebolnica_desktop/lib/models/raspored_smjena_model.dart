@@ -6,7 +6,7 @@ part 'raspored_smjena_model.g.dart';
 
 @JsonSerializable()
 class RasporedSmjena {
-  int? rasporedSmjena;
+  int? rasporedSmjenaId;
   int? smjenaId;
   int? korisnikId;
   DateTime? datum;
@@ -14,7 +14,7 @@ class RasporedSmjena {
   Smjena? smjena;
 
   RasporedSmjena(
-      {this.rasporedSmjena,
+      {this.rasporedSmjenaId,
       this.smjenaId,
       this.korisnikId,
       this.datum,

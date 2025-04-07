@@ -14,6 +14,7 @@ namespace eBolnica.Model.Models
         public string Adresa { get; set; } = null!;
 
         public int Dob { get; set; }
+        public bool Obrisano { get; set; }
         public virtual Korisnik? Korisnik { get; set; } = null!;
     }
 }

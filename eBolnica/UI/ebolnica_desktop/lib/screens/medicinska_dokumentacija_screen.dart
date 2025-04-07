@@ -8,7 +8,7 @@ import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
-import 'package:ebolnica_desktop/screens/nalaz_details_screen.dart';
+import 'package:ebolnica_desktop/screens/nalaz_detalji_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 

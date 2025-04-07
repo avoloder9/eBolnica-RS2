@@ -11,9 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "eBolnica.Services", "eBolni
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D072FA94-DE93-4AFC-A856-460A6A2CFCE3}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eBolnica.Subscriber", "eBolnica.Subscriber\eBolnica.Subscriber.csproj", "{1D8A7158-BFEF-49DD-9498-DEFCF722D70D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +36,10 @@ Global
 		{EAB96781-233A-46AD-808A-02A20DA2619F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAB96781-233A-46AD-808A-02A20DA2619F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAB96781-233A-46AD-808A-02A20DA2619F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D8A7158-BFEF-49DD-9498-DEFCF722D70D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D8A7158-BFEF-49DD-9498-DEFCF722D70D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D8A7158-BFEF-49DD-9498-DEFCF722D70D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D8A7158-BFEF-49DD-9498-DEFCF722D70D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

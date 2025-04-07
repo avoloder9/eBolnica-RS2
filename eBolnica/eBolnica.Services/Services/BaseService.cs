@@ -59,7 +59,7 @@ namespace eBolnica.Services.Services
             }
             else
             {
-                return null;
+                return null!;
             }
         }
     }

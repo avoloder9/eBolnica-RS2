@@ -21,13 +21,13 @@ namespace eBolnica.Services.OperacijaStateMachine
             var entity = set.Find(id);
             Mapper.Map(request, entity);
             Context.SaveChanges();
-            return Mapper.Map<Model.Models.Operacija>(entity);
+            return Mapper.Map<Model.Models.Operacija>(entity!);
         }
         public override Model.Models.Operacija Activate(int id)
         {
             var set = Context.Set<Database.Operacija>();
             var entity = set.Find(id);
-            entity.StateMachine = "active";
+            entity!.StateMachine = "active";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Operacija>(entity);
         }
@@ -35,7 +35,7 @@ namespace eBolnica.Services.OperacijaStateMachine
         {
             var set = Context.Set<Database.Operacija>();
             var entity = set.Find(id);
-            entity.StateMachine = "hidden";
+            entity!.StateMachine = "hidden";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Operacija>(entity);
         }
@@ -43,7 +43,7 @@ namespace eBolnica.Services.OperacijaStateMachine
         {
             var set = Context.Set<Database.Operacija>();
             var entity = set.Find(id);
-            entity.StateMachine = "cancelled";
+            entity!.StateMachine = "cancelled";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Operacija>(entity);
         }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace eBolnica.Model.Requests
 {
-    public class SlobodanDanInsertRequest
+    public class SlobodniDanInsertRequest
     {
         public int KorisnikId { get; set; }
 
@@ -13,6 +13,6 @@ namespace eBolnica.Model.Requests
 
         public string Razlog { get; set; } = null!;
 
-        public string Status { get; set; } = null!;
+        public bool? Status { get; set; } = null!;
     }
 }

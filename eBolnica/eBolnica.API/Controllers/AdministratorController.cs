@@ -2,6 +2,7 @@
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
+using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,5 +33,13 @@ namespace eBolnica.API.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("dashboard-data")]
+        public IActionResult GetDashboardData()
+        {
+            var result = _administratorService.GetDashboardData();
+            return Ok(result);
+        }
+
     }
 }

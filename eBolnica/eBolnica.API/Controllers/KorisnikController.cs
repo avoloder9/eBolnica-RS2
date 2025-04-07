@@ -30,22 +30,23 @@ namespace eBolnica.API.Controllers
         {
             var authenticationResponse = await korisnikService.AuthenticateUser(request.Username, request.Password);
             String? userType;
-            string? odjelNaziv=null;
+            string? odjelNaziv = null;
             switch (authenticationResponse.Result)
             {
                 case AuthenticationResult.Success:
                     var userId = authenticationResponse.UserId;
-                    
+
                     if (korisnikService.isKorisnikDoktor((int)userId))
                     {
                         userType = "doktor";
 
-                        var doktor=await Context.Doktors.Include(x=>x.Odjel).FirstOrDefaultAsync(x=>x.KorisnikId== userId);
+                        var doktor = await Context.Doktors.Include(x => x.Odjel).FirstOrDefaultAsync(x => x.KorisnikId == userId);
                         if (doktor != null)
                         {
                             odjelNaziv = doktor.Odjel?.Naziv;
                         }
                     }
+
                     else if (korisnikService.isKorisnikPacijent((int)userId))
                     {
                         userType = "pacijent";
@@ -57,6 +58,11 @@ namespace eBolnica.API.Controllers
                     else if (korisnikService.isKorisnikMedicinskoOsoblje((int)userId))
                     {
                         userType = "medicinsko osoblje";
+                        var osoblje = await Context.MedicinskoOsobljes.Include(x => x.Odjel).FirstOrDefaultAsync(x => x.KorisnikId == userId);
+                        if (osoblje != null)
+                        {
+                            odjelNaziv = osoblje.Odjel?.Naziv;
+                        }
                     }
                     else
                     {
@@ -66,14 +72,19 @@ namespace eBolnica.API.Controllers
                     {
                         if (userType == "administrator" && request.DeviceType == "mobile")
                         {
-                            return BadRequest("Administrator ne moze koristiti mobilnu aplikaciju");
+                            return StatusCode(StatusCodes.Status403Forbidden, new { message = "Administrator ne može koristiti mobilnu aplikaciju." });
                         }
                     }
-                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik=authenticationResponse.Korisnik, Odjel=odjelNaziv });
+                    return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik = authenticationResponse.Korisnik, Odjel = odjelNaziv });
                 case AuthenticationResult.UserNotFound:
-                    return BadRequest("Korisnik nije pronadjen.");
+                    return Unauthorized(new { message = "Korisnik nije pronadjen." });
+
+                case AuthenticationResult.InvalidPassword:
+                    return Unauthorized(new { message = "Pogresno korisnicko ime ili lozinka." });
+
                 default:
-                    return StatusCode(500, "Doslo je do greske tokom autentifikacije");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do neocekivane greške." });
+
 
             }
         }

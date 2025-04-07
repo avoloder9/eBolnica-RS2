@@ -85,12 +85,14 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
       );
     }
     if (pregledi == null || pregledi!.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text(
-            "Nema obavljenih pregleda",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      return const Expanded(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Text(
+              "Nema obavljenih pregleda",
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       );

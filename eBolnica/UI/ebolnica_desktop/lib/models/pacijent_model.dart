@@ -25,29 +25,31 @@ class Pacijent {
   int? brojZdravstveneKartice;
   String? adresa;
   int? dob;
+  bool? obrisano;
+
   final Korisnik? korisnik;
   @JsonKey(includeFromJson: false, includeToJson: false)
   int? korisnikId;
-  Pacijent({
-    this.pacijentId,
-    this.ime,
-    this.prezime,
-    this.email,
-    this.korisnickoIme,
-    this.lozinka,
-    this.lozinkaPotvrda,
-    this.slika,
-    this.slikaThumb,
-    this.datumRodjenja,
-    this.telefon,
-    this.spol,
-    this.status = true,
-    this.brojZdravstveneKartice,
-    this.adresa,
-    this.dob,
-    this.korisnikId,
-    this.korisnik,
-  });
+  Pacijent(
+      {this.pacijentId,
+      this.ime,
+      this.prezime,
+      this.email,
+      this.korisnickoIme,
+      this.lozinka,
+      this.lozinkaPotvrda,
+      this.slika,
+      this.slikaThumb,
+      this.datumRodjenja,
+      this.telefon,
+      this.spol,
+      this.status = true,
+      this.brojZdravstveneKartice,
+      this.adresa,
+      this.dob,
+      this.korisnikId,
+      this.korisnik,
+      this.obrisano});
 
   factory Pacijent.fromJson(Map<String, dynamic> json) =>
       _$PacijentFromJson(json);

@@ -10,14 +10,14 @@ class MedicinskoOsoblje {
   int? odjelId;
   Korisnik? korisnik;
   Odjel? odjel;
-
-  MedicinskoOsoblje({
-    this.medicinskoOsobljeId,
-    this.korisnikId,
-    this.odjelId,
-    this.korisnik,
-    this.odjel,
-  });
+  bool? obrisano;
+  MedicinskoOsoblje(
+      {this.medicinskoOsobljeId,
+      this.korisnikId,
+      this.odjelId,
+      this.korisnik,
+      this.odjel,
+      this.obrisano});
   factory MedicinskoOsoblje.fromJson(Map<String, dynamic> json) =>
       _$MedicinskoOsobljeFromJson(json);
   Map<String, dynamic> toJson() => _$MedicinskoOsobljeToJson(this);

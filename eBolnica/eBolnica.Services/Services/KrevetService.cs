@@ -1,5 +1,6 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
@@ -40,7 +41,7 @@ namespace eBolnica.Services.Services
             }
             var soba = Context.Set<Database.Soba>().Include(x => x.Odjel).FirstOrDefault(y => y.SobaId == request.SobaId);
 
-            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == soba.Odjel.BolnicaId);
+            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == soba!.Odjel.BolnicaId);
             if (bolnica == null)
             {
                 throw new Exception("Bolnica sa zadanim ID-om ne postoji");
@@ -50,7 +51,7 @@ namespace eBolnica.Services.Services
                 bolnica.UkupanBrojKreveta = 0;
             }
             bolnica.UkupanBrojKreveta++;
-            soba.BrojKreveta++;
+            soba!.BrojKreveta++;
             if (soba.Odjel != null)
             {
                 soba.Odjel.BrojKreveta++;
@@ -96,7 +97,7 @@ namespace eBolnica.Services.Services
             {
                 trenutniKrevet.Soba.BrojKreveta--;
                 var novaSoba = Context.Sobas.Find(request.SobaId);
-                novaSoba.BrojKreveta++;
+                novaSoba!.BrojKreveta++;
             }
             Mapper.Map(request, entity);
 
@@ -143,6 +144,19 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
             return krevetModel;
+        }
+
+        public PopunjenostBolniceResponse GetPopunjenostBolnice()
+        {
+            var ukupnoKreveta = Context.Krevets.Count(k => !k.Obrisano);
+            var zauzetiKreveta = Context.Krevets.Count(k => k.Zauzet && !k.Obrisano);
+            var slobodniKreveti = ukupnoKreveta - zauzetiKreveta;
+            return new PopunjenostBolniceResponse
+            {
+                UkupnoKreveta = ukupnoKreveta,
+                ZauzetiKreveta = zauzetiKreveta,
+                SlobodniKreveta = slobodniKreveti
+            };
         }
     }
 }

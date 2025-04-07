@@ -60,17 +60,17 @@ namespace eBolnica.Services.OperacijaStateMachine
             switch (stateName)
             {
                 case "initial":
-                    return ServiceProvider.GetService<InitialOperacijaState>();
+                    return ServiceProvider.GetService<InitialOperacijaState>()!;
                 case "draft":
-                    return ServiceProvider.GetService<DraftOperacijaState>();
+                    return ServiceProvider.GetService<DraftOperacijaState>()!;
                 case "active":
-                    return ServiceProvider.GetService<ActiveOperacijaState>();
+                    return ServiceProvider.GetService<ActiveOperacijaState>()!;
                 case "hidden":
-                    return ServiceProvider.GetService<HiddenOperacijaState>();
+                    return ServiceProvider.GetService<HiddenOperacijaState>()!;
                 case "closed":
-                    return ServiceProvider.GetService<ClosedOperacijaState>();
+                    return ServiceProvider.GetService<ClosedOperacijaState>()!;
                 case "cancelled":
-                    return ServiceProvider.GetService<CancelledOperacijaState>();
+                    return ServiceProvider.GetService<CancelledOperacijaState>()!;
                 default: throw new Exception("State not recognized");
             }
         }

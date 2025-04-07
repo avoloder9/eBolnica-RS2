@@ -19,7 +19,7 @@ namespace eBolnica.Services.UputnicaStateMachine
 
             var entity = set.Find(id);
 
-            entity.StateMachine = "draft";
+            entity!.StateMachine = "draft";
 
             Context.SaveChanges();
 

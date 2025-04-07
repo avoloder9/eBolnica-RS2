@@ -4,8 +4,9 @@ import 'package:ebolnica_desktop/models/nalaz_parametar_model.dart';
 import 'package:ebolnica_desktop/providers/bolnica_provider.dart';
 import 'package:ebolnica_desktop/providers/nalaz_parametar_provider.dart';
 import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class NalazDetaljiScreen extends StatefulWidget {
   final LaboratorijskiNalaz laboratorijskiNalaz;
@@ -37,7 +38,8 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
 
   Future<void> getNalazParametri() async {
     var result = await nalazParametarProvider.getNalazParametarValues(
-        widget.laboratorijskiNalaz.laboratorijskiNalazId!);
+        laboratorijskiNalazId:
+            widget.laboratorijskiNalaz.laboratorijskiNalazId!);
     setState(() {
       parametri = result;
       isLoading = false;
@@ -99,6 +101,11 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
                   ),
                   const Divider(),
                   buildParametriTable(),
+                  ElevatedButton.icon(
+                    onPressed: isLoading ? null : _printNalaz,
+                    icon: const Icon(Icons.print),
+                    label: const Text("Printaj i preuzmi"),
+                  ),
                 ],
               ),
             ),
@@ -188,5 +195,69 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
         }).toList(),
       ),
     );
+  }
+
+  Future<void> _printNalaz() async {
+    final pdf = pw.Document();
+
+    final pacijent = widget.laboratorijskiNalaz.pacijent?.korisnik;
+    final doktor = widget.laboratorijskiNalaz.doktor?.korisnik;
+
+    pdf.addPage(
+      pw.MultiPage(
+        build: (pw.Context context) => [
+          pw.Text('Laboratorijski nalaz', style: pw.TextStyle(fontSize: 24)),
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Pacijent: ${pacijent?.ime ?? ""} ${pacijent?.prezime ?? ""} '
+            '(${formattedDate(pacijent?.datumRodjenja)}, ${pacijent?.spol})',
+          ),
+          pw.Text(
+            'Doktor: ${doktor?.ime ?? ""} ${doktor?.prezime ?? ""}',
+          ),
+          pw.Text(
+              'Datum nalaza: ${formattedDate(widget.laboratorijskiNalaz.datumNalaza)}'),
+          if (bolnica != null) ...[
+            pw.Text('Ustanova: ${bolnica!.naziv}'),
+            pw.Text('Adresa: ${bolnica!.adresa}'),
+          ],
+          pw.SizedBox(height: 16),
+          pw.Table.fromTextArray(
+            headers: [
+              'Parametar',
+              'U ref. intervalu',
+              'Izdvojeni rezultat',
+              'Ref. interval'
+            ],
+            data: parametri?.map((parametar) {
+                  final vrijednost = parametar.vrijednost;
+                  final min = parametar.parametar?.minVrijednost;
+                  final max = parametar.parametar?.maxVrijednost;
+                  String refInterval = "${min ?? "N/A"} - ${max ?? "N/A"}";
+                  String uRefIntervalu = "";
+                  String izdvojeniRezultat = "";
+
+                  if (vrijednost != null && min != null && max != null) {
+                    if (vrijednost >= min && vrijednost <= max) {
+                      uRefIntervalu = vrijednost.toString();
+                    } else {
+                      izdvojeniRezultat = vrijednost.toString();
+                    }
+                  }
+
+                  return [
+                    parametar.parametar?.naziv ?? "N/A",
+                    uRefIntervalu,
+                    izdvojeniRezultat,
+                    refInterval,
+                  ];
+                }).toList() ??
+                [],
+          )
+        ],
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 }

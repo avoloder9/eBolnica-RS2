@@ -6,6 +6,7 @@ using eBolnica.Services.Database;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.OperacijaStateMachine;
+using eBolnica.Services.RabbitMQ;
 using eBolnica.Services.Services;
 using eBolnica.Services.UputnicaStateMachine;
 using Mapster;
@@ -43,7 +44,7 @@ builder.Services.AddTransient<IVitalniParametriService, VitalniParemetriService>
 builder.Services.AddTransient<IRadniZadatakService, RadniZadatakService>();
 builder.Services.AddTransient<ISmjenaService, SmjenaService>();
 builder.Services.AddTransient<IRasporedSmjenaService, RasporedSmjenaService>();
-builder.Services.AddTransient<ISlobodanDanService, SlobodanDanService>();
+builder.Services.AddTransient<ISlobodniDanService, SlobodniDanService>();
 builder.Services.AddTransient<IRadniSatiService, RadniSatiService>();
 builder.Services.AddTransient<IOtpusnoPismoService, OtpusnoPismoService>();
 
@@ -63,7 +64,7 @@ builder.Services.AddTransient<ClosedOperacijaState>();
 builder.Services.AddTransient<CancelledOperacijaState>();
 
 builder.Services.AddTransient<SobaHelper>();
-
+builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
 builder.Services.AddControllers(x =>
 {
     x.Filters.Add<ExceptionFilter>();

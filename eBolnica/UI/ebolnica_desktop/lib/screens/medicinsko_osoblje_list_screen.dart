@@ -1,9 +1,11 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/medicinsko_osoblje_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_desktop/screens/edit_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/novi_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -47,13 +49,14 @@ class _MedicinskoOsobljeListScreenState
   }
 
   void filterOsoblje(String query) async {
-    final results = osoblje.where((osoblje) {
-      final ime = osoblje.korisnik?.ime!.toLowerCase();
-      final prezime = osoblje.korisnik?.prezime!.toLowerCase();
+    final lowerQuery = query.toLowerCase().trim();
 
-      final matchesSearchQuery =
-          ('$ime $prezime'.contains(query.toLowerCase()) ||
-              '$prezime $ime'.contains(query.toLowerCase()));
+    final results = osoblje.where((osoblje) {
+      final ime = osoblje.korisnik?.ime!.toLowerCase() ?? '';
+      final prezime = osoblje.korisnik?.prezime!.toLowerCase() ?? '';
+
+      final matchesSearchQuery = '$ime $prezime'.startsWith(lowerQuery) ||
+          '$prezime $ime'.startsWith(lowerQuery);
 
       return matchesSearchQuery;
     }).toList();
@@ -108,7 +111,7 @@ class _MedicinskoOsobljeListScreenState
                 },
               );
             },
-            child: const Text("Dodaj"),
+            child: const Text("Dodaj novo osoblje"),
           ),
         ],
       ),
@@ -132,6 +135,7 @@ class _MedicinskoOsobljeListScreenState
                 DataColumn(label: Text("Spol")),
                 DataColumn(label: Text("Odjel")),
                 DataColumn(label: Text("Status")),
+                DataColumn(label: Text("")),
                 DataColumn(label: Text("")),
               ],
               rows: filteredOsoblje
@@ -157,20 +161,55 @@ class _MedicinskoOsobljeListScreenState
                         DataCell(Text(e.korisnik!.status == true
                             ? "Aktivan"
                             : "Neaktivan")),
-                        DataCell(ElevatedButton(
-                          child: const Text("Ažuriraj podatke"),
-                          onPressed: () {
-                            showDialog(
+                        DataCell(
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.edit),
+                            label: const Text("Ažuriraj podatke"),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    EditMedicinskoOsobljeScreen(
+                                  medicinskoOsobljeId: e.medicinskoOsobljeId!,
+                                  onSave: () {
+                                    fetchOsoblje();
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        DataCell(ElevatedButton.icon(
+                          icon: const Icon(Icons.delete),
+                          label: const Text("Ukloni osoblje"),
+                          onPressed: () async {
+                            showCustomDialog(
                               context: context,
-                              builder: (context) => EditMedicinskoOsobljeScreen(
-                                medicinskoOsobljeId: e.medicinskoOsobljeId!,
-                                onSave: () {
-                                  fetchOsoblje();
-                                },
-                              ),
+                              title: "Obrisati medicinsko osoblje?",
+                              message:
+                                  "Da li ste sigurni da zelite ukloniti odabrano osoblje",
+                              confirmText: "Da",
+                              onConfirm: () async {
+                                try {
+                                  await provider.delete(e.medicinskoOsobljeId!);
+                                  await Flushbar(
+                                    message: "Osoblje je uspješno uklonjeno!",
+                                    duration: const Duration(seconds: 3),
+                                    backgroundColor: Colors.green,
+                                  ).show(context);
+                                } catch (error) {
+                                  await Flushbar(
+                                    message:
+                                        "Došlo je do greške prilikom uklanjanja osoblja.",
+                                    duration: const Duration(seconds: 3),
+                                    backgroundColor: Colors.red,
+                                  ).show(context);
+                                }
+                                fetchOsoblje();
+                              },
                             );
                           },
-                        ))
+                        )),
                       ],
                     ),
                   )

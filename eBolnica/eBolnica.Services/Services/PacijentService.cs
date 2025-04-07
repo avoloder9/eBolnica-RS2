@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
 using System.Security.Cryptography.X509Certificates;
+using eBolnica.Model.Response;
 
 namespace eBolnica.Services.Services
 {
@@ -72,7 +73,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
-            query = query.Include(x => x.Korisnik);
+            query = query.Include(x => x.Korisnik).Where(x => x.Obrisano == false);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
@@ -95,7 +96,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.Pacijent>().Include(x => x.Korisnik).FirstOrDefault(a => a.PacijentId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Pacijent>(entity);
         }
@@ -137,7 +138,7 @@ namespace eBolnica.Services.Services
 
             if (!termini.Any())
             {
-            return new List<Model.Models.Termin>();
+                return new List<Model.Models.Termin>();
             }
             var terminModel = termini.Select(p => new Model.Models.Termin
             {
@@ -177,8 +178,8 @@ namespace eBolnica.Services.Services
         }
         public int GetPacijentIdByKorisnikId(int korisnikId)
         {
-            var admin = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return admin.PacijentId;
+            var pacijent = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return pacijent!.PacijentId;
         }
         public List<Pacijent> GetPacijentWithDokumentacija()
         {
@@ -222,14 +223,26 @@ namespace eBolnica.Services.Services
         }
         public async Task<List<Database.OtpusnoPismo>> GetOtpusnaPismaByPacijentIdAsync(int pacijentId)
         {
-            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x.MedicinskaDokumentacija)
+            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x!.MedicinskaDokumentacija)
                 .Where(x => x.Hospitalizacija!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
         }
         public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
         {
-            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
-                .Include(x => x.Pregled).ThenInclude(x => x.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
                 .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
+        }
+        public async Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId && x.DatumZavrsetka >= DateTime.Now).ToListAsync();
+        }
+        public async Task<List<Database.Terapija>> GetGotoveTerapijeByPacijentIdAsync(int pacijentId)
+        {
+            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId && x.DatumZavrsetka < DateTime.Now).ToListAsync();
         }
         public async Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId)
         {
@@ -241,6 +254,33 @@ namespace eBolnica.Services.Services
             return await Context.Operacijas.Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).Include(x => x.Doktor)
                 .ThenInclude(x => x.Korisnik).Include(x => x.Terapija).Where(x => x.PacijentId == pacijentId).ToListAsync();
         }
+        public List<Model.Response.BrojZaposlenihPoOdjeluResponse> GetUkupanBrojZaposlenihPoOdjelima()
+        {
+            return Context.Odjels
+                .Select(o => new BrojZaposlenihPoOdjeluResponse
+                {
+                    OdjelId = o.OdjelId,
+                    NazivOdjela = o.Naziv,
+                    UkupanBrojZaposlenih = Context.Doktors.Count(d => d.OdjelId == o.OdjelId) +
+                                          Context.MedicinskoOsobljes.Count(m => m.OdjelId == o.OdjelId)
+                })
+                .OrderBy(o => o.NazivOdjela)
+                .ToList();
+        }
+        public BrojPacijenataResponse GetBrojPacijenata()
+        {
+            var ukupnoPacijenata = Context.Pacijents.Count(p => !p.Obrisano);
+            var brojHospitalizovanih = Context.Pacijents
+          .Where(p => !p.Obrisano)
+          .Count(p => Context.MedicinskaDokumentacijas
+              .Any(m => m.PacijentId == p.PacijentId && m.Hospitalizovan.HasValue && m.Hospitalizovan == true));
 
+
+            return new BrojPacijenataResponse
+            {
+                UkupanBrojPacijenata = ukupnoPacijenata,
+                BrojHospitalizovanih = brojHospitalizovanih
+            };
+        }
     }
 }

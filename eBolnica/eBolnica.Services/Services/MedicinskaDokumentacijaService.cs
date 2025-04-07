@@ -42,7 +42,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.MedicinskaDokumentacija>().Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).FirstOrDefault(a => a.MedicinskaDokumentacijaId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<MedicinskaDokumentacija>(entity);
         }

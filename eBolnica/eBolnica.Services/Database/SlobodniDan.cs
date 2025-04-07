@@ -1,9 +1,10 @@
-﻿using System;
+﻿using eBolnica.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace eBolnica.Services.Database;
 
-public partial class SlobodniDan
+public partial class SlobodniDan : ISoftDelete
 {
     public int SlobodniDanId { get; set; }
 
@@ -14,6 +15,7 @@ public partial class SlobodniDan
     public string Razlog { get; set; } = null!;
 
     public bool? Status { get; set; }
-
+    public bool Obrisano { get; set; }
+    public DateTime? VrijemeBrisanja { get; set; }
     public virtual Korisnik Korisnik { get; set; } = null!;
 }

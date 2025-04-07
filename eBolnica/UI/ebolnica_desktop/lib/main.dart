@@ -1,17 +1,18 @@
-import 'package:ebolnica_desktop/api_constants.dart';
-import 'package:ebolnica_desktop/models/login_model.dart';
+import 'dart:convert';
+
 import 'package:ebolnica_desktop/providers/auth_provider.dart';
+import 'package:ebolnica_desktop/providers/base_provider.dart';
+import 'package:ebolnica_desktop/providers/korisnik_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/dashboard_doctor.dart';
 import 'package:ebolnica_desktop/screens/dashboard_medical_staff.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
-import 'package:ebolnica_desktop/screens/registration.dart';
-import 'dart:convert';
+import 'package:ebolnica_desktop/screens/registration_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:another_flushbar/flushbar.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -44,6 +45,13 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   String? usernameError;
   String? passwordError;
+  late KorisnikProvider korisnikProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    korisnikProvider = KorisnikProvider();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,12 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
-                  print('Zaboravili ste lozinku?');
-                },
-                child: const Text('Zaboravili ste lozinku?'),
-              ),
-              TextButton(
-                onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const RegistrationScreen(),
                   ));
@@ -154,64 +156,53 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    var loginModel = LoginModel(
-      username: username,
-      password: password,
-      deviceType: 'desktop',
-    );
-    AuthProvider.username = _usernameController.text;
-    AuthProvider.password = _passwordController.text;
-    var url = Uri.parse('${ApiConstants.baseUrl}/Korisnik/login');
     try {
-      var response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(loginModel.toJson()),
-      );
+      var response =
+          await korisnikProvider.login(username, password, 'desktop');
+      if (response.containsKey('userType') && response.containsKey('userId')) {
+        String userType = response['userType'];
+        int userId = response['userId'];
+        final String? nazivOdjela = response['odjel'];
 
-      if (response.statusCode == 200) {
-        var responseBody = json.decode(response.body);
-        String? userType = responseBody['userType'];
-        int userId = responseBody['userId'];
-        final String? nazivOdjela = responseBody['odjel'];
-        if (userType != null) {
-          Widget dashboard;
-          switch (userType) {
-            case 'administrator':
-              dashboard = DashboardAdmin(
-                userId: userId,
-                userType: userType,
-              );
-              break;
-            case 'doktor':
-              dashboard = DashboardDoctor(
-                userId: userId,
-                nazivOdjela: nazivOdjela!,
-              );
-              break;
-            case 'medicinsko osoblje':
-              dashboard = DashboardMedicalStaff(userId: userId);
-              break;
-            case 'pacijent':
-              dashboard = TerminiScreen(
-                userId: userId,
-                userType: userType,
-              );
-              break;
-            default:
-              setState(() {
-                usernameError = "Nepoznata uloga korisnika.";
-                isLoading = false;
-              });
-              return;
-          }
-          _usernameController.clear();
-          _passwordController.clear();
+        AuthProvider.username = _usernameController.text;
+        AuthProvider.password = _passwordController.text;
 
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => dashboard),
-          );
+        Widget dashboard;
+        switch (userType) {
+          case 'administrator':
+            dashboard = DashboardAdmin(
+              userId: userId,
+              userType: userType,
+            );
+            break;
+          case 'doktor':
+            dashboard = DashboardDoctor(
+              userId: userId,
+              nazivOdjela: nazivOdjela!,
+            );
+            break;
+          case 'medicinsko osoblje':
+            dashboard = DashboardMedicalStaff(userId: userId);
+            break;
+          case 'pacijent':
+            dashboard = TerminiScreen(
+              userId: userId,
+              userType: userType,
+            );
+            break;
+          default:
+            setState(() {
+              usernameError = "Nepoznata uloga korisnika.";
+              isLoading = false;
+            });
+            return;
         }
+        _usernameController.clear();
+        _passwordController.clear();
+
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => dashboard),
+        );
       } else {
         setState(() {
           Flushbar(
@@ -222,11 +213,30 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (e) {
+      String errorMessage = "Greška u komunikaciji s serverom.";
+
+      if (e is UserFriendlyException) {
+        errorMessage = e.message;
+      } else if (e is http.ClientException) {
+        errorMessage = "Nema internet konekcije.";
+      } else if (e is FormatException) {
+        errorMessage = "Neispravan odgovor sa servera.";
+      } else if (e is http.Response) {
+        if (e.statusCode == 400) {
+          errorMessage = "Pogrešno korisničko ime ili lozinka.";
+        } else if (e.statusCode == 403) {
+          final errorResponse = jsonDecode(e.body);
+          errorMessage = errorResponse['message'] ?? "Pristup odbijen.";
+        } else if (e.statusCode == 500) {
+          errorMessage = "Greška na serveru. Pokušajte kasnije.";
+        }
+      }
+
       Flushbar(
-              message: "Greška u komunikaciji s serverom.",
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3))
-          .show(context);
+        message: errorMessage,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ).show(context);
     } finally {
       setState(() {
         isLoading = false;

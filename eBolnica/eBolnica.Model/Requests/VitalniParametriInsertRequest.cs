@@ -16,5 +16,6 @@ namespace eBolnica.Model.Requests
         public decimal Secer { get; set; }
 
         public DateTime DatumMjerenja { get; set; } = DateTime.Now;
+        public TimeSpan VrijemeMjerenja { get; set; }
     }
 }

@@ -35,6 +35,12 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("AdministratorId")
                         .HasName("PK__Administ__ACDEFE3340DDBDC7");
 
@@ -67,6 +73,9 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Telefon")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -91,6 +100,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasDefaultValueSql("((0))");
 
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("BolnicaId")
                         .HasName("PK__Bolnica__CA2F6D62DD0581A2");
 
@@ -114,6 +126,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
@@ -122,6 +137,9 @@ namespace eBolnica.Services.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("DoktorId")
                         .HasName("PK__Doktor__77AFB94100FE69BC");
@@ -160,6 +178,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("MedicinskaDokumentacijaID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
@@ -171,6 +192,9 @@ namespace eBolnica.Services.Migrations
                     b.Property<int>("SobaId")
                         .HasColumnType("int")
                         .HasColumnName("SobaID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("HospitalizacijaId")
                         .HasName("PK__Hospital__7A4AE91D901D0554");
@@ -227,6 +251,9 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Prezime")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -249,6 +276,9 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("KorisnikId")
                         .HasName("PK__Korisnik__80B06D612259F9CD");
 
@@ -264,9 +294,15 @@ namespace eBolnica.Services.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KrevetId"));
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("SobaId")
                         .HasColumnType("int")
                         .HasColumnName("SobaID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Zauzet")
                         .ValueGeneratedOnAdd()
@@ -297,9 +333,15 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("DoktorID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PacijentId")
                         .HasColumnType("int")
                         .HasColumnName("PacijentID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("LaboratorijskiNalazId")
                         .HasName("PK__Laborato__79773258792B08E7");
@@ -332,9 +374,15 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PacijentId")
                         .HasColumnType("int")
                         .HasColumnName("PacijentID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("MedicinskaDokumentacijaId")
                         .HasName("PK__Medicins__8FD206224BB5F77C");
@@ -357,9 +405,15 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("MedicinskoOsobljeId")
                         .HasName("PK__Medicins__031D4AAD2850DD13");
@@ -384,12 +438,18 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("LaboratorijskiNalazID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ParametarId")
                         .HasColumnType("int")
                         .HasColumnName("ParametarID");
 
                     b.Property<decimal>("Vrijednost")
                         .HasColumnType("decimal(18, 1)");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("NalazParametarId")
                         .HasName("PK__NalazPar__1DEE79CBD19A41B1");
@@ -438,6 +498,12 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("OdjelId")
                         .HasName("PK__Odjel__FAE1DA5135ABB2F0");
 
@@ -468,6 +534,9 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PacijentId")
                         .HasColumnType("int")
                         .HasColumnName("PacijentID");
@@ -484,6 +553,9 @@ namespace eBolnica.Services.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("OperacijaId")
                         .HasName("PK__Operacij__D0550FAF9FA3E18A");
@@ -507,24 +579,30 @@ namespace eBolnica.Services.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OtpusnoPismoId"));
 
                     b.Property<string>("Anamneza")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("Dijagnoza")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<int?>("HospitalizacijaId")
                         .HasColumnType("int")
                         .HasColumnName("HospitalizacijaID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("TerapijaId")
                         .HasColumnType("int")
                         .HasColumnName("TerapijaID");
 
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Zakljucak")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.HasKey("OtpusnoPismoId")
                         .HasName("PK__OtpusnoP__3A85962A9D508918");
@@ -560,6 +638,12 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("PacijentId")
                         .HasName("PK__Pacijent__7471C17DA3E8384D");
 
@@ -591,6 +675,12 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("ParametarId")
                         .HasName("PK__Parameta__5D50EB242EB9ECB4");
 
@@ -620,9 +710,15 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("MedicinskaDokumentacijaID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("UputnicaId")
                         .HasColumnType("int")
                         .HasColumnName("UputnicaID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Zakljucak")
                         .IsRequired()
@@ -652,9 +748,15 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("MedicinskoOsobljeID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("RasporedSmjenaId")
                         .HasColumnType("int")
                         .HasColumnName("RasporedSmjenaID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<TimeSpan>("VrijemeDolaska")
                         .HasColumnType("time");
@@ -692,6 +794,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("MedicinskoOsobljeID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Opis")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -705,6 +810,9 @@ namespace eBolnica.Services.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValueSql("((0))");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("RadniZadatakId")
                         .HasName("PK__RadniZad__9E5314D03ED4289A");
@@ -734,9 +842,15 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("SmjenaId")
                         .HasColumnType("int")
                         .HasColumnName("SmjenaID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("RasporedSmjenaId")
                         .HasName("PK__Raspored__6199E6F435135DAA");
@@ -764,6 +878,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("KorisnikID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Razlog")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -771,6 +888,9 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<bool?>("Status")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("SlobodniDanId")
                         .HasName("PK__Slobodni__DF3081FE823DEE18");
@@ -792,6 +912,12 @@ namespace eBolnica.Services.Migrations
                     b.Property<string>("NazivSmjene")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<TimeSpan>("VrijemePocetka")
                         .HasColumnType("time");
@@ -823,9 +949,15 @@ namespace eBolnica.Services.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("Zauzeta")
                         .ValueGeneratedOnAdd()
@@ -860,14 +992,20 @@ namespace eBolnica.Services.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Opis")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("PregledId")
                         .HasColumnType("int")
                         .HasColumnName("PregledID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("TerapijaId")
                         .HasName("PK__Terapija__0EA553B6B8C13B9F");
@@ -893,6 +1031,9 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int")
                         .HasColumnName("DoktorID");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OdjelId")
                         .HasColumnType("int")
                         .HasColumnName("OdjelID");
@@ -905,6 +1046,9 @@ namespace eBolnica.Services.Migrations
                     b.Property<int>("PacijentId")
                         .HasColumnType("int")
                         .HasColumnName("PacijentID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.Property<TimeSpan>("VrijemeTermina")
                         .HasColumnType("time");
@@ -933,6 +1077,9 @@ namespace eBolnica.Services.Migrations
                     b.Property<DateTime>("DatumKreiranja")
                         .HasColumnType("datetime");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<string>("StateMachine")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -943,6 +1090,9 @@ namespace eBolnica.Services.Migrations
                     b.Property<int>("TerminId")
                         .HasColumnType("int")
                         .HasColumnName("TerminID");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UputnicaId")
                         .HasName("PK__Uputnica__B7A9182EABA65D87");
@@ -964,6 +1114,9 @@ namespace eBolnica.Services.Migrations
                     b.Property<DateTime>("DatumMjerenja")
                         .HasColumnType("date");
 
+                    b.Property<bool>("Obrisano")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OtkucajSrca")
                         .HasColumnType("int");
 
@@ -975,7 +1128,13 @@ namespace eBolnica.Services.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Secer")
-                        .HasColumnType("decimal(18, 0)");
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime?>("VrijemeBrisanja")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("VrijemeMjerenja")
+                        .HasColumnType("time");
 
                     b.HasKey("VitalniParametarId")
                         .HasName("PK__VitalniP__5D42790C8B61FD1B");

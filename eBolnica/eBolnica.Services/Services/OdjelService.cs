@@ -1,5 +1,6 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Database;
 using eBolnica.Services.Interfaces;
@@ -147,6 +148,21 @@ namespace eBolnica.Services.Services
             var doktor = Context.Doktors.Include(d => d.Odjel).FirstOrDefault(d => d.DoktorId == doktorId);
             return doktor?.Odjel;
         }
+
+        public List<Model.Response.BrojZaposlenihPoOdjeluResponse> GetUkupanBrojZaposlenihPoOdjelima()
+        {
+            return Context.Odjels
+                .Select(o => new BrojZaposlenihPoOdjeluResponse
+                {
+                    OdjelId = o.OdjelId,
+                    NazivOdjela = o.Naziv,
+                    UkupanBrojZaposlenih = Context.Doktors.Count(d => d.OdjelId == o.OdjelId) +
+                                          Context.MedicinskoOsobljes.Count(m => m.OdjelId == o.OdjelId)
+                })
+                .OrderBy(o => o.NazivOdjela)
+                .ToList();
+        }
+
     }
 }
 

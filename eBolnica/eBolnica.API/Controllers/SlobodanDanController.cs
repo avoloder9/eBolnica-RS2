@@ -5,8 +5,8 @@ using eBolnica.Services.Interfaces;
 
 namespace eBolnica.API.Controllers
 {
-    public class SlobodanDanController : BaseCRUDController<SlobodniDan, SlobodniDanSearchObject, SlobodanDanInsertRequest, SlobodanDanUpdateRequest>
+    public class SlobodniDanController : BaseCRUDController<SlobodniDan, SlobodniDanSearchObject, SlobodniDanInsertRequest, SlobodniDanUpdateRequest>
     {
-        public SlobodanDanController(ISlobodanDanService service) : base(service) { }
+        public SlobodniDanController(ISlobodniDanService service) : base(service) { }
     }
 }

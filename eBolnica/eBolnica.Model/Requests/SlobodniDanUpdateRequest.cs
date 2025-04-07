@@ -5,8 +5,8 @@ using System.Text;
 
 namespace eBolnica.Model.Requests
 {
-    public class SlobodanDanUpdateRequest
+    public class SlobodniDanUpdateRequest
     {
-        public string Status { get; set; } = null!;
+        public bool Status { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/providers/soba_provider.dart';
-import 'package:ebolnica_desktop/screens/soba_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class NovaSobaScreen extends StatefulWidget {
@@ -31,21 +30,45 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Dodaj novu sobu"),
+      title: const Align(
+        alignment: Alignment.center,
+        child: Text(
+          "Dodaj novu sobu",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black87,
+          ),
+        ),
+      ),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.only(bottom: 16.0),
               child: TextFormField(
                 controller: nazivController,
                 decoration: InputDecoration(
                   labelText: 'Naziv',
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(
+                      color: Colors.grey[300]!,
+                      width: 1.0,
+                    ),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(
+                      color: Colors.blue[600]!,
+                      width: 2.0,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14.0, horizontal: 16.0),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -64,6 +87,10 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            textStyle: TextStyle(fontSize: 16, color: Colors.blue[600]),
+          ),
           child: const Text("Otkaži"),
         ),
         ElevatedButton(
@@ -85,19 +112,6 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
                         duration: const Duration(seconds: 2))
                     .show(context);
                 _formKey.currentState?.reset();
-                await Future.wait([
-                  Future.delayed(const Duration(seconds: 1)),
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SobaListScreen(
-                          odjelId: widget.odjelId,
-                          userId: widget.userId,
-                          userType: widget.userType,
-                        ),
-                      ),
-                      (route) => route.isFirst)
-                ]);
               } catch (e) {
                 await Flushbar(
                         message: "Došlo je do greške. Pokušajte ponovo.",
@@ -108,31 +122,18 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
               Navigator.pop(context);
             }
           },
-          child: const Text("Dodaj"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue[600],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            padding:
+                const EdgeInsets.symmetric(vertical: 14.0, horizontal: 28.0),
+          ),
+          child: const Text("Dodaj",
+              style: TextStyle(fontSize: 16, color: Colors.white)),
         ),
       ],
-    );
-  }
-
-  Future<bool> _showConfirmationDialog() async {
-    return await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Potvrda"),
-          content: const Text("Da li ste sigurni da želite dodati novu sobu?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("Ne"),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Da"),
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
+using eBolnica.Model.Response;
 
 namespace eBolnica.Services.Services
 {
@@ -120,20 +121,60 @@ namespace eBolnica.Services.Services
                 Mapper.Map(request, korisnik);
             }
         }
-
         public override Model.Models.Administrator GetById(int id)
         {
             var entity = Context.Set<Database.Administrator>().Include(x => x.Korisnik).FirstOrDefault(a => a.AdministratorId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Model.Models.Administrator>(entity);
         }
         public int GetAdministratorIdByKorisnikId(int korisnikId)
         {
             var admin = Context.Administrators.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return admin.AdministratorId;
+            return admin!.AdministratorId;
         }
+
+        public DashboardResponse GetDashboardData()
+        {
+            var ukupnoPacijenata = Context.Pacijents.Count(p => !p.Obrisano);
+            var brojHospitalizovanih = Context.Pacijents
+          .Where(p => !p.Obrisano)
+          .Count(p => Context.MedicinskaDokumentacijas
+              .Any(m => m.PacijentId == p.PacijentId && m.Hospitalizovan.HasValue && m.Hospitalizovan == true));
+            var brojPregleda = Context.Pregleds.Count(x => !x.Obrisano);
+            var brojKorisnika = Context.Korisniks.Count(x => !x.Obrisano);
+            var brojDoktora = Context.Doktors.Count(x => !x.Obrisano);
+            var brojOsoblja = Context.MedicinskoOsobljes.Count(x => !x.Obrisano);
+            var brojSoba = Context.Sobas.Count(x => !x.Obrisano);
+            var ukupnoKreveta = Context.Krevets.Count(k => !k.Obrisano);
+            var brojZauzetihKreveti = Context.Krevets.Count(k => k.Zauzet && !k.Obrisano);
+            var brojSlobodnihKreveta = ukupnoKreveta - brojZauzetihKreveti;
+            var brojOdjela = Context.Odjels.Count(x => !x.Obrisano);
+            var terminiPoMjesecima = Context.Termins.GroupBy(x => new { x.DatumTermina.Year, x.DatumTermina.Month }).Select(x => new TerminiPoMjesecima
+            {
+                Godina = x.Key.Year,
+                Mjesec = x.Key.Month,
+                BrojTermina = x.Count()
+            }).OrderBy(x => x.Godina).ThenBy(x => x.Mjesec).ToList();
+            return new DashboardResponse
+            {
+                UkupanBrojPacijenata = ukupnoPacijenata,
+                BrojHospitalizovanih = brojHospitalizovanih,
+                BrojKorisnika = brojKorisnika,
+                BrojDoktora = brojDoktora,
+                BrojOsoblja = brojOsoblja,
+                BrojOdjela = brojOdjela,
+                BrojSoba = brojSoba,
+                BrojKreveta = ukupnoKreveta,
+                BrojSlobodnihKreveta = brojSlobodnihKreveta,
+                BrojZauzetihKreveta = brojZauzetihKreveti,
+                BrojPregleda = brojPregleda,
+                TerminiPoMjesecima = terminiPoMjesecima
+            };
+        }
+
+
     }
 }

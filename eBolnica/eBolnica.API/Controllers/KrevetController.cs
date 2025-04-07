@@ -12,7 +12,8 @@ namespace eBolnica.API.Controllers
     public class KrevetController : BaseCRUDController<Krevet, KrevetSearchObject, KrevetInsertRequest, KrevetUpdateRequest>
     {
         private readonly IKrevetService krevetService;
-        public KrevetController(IKrevetService service) : base(service) {
+        public KrevetController(IKrevetService service) : base(service)
+        {
 
             krevetService = service;
         }
@@ -43,7 +44,13 @@ namespace eBolnica.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
 
+        [HttpGet("popunjenost")]
+        public IActionResult GetPopunjenostBolnice()
+        {
+            var result = krevetService.GetPopunjenostBolnice();
+            return Ok(result);
         }
     }
 }

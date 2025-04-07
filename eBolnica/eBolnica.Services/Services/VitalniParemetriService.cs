@@ -31,6 +31,11 @@ namespace eBolnica.Services.Services
                 query = query.Where(x => x.Pacijent.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
 
+            if (searchObject?.PacijentId != null)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId && Context.MedicinskaDokumentacijas.Any(md =>
+                        md.PacijentId == searchObject.PacijentId && md.Hospitalizovan == true)).OrderByDescending(x => x.VrijemeMjerenja);
+            }
             return query;
         }
         public override void BeforeInsert(VitalniParametriInsertRequest request, Database.VitalniParametri entity)
@@ -47,7 +52,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.VitalniParametri>().Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).FirstOrDefault(a => a.PacijentId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<VitalniParametri>(entity);
         }

@@ -61,7 +61,7 @@ namespace eBolnica.Services.Services
     .Include(u => u.Termin.Odjel).FirstOrDefault(x => x.UputnicaId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Uputnica>(entity);
         }
@@ -80,21 +80,21 @@ namespace eBolnica.Services.Services
         public Uputnica Activate(int id)
         {
             var entity = GetById(id);
-            var state = BaseUputnicaState.CreateState(entity.StateMachine);
+            var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Activate(id);
         }
 
         public Uputnica Hide(int id)
         {
             var entity = GetById(id);
-            var state = BaseUputnicaState.CreateState(entity.StateMachine);
+            var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Hide(id);
         }
 
         public Uputnica Edit(int id)
         {
             var entity = GetById(id);
-            var state = BaseUputnicaState.CreateState(entity.StateMachine);
+            var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Edit(id);
         }
 
@@ -105,12 +105,12 @@ namespace eBolnica.Services.Services
             if (id <= 0)
             {
                 var state = BaseUputnicaState.CreateState("initial");
-                return state.AllowedActions(null);
+                return state.AllowedActions(null!);
             }
             else
             {
                 var entity = Context.Uputnicas.Find(id);
-                var state = BaseUputnicaState.CreateState(entity.StateMachine);
+                var state = BaseUputnicaState.CreateState(entity!.StateMachine!);
                 return state.AllowedActions(entity);
             }
         }
@@ -118,7 +118,7 @@ namespace eBolnica.Services.Services
         public Uputnica Close(int id)
         {
             var entity = GetById(id);
-            var state = BaseUputnicaState.CreateState(entity.StateMachine);
+            var state = BaseUputnicaState.CreateState(entity!.StateMachine!);
             return state.Close(id);
         }
     }

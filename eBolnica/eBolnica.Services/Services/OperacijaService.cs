@@ -115,28 +115,28 @@ namespace eBolnica.Services.Services
         public override Model.Models.Operacija Update(int id, OperacijaUpdateRequest request)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Update(id, request);
         }
 
         public Model.Models.Operacija Activate(int id)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Activate(id);
         }
 
         public Model.Models.Operacija Hide(int id)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Hide(id);
         }
 
         public Model.Models.Operacija Edit(int id)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Edit(id);
         }
 
@@ -147,12 +147,12 @@ namespace eBolnica.Services.Services
             if (id <= 0)
             {
                 var state = BaseOperacijaState.CreateState("initial");
-                return state.AllowedActions(null);
+                return state.AllowedActions(null!);
             }
             else
             {
                 var entity = Context.Operacijas.Find(id);
-                var state = BaseOperacijaState.CreateState(entity.StateMachine);
+                var state = BaseOperacijaState.CreateState(entity!.StateMachine!);
                 return state.AllowedActions(entity);
             }
         }
@@ -160,14 +160,14 @@ namespace eBolnica.Services.Services
         public Model.Models.Operacija Close(int id)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Close(id);
         }
 
         public Model.Models.Operacija Cancelled(int id)
         {
             var entity = GetById(id);
-            var state = BaseOperacijaState.CreateState(entity.StateMachine);
+            var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Cancel(id);
         }
     }

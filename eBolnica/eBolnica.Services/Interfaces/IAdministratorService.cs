@@ -1,5 +1,6 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace eBolnica.Services.Interfaces
     public interface IAdministratorService : ICRUDService<Administrator, AdministratorSearchObject, AdministratorInsertRequest, AdministratorUpdateRequest>
     {
         public int GetAdministratorIdByKorisnikId(int korisnikId);
+        public DashboardResponse GetDashboardData();
 
     }
 }

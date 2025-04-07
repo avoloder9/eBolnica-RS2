@@ -72,5 +72,11 @@ namespace eBolnica.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("GetDnevniRaspored/{doktorId}")]
+        public async Task<IActionResult> GetDnevniRaspored(int doktorId)
+        {
+            var raspored = await _doktorService.GetDnevniRasporedAsync(doktorId);
+            return Ok(raspored);
+        }
     }
 }

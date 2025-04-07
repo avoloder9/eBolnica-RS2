@@ -15,6 +15,7 @@ namespace eBolnica.Services.Interfaces
         public List<Model.Models.Termin> GetTerminByDoktorId(int doktorId);
         public List<Model.Models.Pregled> GetPreglediByDoktorId(int doktorId);
         public List<Model.Models.Operacija> GetOperacijaByDoktorId(int doktorId);
+        public Task<Model.Response.DnevniRasporedResponse> GetDnevniRasporedAsync(int doktorId);
 
 
     }
