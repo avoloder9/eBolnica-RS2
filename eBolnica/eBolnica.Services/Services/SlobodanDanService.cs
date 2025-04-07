@@ -33,7 +33,7 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
-            if (searchObject.Status.HasValue)
+            if (searchObject!.Status.HasValue)
             {
                 query = query.Where(x => x.Status == searchObject.Status);
             }

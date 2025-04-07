@@ -19,7 +19,7 @@ namespace eBolnica.Services.Services
         { }
         public virtual TModel Insert(TInsert request)
         {
-            TDbEntity entity = Mapper.Map<TDbEntity>(request);
+            TDbEntity entity = Mapper.Map<TDbEntity>(request!);
             BeforeInsert(request, entity);
             Context.Add(entity);
             Context.SaveChanges();

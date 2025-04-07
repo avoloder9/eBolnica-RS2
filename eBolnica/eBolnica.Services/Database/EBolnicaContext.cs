@@ -452,7 +452,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.DatumZadatka).HasColumnType("datetime");
             entity.Property(e => e.DoktorId).HasColumnName("DoktorID");
             entity.Property(e => e.MedicinskoOsobljeId).HasColumnName("MedicinskoOsobljeID");
-            entity.Property(e => e.Opis).HasMaxLength(40);
+            entity.Property(e => e.Opis).HasMaxLength(200);
             entity.Property(e => e.PacijentId).HasColumnName("PacijentID");
             entity.Property(e => e.Status).HasDefaultValueSql("((0))");
 

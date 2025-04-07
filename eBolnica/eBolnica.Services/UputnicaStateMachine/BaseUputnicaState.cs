@@ -56,13 +56,13 @@ namespace eBolnica.Services.UputnicaStateMachine
             switch (stateName)
             {
                 case "initial":
-                    return ServiceProvider.GetService<InitialUputnicaState>();
+                    return ServiceProvider.GetService<InitialUputnicaState>()!;
                 case "draft":
-                    return ServiceProvider.GetService<DraftUputnicaState>();
+                    return ServiceProvider.GetService<DraftUputnicaState>()!;
                 case "active":
-                    return ServiceProvider.GetService<ActiveUputnicaState>();
+                    return ServiceProvider.GetService<ActiveUputnicaState>()!;
                 case "hidden":
-                    return ServiceProvider.GetService<HiddenUputnicaState>();
+                    return ServiceProvider.GetService<HiddenUputnicaState>()!;
                 case "closed":
                     return ServiceProvider.GetService<ClosedUputnicaState>();
                 default: throw new Exception("State not recognized");

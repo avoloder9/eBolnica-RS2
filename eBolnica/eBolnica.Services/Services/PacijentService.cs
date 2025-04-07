@@ -96,7 +96,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.Pacijent>().Include(x => x.Korisnik).FirstOrDefault(a => a.PacijentId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Pacijent>(entity);
         }
@@ -179,7 +179,7 @@ namespace eBolnica.Services.Services
         public int GetPacijentIdByKorisnikId(int korisnikId)
         {
             var pacijent = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return pacijent.PacijentId;
+            return pacijent!.PacijentId;
         }
         public List<Pacijent> GetPacijentWithDokumentacija()
         {
@@ -223,13 +223,13 @@ namespace eBolnica.Services.Services
         }
         public async Task<List<Database.OtpusnoPismo>> GetOtpusnaPismaByPacijentIdAsync(int pacijentId)
         {
-            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x.MedicinskaDokumentacija)
+            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x!.MedicinskaDokumentacija)
                 .Where(x => x.Hospitalizacija!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
         }
         public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
         {
             return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
-                .Include(x => x.Pregled).ThenInclude(x => x.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
                 .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
         }
         public async Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId)

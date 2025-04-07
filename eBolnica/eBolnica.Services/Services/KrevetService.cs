@@ -41,7 +41,7 @@ namespace eBolnica.Services.Services
             }
             var soba = Context.Set<Database.Soba>().Include(x => x.Odjel).FirstOrDefault(y => y.SobaId == request.SobaId);
 
-            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == soba.Odjel.BolnicaId);
+            var bolnica = Context.Bolnicas.FirstOrDefault(b => b.BolnicaId == soba!.Odjel.BolnicaId);
             if (bolnica == null)
             {
                 throw new Exception("Bolnica sa zadanim ID-om ne postoji");
@@ -51,7 +51,7 @@ namespace eBolnica.Services.Services
                 bolnica.UkupanBrojKreveta = 0;
             }
             bolnica.UkupanBrojKreveta++;
-            soba.BrojKreveta++;
+            soba!.BrojKreveta++;
             if (soba.Odjel != null)
             {
                 soba.Odjel.BrojKreveta++;
@@ -97,7 +97,7 @@ namespace eBolnica.Services.Services
             {
                 trenutniKrevet.Soba.BrojKreveta--;
                 var novaSoba = Context.Sobas.Find(request.SobaId);
-                novaSoba.BrojKreveta++;
+                novaSoba!.BrojKreveta++;
             }
             Mapper.Map(request, entity);
 

@@ -6,9 +6,9 @@ namespace eBolnica.Model.Messages
 {
     public class Email
     {
-        public string EmailTo { get; set; }
-        public string ReceiverName { get; set; }
-        public string Subject { get; set; }
-        public string Message { get; set; }
+        public string? EmailTo { get; set; }
+        public string? ReceiverName { get; set; }
+        public string? Subject { get; set; }
+        public string? Message { get; set; }
     }
 }

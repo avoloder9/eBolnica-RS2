@@ -43,7 +43,7 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.LaboratorijskiNalazId == searchObject.LaboratorijskiNalazId);
             }
-            return base.AddFilter(searchObject, query);
+            return base.AddFilter(searchObject!, query);
         }
 
         public override void BeforeInsert(NalazParametarInsertRequest request, Database.NalazParametar entity)

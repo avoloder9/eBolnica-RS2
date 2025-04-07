@@ -126,14 +126,14 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.Administrator>().Include(x => x.Korisnik).FirstOrDefault(a => a.AdministratorId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Model.Models.Administrator>(entity);
         }
         public int GetAdministratorIdByKorisnikId(int korisnikId)
         {
             var admin = Context.Administrators.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return admin.AdministratorId;
+            return admin!.AdministratorId;
         }
 
         public DashboardResponse GetDashboardData()

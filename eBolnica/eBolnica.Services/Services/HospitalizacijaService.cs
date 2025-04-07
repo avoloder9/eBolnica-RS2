@@ -88,7 +88,7 @@ namespace eBolnica.Services.Services
             if (medicinskaDokumentacija != null)
             {
                 medicinskaDokumentacija.Hospitalizovan = true;
-                bolnica.TrenutniBrojHospitalizovanih++;
+                bolnica!.TrenutniBrojHospitalizovanih++;
                 Context.SaveChanges();
             }
             else

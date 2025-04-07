@@ -52,7 +52,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.VitalniParametri>().Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).FirstOrDefault(a => a.PacijentId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<VitalniParametri>(entity);
         }

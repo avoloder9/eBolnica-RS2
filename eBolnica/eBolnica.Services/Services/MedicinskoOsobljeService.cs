@@ -135,14 +135,14 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.MedicinskoOsoblje>().Include(x => x.Korisnik).Include(y => y.Odjel).FirstOrDefault(a => a.MedicinskoOsobljeId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<MedicinskoOsoblje>(entity);
         }
         public int GetOsobljeIdByKorisnikId(int korisnikId)
         {
             var osoblje = Context.MedicinskoOsobljes.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return osoblje.MedicinskoOsobljeId;
+            return osoblje!.MedicinskoOsobljeId;
         }
         public int? GetOdjelIdByOsobljeId(int osobljeId)
         {

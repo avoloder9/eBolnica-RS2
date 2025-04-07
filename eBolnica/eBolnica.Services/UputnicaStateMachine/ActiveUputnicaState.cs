@@ -17,7 +17,7 @@ namespace eBolnica.Services.UputnicaStateMachine
         {
             var set = Context.Set<Database.Uputnica>();
             var entity = set.Find(id);
-            entity.StateMachine = "hidden";
+            entity!.StateMachine = "hidden";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Uputnica>(entity);
         }
@@ -25,7 +25,7 @@ namespace eBolnica.Services.UputnicaStateMachine
         {
             var set = Context.Set<Database.Uputnica>();
             var entity = set.Find(id);
-            entity.StateMachine = "closed";
+            entity!.StateMachine = "closed";
             Context.SaveChanges();
             return Mapper.Map<Model.Models.Uputnica>(entity);
         }

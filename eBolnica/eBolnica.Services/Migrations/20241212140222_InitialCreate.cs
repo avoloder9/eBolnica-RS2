@@ -39,7 +39,7 @@ namespace eBolnica.Services.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Ime = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Prezime = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(70)", maxLength: 70, nullable: false),
                     KorisnickoIme = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LozinkaHash = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LozinkaSalt = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -424,7 +424,7 @@ namespace eBolnica.Services.Migrations
                     DoktorID = table.Column<int>(type: "int", nullable: false),
                     PacijentID = table.Column<int>(type: "int", nullable: false),
                     MedicinskoOsobljeID = table.Column<int>(type: "int", nullable: false),
-                    Opis = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    Opis = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     DatumZadatka = table.Column<DateTime>(type: "datetime", nullable: false),
                     Status = table.Column<bool>(type: "bit", nullable: true, defaultValueSql: "((0))")
                 },

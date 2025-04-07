@@ -80,7 +80,7 @@ namespace eBolnica.Services.Services
             var entity = Context.Set<Database.Doktor>().Include(x => x.Korisnik).Include(x => x.Odjel).FirstOrDefault(a => a.DoktorId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Doktor>(entity);
         }
@@ -99,8 +99,8 @@ namespace eBolnica.Services.Services
         }
         public int GetDoktorIdByKorisnikId(int korisnikId)
         {
-            var admin = Context.Doktors.FirstOrDefault(t => t.KorisnikId == korisnikId);
-            return admin.DoktorId;
+            var doktor = Context.Doktors.FirstOrDefault(t => t.KorisnikId == korisnikId);
+            return doktor!.DoktorId;
         }
 
         public List<Model.Models.Pregled> GetPreglediByDoktorId(int doktorId)

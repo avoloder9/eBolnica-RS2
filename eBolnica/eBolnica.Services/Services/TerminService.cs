@@ -106,7 +106,7 @@ namespace eBolnica.Services.Services
                 .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).FirstOrDefault(x => x.TerminId == id);
             if (entity == null)
             {
-                return null;
+                return null!;
             }
             return Mapper.Map<Model.Models.Termin>(entity);
         }
