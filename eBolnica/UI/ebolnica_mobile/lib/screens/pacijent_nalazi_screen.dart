@@ -68,7 +68,7 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
           await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     }
     if (pacijentId != null) {
-      var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId!);
+      var result = await pacijentProvider.getNalaziByPacijentId(pacijentId!);
       setState(() {
         nalazi = result;
         isLoading = false;

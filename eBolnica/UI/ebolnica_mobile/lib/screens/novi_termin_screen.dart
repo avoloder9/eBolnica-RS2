@@ -8,9 +8,8 @@ import 'package:ebolnica_mobile/providers/odjel_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/providers/termin_provider.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
-import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -355,7 +354,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   userType: widget.userType,
                 );
               } else {
-                return PacijentScreen(
+                return PacijentDetaljiScreen(
                     userId: widget.userId, userType: widget.userType);
               }
             },

@@ -10,6 +10,6 @@ namespace eBolnica.Services.Recommender
     public interface IRecommenderService
     {
         void TrainModel();
-        List<RecommendedDoktorDTO> GetPreporuceniDoktori(int pacijentId, int brojPreporuka = 3);
+        List<Model.Models.Doktor> GetPreporuceniDoktori(int pacijentId, int brojPreporuka = 3);
     }
 }

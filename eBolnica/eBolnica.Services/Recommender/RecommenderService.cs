@@ -70,7 +70,7 @@ namespace eBolnica.Services.Recommender
                 }
             }
         }
-        public List<RecommendedDoktorDTO> GetPreporuceniDoktori(int pacijentId, int brojPreporuka = 3)
+        public List<Model.Models.Doktor> GetPreporuceniDoktori(int pacijentId, int brojPreporuka = 3)
         {
             var doktori = Context.Doktors.Include(d => d.Korisnik).ToList();
 
@@ -84,11 +84,18 @@ namespace eBolnica.Services.Recommender
 
             if (!prethodniDoktori.Any())
             {
-                return doktori.Take(brojPreporuka).Select(d => new RecommendedDoktorDTO
+                return doktori.Take(brojPreporuka).Select(d => new Model.Models.Doktor
                 {
                     DoktorId = d.DoktorId,
-                    Ime = d.Korisnik.Ime,
-                    Prezime = d.Korisnik.Prezime,
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = d.Korisnik.Ime,
+                        Prezime = d.Korisnik.Prezime,
+                        KorisnikId = d.Korisnik.KorisnikId,
+                        DatumRodjenja = d.Korisnik.DatumRodjenja,
+                        Telefon = d.Korisnik.Telefon,
+                        Slika = d.Korisnik.Slika
+                    },
                     Specijalizacija = d.Specijalizacija,
                     Biografija = d.Biografija!
                 }).ToList();
@@ -126,11 +133,18 @@ namespace eBolnica.Services.Recommender
                 })
                 .OrderByDescending(x => x.Score)
                 .Take(brojPreporuka)
-                .Select(x => new RecommendedDoktorDTO
+                .Select(x => new Model.Models.Doktor
                 {
                     DoktorId = x.Doktor.DoktorId,
-                    Ime = x.Doktor.Korisnik.Ime,
-                    Prezime = x.Doktor.Korisnik.Prezime,
+                    Korisnik = new Model.Models.Korisnik
+                    {
+                        Ime = x.Doktor.Korisnik.Ime,
+                        Prezime = x.Doktor.Korisnik.Prezime,
+                        KorisnikId = x.Doktor.Korisnik.KorisnikId,
+                        DatumRodjenja = x.Doktor.Korisnik.DatumRodjenja,
+                        Telefon = x.Doktor.Korisnik.Telefon,
+                        Slika = x.Doktor.Korisnik.Slika
+                    },
                     Specijalizacija = x.Doktor.Specijalizacija,
                     Biografija = x.Doktor.Biografija!
                 }).ToList();

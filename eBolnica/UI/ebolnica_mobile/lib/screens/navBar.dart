@@ -1,9 +1,10 @@
 import 'package:ebolnica_mobile/screens/dnevni_raspored_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/hospitalizacije_list_screen.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
-import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
 import 'package:ebolnica_mobile/screens/radni_zadatak_screen.dart';
 import 'package:ebolnica_mobile/screens/raspored_smjena_screen.dart';
 import 'package:ebolnica_mobile/screens/terapije_list_screen.dart';
@@ -53,8 +54,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ];
       case 'pacijent':
         return [
-          const Placeholder(),
           PacijentScreen(userId: widget.userId, userType: widget.userType),
+          PacijentDetaljiScreen(
+              userId: widget.userId, userType: widget.userType),
           PacijentNalaziScreen(
               userId: widget.userId, userType: widget.userType),
           PacijentTerapijaScreen(

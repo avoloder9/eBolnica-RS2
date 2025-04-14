@@ -1,12 +1,7 @@
-import 'package:another_flushbar/flushbar.dart';
-import 'package:ebolnica_mobile/models/operacija_model.dart';
-import 'package:ebolnica_mobile/models/pregled_model.dart';
-import 'package:ebolnica_mobile/models/terapija_model.dart';
+import 'dart:convert';
+import 'package:ebolnica_mobile/models/doktor_model.dart';
 import 'package:ebolnica_mobile/models/termin_model.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
-import 'package:ebolnica_mobile/providers/terapija_provider.dart';
-import 'package:ebolnica_mobile/providers/termin_provider.dart';
-import 'package:ebolnica_mobile/screens/novi_termin_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -19,23 +14,18 @@ class PacijentScreen extends StatefulWidget {
 }
 
 class _PacijentScreenState extends State<PacijentScreen> {
-  late PacijentProvider pacijentProvider;
-  late TerminProvider terminProvider;
-  late TerapijaProvider terapijaProvider;
-  List<Termin>? termini = [];
-  List<Pregled>? pregledi = [];
-  List<Operacija>? operacije = [];
-
   int? pacijentId;
+  late PacijentProvider pacijentProvider;
+  List<Termin>? termini = [];
+  List<Doktor> recommendedDoktori = [];
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
-    terminProvider = TerminProvider();
-    terapijaProvider = TerapijaProvider();
     fetchTermini();
-    fetchPregledi();
-    fetchOperacije();
+    fetchRecommendedDoktori();
   }
 
   Future<void> fetchTermini() async {
@@ -52,438 +42,217 @@ class _PacijentScreenState extends State<PacijentScreen> {
     }
   }
 
-  Future<void> fetchPregledi() async {
-    pregledi = [];
-    pacijentId =
-        await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
-    if (pacijentId != null) {
-      var result = await pacijentProvider.getPreglediByPacijentId(pacijentId!);
+  Future<void> fetchRecommendedDoktori() async {
+    try {
+      pacijentId ??=
+          await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
+      if (pacijentId != null) {
+        var result = await pacijentProvider.getRecommendedDoktori(pacijentId!);
+        setState(() {
+          recommendedDoktori = result;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        pregledi = result;
+        isLoading = false;
       });
-    } else {
-      pregledi = [];
-    }
-  }
-
-  Future<void> fetchOperacije() async {
-    operacije = [];
-    pacijentId =
-        await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
-    if (pacijentId != null) {
-      var result = await pacijentProvider.GetOperacijeByPacijentId(pacijentId!);
-      setState(() {
-        operacije = result;
-      });
-    } else {
-      operacije = [];
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blueAccent, Colors.deepPurple],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    return Scaffold(
+      appBar: widget.userType == "pacijent"
+          ? AppBar(
+              centerTitle: true,
+              automaticallyImplyLeading: widget.userType == "doktor",
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.deepPurple],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
               ),
+            )
+          : null,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Vaše zdravlje je naša briga",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
             ),
-            actions: [
-              IconButton(
-                onPressed: pacijentId == null
-                    ? null
-                    : () async {
-                        bool rezultat = await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return NoviTerminScreen(
-                                    pacijentId: pacijentId!,
-                                    userId: widget.userId,
-                                    userType: widget.userType,
-                                  );
-                                },
-                                barrierDismissible: false) ??
-                            false;
-                        if (rezultat == true) {
-                          fetchTermini();
-                        }
-                      },
-                style: const ButtonStyle(
-                    iconColor: MaterialStatePropertyAll(Colors.white)),
-                icon: const Icon(Icons.add),
+            const SizedBox(height: 20),
+            const Text(
+              "Naredni termin",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 10),
+            termini!.isNotEmpty
+                ? _buildNextAppointmentCard(termini!.first)
+                : const Text("Nemate zakazanih termina."),
+            const SizedBox(height: 60),
+            const Text(
+              "Preporučeni doktori",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 15),
+            _buildDoctorRecommendations(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNextAppointmentCard(Termin termin) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shadowColor: const Color.fromARGB(255, 200, 150, 209),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-            bottom: const TabBar(
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                indicatorColor: Colors.white,
-                labelStyle:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                tabs: [
-                  Tab(text: "Termini"),
-                  Tab(text: "Pregledi"),
-                  Tab(text: "Operacije"),
-                ]),
-          ),
-          body: TabBarView(
-            children: [
-              _buildTerminiTab(),
-              _buildPreglediTab(),
-              _buildOperacijeTab()
-            ],
-          ),
-        ));
-  }
-
-  Widget _buildTerminiTab() {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: termini == null || termini!.isEmpty
-          ? const Center(child: Text("Nema dostupnih termina."))
-          : ListView.builder(
-              itemCount: termini!.length,
-              itemBuilder: (context, index) {
-                var e = termini![index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Text(
-                        e.doktor?.korisnik?.ime?.isNotEmpty == true
-                            ? e.doktor!.korisnik!.ime![0]
-                            : "?",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(
-                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina!)}",
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.cancel,
-                        color: Colors.red,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Potvrda"),
-                              content: const Text(
-                                  "Da li ste sigurni da želite otkazati termin?"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("Ne"),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    var request = {
-                                      "DatumTermina":
-                                          e.datumTermina!.toIso8601String(),
-                                      "VrijemeTermina":
-                                          e.vrijemeTermina.toString(),
-                                      "Otkazano": true
-                                    };
-                                    try {
-                                      await terminProvider.update(
-                                          e.terminId!, request);
-                                      if (!mounted) return;
-                                      Navigator.of(context).pop();
-                                      if (!mounted) return;
-
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (BuildContext dialogContext) {
-                                          Future.delayed(
-                                              const Duration(seconds: 2), () {
-                                            if (mounted) {
-                                              Navigator.of(dialogContext).pop();
-                                            }
-                                          });
-                                          return AlertDialog(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Image.asset(
-                                                    "assets/images/success.png",
-                                                    height: 80),
-                                                const SizedBox(height: 10),
-                                                const Text(
-                                                    "Termin je uspješno otkazan."),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      );
-                                      fetchTermini();
-                                      setState(() {});
-                                    } catch (error) {
-                                      if (!mounted) return;
-                                      await Flushbar(
-                                        message:
-                                            "Došlo je do greške. Pokušajte ponovo.",
-                                        backgroundColor: Colors.red,
-                                        duration: const Duration(seconds: 3),
-                                      ).show(context);
-                                    }
-                                  },
-                                  child: const Text("Da"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
+              child: const Icon(Icons.calendar_today,
+                  size: 36, color: Colors.deepPurple),
             ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${termin.doktor!.korisnik!.ime} ${termin.doktor!.korisnik!.prezime}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        formattedTime(termin.vrijemeTermina!),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        termin.odjel!.naziv!,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    formattedDate(termin.datumTermina!),
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildPreglediTab() {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: pregledi == null || pregledi!.isEmpty
-          ? const Center(child: Text("Nema dostupnih pregleda."))
-          : ListView.builder(
-              itemCount: pregledi!.length,
-              itemBuilder: (context, index) {
-                var e = pregledi![index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Text(
-                        e.uputnica?.termin?.doktor?.korisnik?.ime?.isNotEmpty ==
-                                true
-                            ? e.uputnica!.termin!.doktor!.korisnik!.ime![0]
-                            : "?",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(
-                      "${e.uputnica!.termin!.doktor!.korisnik!.ime} ${e.uputnica!.termin!.doktor!.korisnik!.prezime}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      "${formattedDate(e.uputnica!.termin!.datumTermina)} u ${formattedTime(e.uputnica!.termin!.vrijemeTermina!)}",
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    onTap: () => showPregledDetailsDialog(context, e),
-                  ),
-                );
-              },
-            ),
-    );
-  }
+  Widget _buildDoctorRecommendations() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  Widget _buildOperacijeTab() {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: operacije == null || operacije!.isEmpty
-          ? const Center(child: Text("Nema dostupnih operacija."))
-          : ListView.builder(
-              itemCount: operacije!.length,
-              itemBuilder: (context, index) {
-                var e = operacije![index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Text(
-                        e.doktor?.korisnik?.ime?.isNotEmpty == true
-                            ? e.doktor!.korisnik!.ime![0]
-                            : "?",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(
-                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      formattedDate(e.datumOperacije),
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                );
-              },
-            ),
-    );
-  }
+    if (recommendedDoktori.isEmpty) {
+      return const Text("Nema preporučenih doktora trenutno.");
+    }
 
-  void showPregledDetailsDialog(BuildContext context, Pregled pregled) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          child: FutureBuilder<Terapija?>(
-            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId!),
-            builder: (context, snapshot) {
-              bool hasTerapija = snapshot.hasData && snapshot.data != null;
-              double dialogHeight = hasTerapija
-                  ? MediaQuery.of(context).size.height * 0.7
-                  : MediaQuery.of(context).size.height * 0.55;
+    return SizedBox(
+      height: 200,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: recommendedDoktori.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final doktor = recommendedDoktori[index];
 
-              return Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: dialogHeight,
-                padding: const EdgeInsets.all(24.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                ),
+          return GestureDetector(
+            onTap: () {
+              print(
+                  "Kliknut doktor: ${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}");
+            },
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                height: 210,
+                width: 150,
+                padding: const EdgeInsets.all(8),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Detalji pregleda",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.grey),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.transparent,
+                      child: doktor.korisnik!.slika != null &&
+                              doktor.korisnik!.slika!.isNotEmpty
+                          ? Image.memory(
+                              base64Decode(doktor.korisnik!.slika!),
+                              fit: BoxFit.cover,
+                            )
+                          : ClipOval(
+                              child: Image.asset(
+                              'assets/images/osoba.jpg',
+                              fit: BoxFit.cover,
+                              width: 100,
+                              height: 100,
+                            )),
                     ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildDetailRow(Icons.person, "Pacijent:",
-                                "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}"),
-                            _buildDetailRow(
-                                Icons.calendar_today,
-                                "Datum pregleda:",
-                                formattedDate(
-                                    pregled.uputnica!.termin!.datumTermina)),
-                            _buildDetailRow(
-                                Icons.medical_services,
-                                "Glavna dijagnoza:",
-                                pregled.glavnaDijagnoza ?? "N/A"),
-                            _buildDetailRow(Icons.history_edu, "Anamneza:",
-                                pregled.anamneza ?? "N/A"),
-                            _buildDetailRow(Icons.assignment, "Zaključak:",
-                                pregled.zakljucak ?? "N/A"),
-                            if (hasTerapija) ...[
-                              const SizedBox(height: 10),
-                              const Text(
-                                "Terapija",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Divider(),
-                              _buildDetailRow(
-                                  Icons.medication,
-                                  "Naziv terapije:",
-                                  snapshot.data!.naziv ?? "N/A"),
-                              _buildDetailRow(Icons.description, "Opis:",
-                                  snapshot.data!.opis ?? "N/A"),
-                              _buildDetailRow(
-                                  Icons.date_range,
-                                  "Datum početka:",
-                                  formattedDate(snapshot.data!.datumPocetka)),
-                              _buildDetailRow(
-                                  Icons.date_range,
-                                  "Datum završetka:",
-                                  formattedDate(snapshot.data!.datumZavrsetka)),
-                            ],
-                          ],
-                        ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      doktor.specijalizacija.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 87, 85, 85),
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Colors.blueAccent, size: 24),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                  softWrap: true,
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

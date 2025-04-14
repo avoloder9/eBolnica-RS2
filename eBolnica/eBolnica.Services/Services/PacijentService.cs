@@ -284,7 +284,7 @@ namespace eBolnica.Services.Services
                 BrojHospitalizovanih = brojHospitalizovanih
             };
         }
-        public List<RecommendedDoktorDTO> GetPreporuceneDoktore(int pacijentId)
+        public List<Model.Models.Doktor> GetPreporuceneDoktore(int pacijentId)
         {
             return recommenderService.GetPreporuceniDoktori(pacijentId);
         }

@@ -25,7 +25,7 @@ namespace eBolnica.Services.Interfaces
         public Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId);
         public Task<List<Database.Terapija>> GetGotoveTerapijeByPacijentIdAsync(int pacijentId);
         public BrojPacijenataResponse GetBrojPacijenata();
-        List<RecommendedDoktorDTO> GetPreporuceneDoktore(int pacijentId);
+        List<Model.Models.Doktor> GetPreporuceneDoktore(int pacijentId);
         public void TrainModel();
 
     }

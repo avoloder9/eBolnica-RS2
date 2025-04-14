@@ -1,3 +1,4 @@
+import 'package:ebolnica_mobile/models/doktor_model.dart';
 import 'package:ebolnica_mobile/models/hospitalizacija_model.dart';
 import 'package:ebolnica_mobile/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_mobile/models/operacija_model.dart';
@@ -198,7 +199,7 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     throw Exception("Greška pri dobavljanju terapija.");
   }
 
-  Future<List<Operacija>> GetOperacijeByPacijentId(int pacijentId) async {
+  Future<List<Operacija>> getOperacijeByPacijentId(int pacijentId) async {
     var url =
         "${BaseProvider.baseUrl}Pacijent/getOperacijeByPacijentId/$pacijentId";
     var uri = Uri.parse(url);
@@ -214,7 +215,7 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     throw Exception("Greška pri dobavljanju operacija.");
   }
 
-  Future<List<LaboratorijskiNalaz>> GetNalaziByPacijentId(
+  Future<List<LaboratorijskiNalaz>> getNalaziByPacijentId(
       int pacijentId) async {
     var url =
         "${BaseProvider.baseUrl}Pacijent/getNalaziByPacijentId/$pacijentId";
@@ -229,5 +230,24 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     }
 
     throw Exception("Greška pri dobavljanju nalaza.");
+  }
+
+  Future<List<Doktor>> getRecommendedDoktori(int pacijentId) async {
+    var url = "${BaseProvider.baseUrl}Pacijent/$pacijentId/recommended-doktori";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+
+      if (data is List) {
+        return data.map((item) => Doktor.fromJson(item)).toList();
+      } else {
+        throw Exception("Očekivana lista iz JSON odgovora");
+      }
+    }
+    throw Exception("Greška prilikom dohvata preporučenih doktora");
   }
 }

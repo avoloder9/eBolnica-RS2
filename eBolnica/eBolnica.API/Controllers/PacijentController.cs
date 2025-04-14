@@ -177,7 +177,7 @@ namespace eBolnica.API.Controllers
         }
 
         [HttpGet("{pacijentId}/recommended-doktori")]
-        public ActionResult<List<RecommendedDoktorDTO>> GetRecommendedDoktori(int pacijentId)
+        public ActionResult<List<Model.Models.Doktor>> GetRecommendedDoktori(int pacijentId)
         {
             var recommended = _pacijentService.GetPreporuceneDoktore(pacijentId);
             return Ok(recommended);
