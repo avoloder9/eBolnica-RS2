@@ -1,5 +1,6 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.Services;
@@ -19,7 +20,7 @@ namespace eBolnica.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]      
+        [HttpPost("register")]
         public IActionResult Register([FromBody] PacijentInsertRequest request)
         {
             try
@@ -167,11 +168,25 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
+
         [HttpGet("broj-pacijenata")]
         public IActionResult GetBrojPacijenata()
         {
             var result = _pacijentService.GetBrojPacijenata();
             return Ok(result);
+        }
+
+        [HttpGet("{pacijentId}/recommended-doktori")]
+        public ActionResult<List<RecommendedDoktorDTO>> GetRecommendedDoktori(int pacijentId)
+        {
+            var recommended = _pacijentService.GetPreporuceneDoktore(pacijentId);
+            return Ok(recommended);
+        }
+   
+        [HttpGet("train-model")]
+        public void TrainModel()
+        {
+            _pacijentService.TrainModel();
         }
     }
 }

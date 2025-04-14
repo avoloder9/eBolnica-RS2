@@ -103,15 +103,16 @@ class _PacijentScreenState extends State<PacijentScreen> {
                     ? null
                     : () async {
                         bool rezultat = await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return NoviTerminScreen(
-                                pacijentId: pacijentId!,
-                                userId: widget.userId,
-                                userType: widget.userType,
-                              );
-                            },
-                            barrierDismissible: false);
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return NoviTerminScreen(
+                                    pacijentId: pacijentId!,
+                                    userId: widget.userId,
+                                    userType: widget.userType,
+                                  );
+                                },
+                                barrierDismissible: false) ??
+                            false;
                         if (rezultat == true) {
                           fetchTermini();
                         }

@@ -14,13 +14,17 @@ using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
 using System.Security.Cryptography.X509Certificates;
 using eBolnica.Model.Response;
+using eBolnica.Services.Recommender;
 
 namespace eBolnica.Services.Services
 {
     public class PacijentService : BaseCRUDService<Pacijent, PacijentSearchObject, Database.Pacijent, PacijentInsertRequest, PacijentUpdateRequest>, IPacijentService
     {
-        public PacijentService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
-        { }
+        private readonly IRecommenderService recommenderService;
+        public PacijentService(Database.EBolnicaContext context, IMapper mapper, IRecommenderService recommenderService) : base(context, mapper)
+        {
+            this.recommenderService = recommenderService;
+        }
 
         public override void BeforeInsert(PacijentInsertRequest request, Database.Pacijent entity)
         {
@@ -69,7 +73,6 @@ namespace eBolnica.Services.Services
 
             base.BeforeInsert(request, entity);
         }
-
         public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
@@ -129,7 +132,6 @@ namespace eBolnica.Services.Services
                 Mapper.Map(request, korisnik);
             }
         }
-
         public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId)
         {
             var termini = Context.Set<Database.Termin>().Where(x => x.PacijentId == pacijentId)
@@ -281,6 +283,14 @@ namespace eBolnica.Services.Services
                 UkupanBrojPacijenata = ukupnoPacijenata,
                 BrojHospitalizovanih = brojHospitalizovanih
             };
+        }
+        public List<RecommendedDoktorDTO> GetPreporuceneDoktore(int pacijentId)
+        {
+            return recommenderService.GetPreporuceniDoktori(pacijentId);
+        }
+        public void TrainModel()
+        {
+            recommenderService.TrainModel();
         }
     }
 }
