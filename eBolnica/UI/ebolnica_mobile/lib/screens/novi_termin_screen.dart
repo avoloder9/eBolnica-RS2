@@ -18,12 +18,16 @@ class NoviTerminScreen extends StatefulWidget {
   final int? odjelId;
   final int userId;
   final String? userType;
+  final Doktor? doktor;
+  final Odjel? odjel;
   const NoviTerminScreen(
       {super.key,
       this.pacijentId,
       this.odjelId,
       required this.userId,
-      this.userType});
+      this.userType,
+      this.doktor,
+      this.odjel});
 
   @override
   _NoviTerminScreenState createState() => _NoviTerminScreenState();
@@ -53,6 +57,11 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
     doktorProvider = DoktorProvider();
     terminProvider = TerminProvider();
     pacijentProvider = PacijentProvider();
+    if (widget.doktor != null && widget.odjel != null) {
+      odabraniDoktor = widget.doktor!;
+      odabraniOdjel = widget.odjel!;
+    }
+
     fetchOdjeli().then((_) {
       if (widget.odjelId != null && resultOdjel != null) {
         var matchingOdjel = resultOdjel!.result.firstWhere(
@@ -168,7 +177,10 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                     onChanged: (value) =>
                         setState(() => odabraniPacijent = value),
                   ),
-                if (widget.userType != "medicinsko osoblje")
+                if ((widget.userType != "medicinsko osoblje" &&
+                        widget.odjel == null &&
+                        widget.pacijentId == null) ||
+                    (widget.doktor == null && widget.odjel == null))
                   _buildDropdown<Odjel>(
                     label: "Odjel",
                     icon: Icons.business,
@@ -192,25 +204,26 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   )
                 else
                   const SizedBox.shrink(),
-                _buildDropdown<Doktor>(
-                  label: "Doktor",
-                  icon: Icons.medical_services,
-                  value: odabraniDoktor,
-                  items: (resultDoktor ?? [])
-                      .map((doktor) => DropdownMenuItem(
-                            value: doktor,
-                            child: Text(
-                                "${doktor.korisnik?.ime ?? "Nepoznato"} ${doktor.korisnik?.prezime ?? "Nepoznato"}"),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      odabraniDoktor = value;
-                      zauzetiTermini = [];
-                    });
-                    loadZauzetiTermini();
-                  },
-                ),
+                if (widget.pacijentId == null && widget.doktor == null)
+                  _buildDropdown<Doktor>(
+                    label: "Doktor",
+                    icon: Icons.medical_services,
+                    value: odabraniDoktor,
+                    items: (resultDoktor ?? [])
+                        .map((doktor) => DropdownMenuItem(
+                              value: doktor,
+                              child: Text(
+                                  "${doktor.korisnik?.ime ?? "Nepoznato"} ${doktor.korisnik?.prezime ?? "Nepoznato"}"),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        odabraniDoktor = value;
+                        zauzetiTermini = [];
+                      });
+                      loadZauzetiTermini();
+                    },
+                  ),
                 _buildDatePicker(),
                 _buildTimeSelector(),
                 const SizedBox(height: 20),
@@ -325,16 +338,23 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       var noviTermin = {
         "pacijentId": widget.pacijentId ?? odabraniPacijent?.pacijentId,
-        "doktorId": odabraniDoktor?.doktorId,
-        "odjelId": odabraniOdjel?.odjelId,
+        "doktorId": widget.doktor?.doktorId ?? odabraniDoktor?.doktorId,
+        "odjelId": widget.odjel?.odjelId ?? odabraniOdjel?.odjelId,
         "datumTermina": DateFormat('yyyy-MM-dd').format(selectedDate),
         "vrijemeTermina": "$time:00",
         "otkazano": false,
       };
 
       try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
         await terminProvider.insert(noviTermin);
-        if (!mounted) return;
+        if (mounted) Navigator.pop(context);
         showCustomDialog(
             context: context,
             title: "",
@@ -361,6 +381,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
           ),
         );
       } catch (e) {
+        if (mounted) Navigator.pop(context);
         await Flushbar(
           message: "Došlo je do greške. Pokušajte ponovo.",
           backgroundColor: Colors.red,

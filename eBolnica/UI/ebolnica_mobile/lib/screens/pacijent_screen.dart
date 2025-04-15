@@ -1,7 +1,11 @@
 import 'dart:convert';
 import 'package:ebolnica_mobile/models/doktor_model.dart';
 import 'package:ebolnica_mobile/models/termin_model.dart';
+import 'package:ebolnica_mobile/providers/doktor_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
+import 'package:ebolnica_mobile/screens/doktor_list_screen.dart';
+import 'package:ebolnica_mobile/screens/novi_termin_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -16,16 +20,19 @@ class PacijentScreen extends StatefulWidget {
 class _PacijentScreenState extends State<PacijentScreen> {
   int? pacijentId;
   late PacijentProvider pacijentProvider;
+  late DoktorProvider doktorProvider;
   List<Termin>? termini = [];
   List<Doktor> recommendedDoktori = [];
   bool isLoading = true;
-
+  List<Doktor> doktori = [];
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
+    doktorProvider = DoktorProvider();
     fetchTermini();
     fetchRecommendedDoktori();
+    fetchDoktori();
   }
 
   Future<void> fetchTermini() async {
@@ -40,6 +47,14 @@ class _PacijentScreenState extends State<PacijentScreen> {
     } else {
       termini = [];
     }
+  }
+
+  Future<void> fetchDoktori() async {
+    doktori = [];
+    var result = await doktorProvider.get();
+    setState(() {
+      doktori = result.result;
+    });
   }
 
   Future<void> fetchRecommendedDoktori() async {
@@ -85,23 +100,83 @@ class _PacijentScreenState extends State<PacijentScreen> {
           children: [
             const Text(
               "Vaše zdravlje je naša briga",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Naredni termin",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            SizedBox(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Naredni termin",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  TextButton(
+                    child: const Text("Prikaži sve",
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black)),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.85,
+                            child: PacijentDetaljiScreen(
+                              userId: widget.userId,
+                              userType: widget.userType,
+                            ),
+                          );
+                        },
+                      ).then((result) {
+                        if (result == true) {
+                          fetchTermini();
+                        }
+                      });
+                    },
+                  )
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
             termini!.isNotEmpty
                 ? _buildNextAppointmentCard(termini!.first)
                 : const Text("Nemate zakazanih termina."),
-            const SizedBox(height: 60),
-            const Text(
-              "Preporučeni doktori",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            const SizedBox(height: 20),
+            SizedBox(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Preporučeni doktori",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  TextButton(
+                      child: const Text("Prikaži sve",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600)),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DoktoriListScreen(
+                              doktori: doktori,
+                              userId: widget.userId,
+                              userType: widget.userType,
+                            ),
+                          ),
+                        );
+                        if (result == true) {
+                          fetchTermini();
+                        }
+                      })
+                ],
+              ),
             ),
-            const SizedBox(height: 15),
             _buildDoctorRecommendations(),
           ],
         ),
@@ -180,11 +255,9 @@ class _PacijentScreenState extends State<PacijentScreen> {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-
     if (recommendedDoktori.isEmpty) {
       return const Text("Nema preporučenih doktora trenutno.");
     }
-
     return SizedBox(
       height: 200,
       child: ListView.separated(
@@ -196,8 +269,12 @@ class _PacijentScreenState extends State<PacijentScreen> {
 
           return GestureDetector(
             onTap: () {
-              print(
-                  "Kliknut doktor: ${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}");
+              showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return _buildDoktorInfo(doktor.doktorId!);
+                  });
             },
             child: Card(
               elevation: 4,
@@ -254,6 +331,111 @@ class _PacijentScreenState extends State<PacijentScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildDoktorInfo(int doktorId) {
+    return FutureBuilder<Doktor>(
+      future: doktorProvider.getById(doktorId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Greška: ${snapshot.error}"));
+        } else if (!snapshot.hasData) {
+          return const Center(child: Text("Doktor nije pronađen"));
+        }
+
+        final doktor = snapshot.data!;
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.transparent,
+                child: doktor.korisnik!.slika != null &&
+                        doktor.korisnik!.slika!.isNotEmpty
+                    ? Image.memory(
+                        base64Decode(doktor.korisnik!.slika!),
+                        fit: BoxFit.cover,
+                      )
+                    : ClipOval(
+                        child: Image.asset(
+                          'assets/images/osoba.jpg',
+                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "${doktor.korisnik!.ime} ${doktor.korisnik!.prezime}",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                doktor.specijalizacija!,
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                doktor.biografija ?? 'Nema dostupne biografije',
+                style: const TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Godina rođenja: ${formattedDate(doktor.korisnik!.datumRodjenja)}",
+                style: const TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Zaposlen na odjelu: ${doktor.odjel!.naziv}",
+                style: const TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  final result = await showDialog(
+                    context: context,
+                    builder: (BuildContext context) => NoviTerminScreen(
+                      userId: widget.userId,
+                      userType: widget.userType,
+                      doktor: doktor,
+                      odjel: doktor.odjel,
+                      pacijentId: pacijentId,
+                    ),
+                  );
+
+                  if (result == true && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                  fetchTermini();
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 60),
+                ),
+                child: const Text(
+                  "Zakaži termin",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

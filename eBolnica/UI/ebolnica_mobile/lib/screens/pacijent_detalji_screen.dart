@@ -25,8 +25,8 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
   List<Termin>? termini = [];
   List<Pregled>? pregledi = [];
   List<Operacija>? operacije = [];
-
   int? pacijentId;
+
   @override
   void initState() {
     super.initState();
@@ -208,11 +208,18 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                                           e.vrijemeTermina.toString(),
                                       "Otkazano": true
                                     };
+
                                     try {
                                       await terminProvider.update(
                                           e.terminId!, request);
                                       if (!mounted) return;
-                                      Navigator.of(context).pop();
+
+                                      await fetchTermini();
+                                      if (!mounted) return;
+
+                                      setState(() {});
+
+                                      Navigator.of(context).pop(true);
                                       if (!mounted) return;
 
                                       showDialog(
@@ -222,7 +229,8 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                                           Future.delayed(
                                               const Duration(seconds: 2), () {
                                             if (mounted) {
-                                              Navigator.of(dialogContext).pop();
+                                              Navigator.of(dialogContext)
+                                                  .pop(true);
                                             }
                                           });
                                           return AlertDialog(
@@ -244,8 +252,6 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                                           );
                                         },
                                       );
-                                      fetchTermini();
-                                      setState(() {});
                                     } catch (error) {
                                       if (!mounted) return;
                                       await Flushbar(
