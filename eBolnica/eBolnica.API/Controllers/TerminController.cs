@@ -23,7 +23,7 @@ namespace eBolnica.API.Controllers
             return Ok(zauzetiTermini);
         }
 
-        [HttpGet("termin/{terminId}")]
+        [HttpGet("uputnica/{terminId}")]
         public async Task<IActionResult> GetUputnicaByTerminId(int terminId)
         {
             var uputnica =await _terminService.GetUputnicaByTerminId(terminId);

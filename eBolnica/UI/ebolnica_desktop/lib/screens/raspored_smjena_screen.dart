@@ -285,6 +285,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                 duration: const Duration(seconds: 3))
             .show(context);
         Navigator.pop(context);
+        startDate = null;
+        endDate = null;
         fetchRaspored();
       } catch (e) {
         await Flushbar(

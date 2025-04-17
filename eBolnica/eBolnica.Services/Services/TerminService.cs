@@ -155,7 +155,7 @@ namespace eBolnica.Services.Services
         }
         public Task<Database.Uputnica?> GetUputnicaByTerminId(int terminId)
         {
-            return Context.Uputnicas.FirstOrDefaultAsync(x => x.TerminId == terminId);
+            return Context.Uputnicas.Include(x=>x.Termin).FirstOrDefaultAsync(x => x.TerminId == terminId);
         }
     }
 }

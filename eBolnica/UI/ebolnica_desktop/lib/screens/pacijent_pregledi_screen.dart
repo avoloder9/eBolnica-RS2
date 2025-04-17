@@ -55,7 +55,6 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
       setState(() {
         _isLoading = false;
       });
-      print("error");
     }
   }
 
@@ -84,6 +83,7 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
         ),
       );
     }
+
     if (pregledi == null || pregledi!.isEmpty) {
       return const Expanded(
         child: Center(
@@ -91,61 +91,84 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
             padding: EdgeInsets.all(20.0),
             child: Text(
               "Nema obavljenih pregleda",
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
             ),
           ),
         ),
       );
     }
+
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: DataTable(
+            headingRowColor: MaterialStateProperty.all(
+              Colors.blueGrey.shade50,
+            ),
+            headingTextStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.blue.withOpacity(0.2);
+                }
+                return null;
+              },
+            ),
+            dataTextStyle: const TextStyle(
+              fontSize: 14,
+            ),
+            columnSpacing: 24,
             columns: const [
               DataColumn(label: Text("Doktor")),
               DataColumn(label: Text("Odjel")),
               DataColumn(label: Text("Datum pregleda")),
               DataColumn(label: Text("Glavna dijagnoza")),
               DataColumn(label: Text("Anamneza")),
-              DataColumn(label: Text("Zakljucak")),
+              DataColumn(label: Text("Zaključak")),
               DataColumn(label: Text("Terapija")),
             ],
-            rows: pregledi!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.uputnica!.termin!.doktor!.korisnik!.ime} ${e.uputnica!.termin!.doktor!.korisnik!.prezime}")),
-                      DataCell(
-                          Text(e.uputnica!.termin!.odjel!.naziv.toString())),
-                      DataCell(Text(
-                          formattedDate(e.uputnica!.termin!.datumTermina))),
-                      DataCell(Text(e.glavnaDijagnoza.toString())),
-                      DataCell(Text(e.anamneza.toString())),
-                      DataCell(Text(e.zakljucak.toString())),
-                      DataCell(
-                        FutureBuilder<Terapija?>(
-                          future: terapijaProvider
-                              .getTerapijabyPregledId(e.pregledId!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return const Text(
-                                  "Nije određena terapija nakon pregleda");
-                            } else if (!snapshot.hasData ||
-                                snapshot.data == null) {
-                              return const Text("");
-                            } else {
-                              return Text(snapshot.data!.opis ?? "");
-                            }
-                          },
-                        ),
+            rows: pregledi!.map<DataRow>(
+              (e) {
+                final doktor = e.uputnica!.termin!.doktor!.korisnik!;
+                final odjel = e.uputnica!.termin!.odjel!;
+                final datum = e.uputnica!.termin!.datumTermina;
+                return DataRow(
+                  cells: [
+                    DataCell(Text("${doktor.ime} ${doktor.prezime}")),
+                    DataCell(Text(odjel.naziv ?? "")),
+                    DataCell(Text(formattedDate(datum))),
+                    DataCell(Text(e.glavnaDijagnoza ?? "")),
+                    DataCell(Text(e.anamneza ?? "")),
+                    DataCell(Text(e.zakljucak ?? "")),
+                    DataCell(
+                      FutureBuilder<Terapija?>(
+                        future: terapijaProvider
+                            .getTerapijabyPregledId(e.pregledId!),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text(
+                              "Nije određena terapija nakon pregleda",
+                              style: TextStyle(color: Colors.red),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data == null) {
+                            return const Text("—");
+                          } else {
+                            return Text(snapshot.data!.opis ?? "");
+                          }
+                        },
                       ),
-                    ],
-                  ),
-                )
-                .toList(),
+                    ),
+                  ],
+                );
+              },
+            ).toList(),
           ),
         ),
       ),

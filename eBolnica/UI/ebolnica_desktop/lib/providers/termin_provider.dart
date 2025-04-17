@@ -32,7 +32,7 @@ class TerminProvider extends BaseProvider<Termin> {
   }
 
   Future<Uputnica> getUputnicaByTerminId(int terminId) async {
-    var url = "${BaseProvider.baseUrl}Termin/termin/$terminId";
+    var url = "${BaseProvider.baseUrl}Termin/uputnica/$terminId";
     var uri = Uri.parse(url);
     var headers = createHeaders();
 

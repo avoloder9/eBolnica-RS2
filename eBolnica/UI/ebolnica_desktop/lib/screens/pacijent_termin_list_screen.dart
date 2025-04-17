@@ -4,8 +4,8 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_termin_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TerminiScreen extends StatefulWidget {
   final int userId;
@@ -34,17 +34,6 @@ class _TerminiScreenState extends State<TerminiScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     fetchTermini();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
-  }
-
-  String formattedTime(Duration time) {
-    final hours = time.inHours.toString().padLeft(2, '0');
-    final minutes = (time.inMinutes % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes';
   }
 
   Future<void> fetchTermini() async {
@@ -128,7 +117,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
             padding: EdgeInsets.all(20.0),
             child: Text(
               "Nema dostupnih termina",
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -140,155 +129,102 @@ class _TerminiScreenState extends State<TerminiScreen> {
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: DataTable(
+            headingRowColor: MaterialStateProperty.all(
+              Colors.blueGrey.shade50,
+            ),
+            headingTextStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            columnSpacing: 24,
+            dataRowHeight: 60,
             columns: const [
               DataColumn(label: Text("Ime i prezime doktora")),
               DataColumn(label: Text("Odjel")),
               DataColumn(label: Text("Datum termina")),
               DataColumn(label: Text("Vrijeme termina")),
-              DataColumn(label: Text(" ")),
+              DataColumn(label: Text("")),
             ],
-            rows: termini!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}")),
-                      DataCell(Text(e.odjel!.naziv.toString())),
-                      DataCell(Text(formattedDate(e.datumTermina))),
-                      DataCell(Text(formattedTime(e.vrijemeTermina!))),
-                      DataCell(
-                        ElevatedButton(
-                          child: const Text("Otkaži termin"),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20)),
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.9),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: ConstrainedBox(
-                                      constraints:
-                                          const BoxConstraints(maxWidth: 400),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.check_circle,
-                                            color: Colors.green,
-                                            size: 60,
-                                          ),
-                                          const SizedBox(
-                                            height: 12,
-                                          ),
-                                          const Text(
-                                            "Otkazati termin?",
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          const Text(
-                                            "Da li ste sigurni da želite otkazati termin?",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 16),
-                                          ),
-                                          const SizedBox(height: 20),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              OutlinedButton(
-                                                style: OutlinedButton.styleFrom(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 12),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                  ),
-                                                ),
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: const Text("Odustani"),
-                                              ),
-                                              ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.green,
-                                                    foregroundColor:
-                                                        Colors.white,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 12,
-                                                    ),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
-                                                    )),
-                                                onPressed: () async {
-                                                  var request = {
-                                                    "DatumTermina": e
-                                                        .datumTermina!
-                                                        .toIso8601String(),
-                                                    "VrijemeTermina": e
-                                                        .vrijemeTermina
-                                                        .toString(),
-                                                    "Otkazano": true
-                                                  };
-                                                  try {
-                                                    await terminProvider.update(
-                                                        e.terminId!, request);
-                                                    Navigator.of(context).pop();
-                                                    await Flushbar(
-                                                      message:
-                                                          "Uspješno otkazan termin",
-                                                      backgroundColor:
-                                                          Colors.green,
-                                                      duration: const Duration(
-                                                          seconds: 3),
-                                                    ).show(context);
-                                                    fetchTermini();
-                                                  } catch (error) {
-                                                    await Flushbar(
-                                                      message:
-                                                          "Došlo je do greške. Pokušajte ponovo.",
-                                                      backgroundColor:
-                                                          Colors.red,
-                                                      duration: const Duration(
-                                                          seconds: 3),
-                                                    ).show(context);
-                                                  }
-                                                },
-                                                child: const Text("Da"),
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
+            rows: List.generate(termini!.length, (index) {
+              final e = termini![index];
+              final isEven = index % 2 == 0;
+
+              return DataRow(
+                color: MaterialStateProperty.resolveWith<Color?>(
+                  (Set<MaterialState> states) {
+                    return isEven ? Colors.grey[50] : null;
+                  },
+                ),
+                cells: [
+                  DataCell(Text(
+                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}")),
+                  DataCell(Text(e.odjel!.naziv.toString())),
+                  DataCell(Text(formattedDate(e.datumTermina))),
+                  DataCell(Text(formattedTime(e.vrijemeTermina!))),
+                  DataCell(
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.cancel, size: 18),
+                      label: const Text("Otkaži"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                    ],
+                      onPressed: () async {
+                        showCustomDialog(
+                          context: context,
+                          title: "Otkazati termin?",
+                          message:
+                              "Da li ste sigurni da želite otkazati termin?",
+                          confirmText: "Da",
+                          onConfirm: () async {
+                            var request = {
+                              "DatumTermina": e.datumTermina!.toIso8601String(),
+                              "VrijemeTermina": e.vrijemeTermina.toString(),
+                              "Otkazano": true,
+                            };
+                            try {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                    child: CircularProgressIndicator()),
+                              );
+                              await terminProvider.update(e.terminId!, request);
+                              if (!context.mounted) return;
+                              Navigator.of(context, rootNavigator: true).pop();
+                              await Flushbar(
+                                message: "Uspješno otkazan termin",
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 3),
+                              ).show(context);
+                              if (context.mounted) {
+                                fetchTermini();
+                                setState(() {});
+                              }
+                            } catch (error) {
+                              if (!context.mounted) return;
+                              Navigator.of(context, rootNavigator: true).pop();
+                              await Flushbar(
+                                message:
+                                    "Došlo je do greške. Pokušajte ponovo.",
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 3),
+                              ).show(context);
+                            }
+                          },
+                        );
+                      },
+                    ),
                   ),
-                )
-                .toList(),
+                ],
+              );
+            }),
           ),
         ),
       ),

@@ -7,8 +7,8 @@ import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/providers/uputnica_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_termin_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class OdjelTerminiScreen extends StatefulWidget {
   final int userId;
@@ -34,17 +34,6 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
     uputnicaProvider = UputnicaProvider();
     terminProvider = TerminProvider();
     fetchTermini();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
-  }
-
-  String formattedTime(Duration time) {
-    final hours = time.inHours.toString().padLeft(2, '0');
-    final minutes = (time.inMinutes % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes';
   }
 
   Future<void> fetchTermini() async {
@@ -133,59 +122,56 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                     DataCell(Text(formattedTime(e.vrijemeTermina!))),
                     DataCell(
                       ElevatedButton(
-                        child: const Text("Otkaži termin"),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Potvrda"),
-                                content: const Text(
-                                    "Da li ste sigurni da želite otkazati termin?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("Ne"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      var request = {
-                                        "DatumTermina":
-                                            e.datumTermina!.toIso8601String(),
-                                        "VrijemeTermina":
-                                            e.vrijemeTermina.toString(),
-                                        "Otkazano": true
-                                      };
-                                      try {
-                                        await terminProvider.update(
-                                            e.terminId!, request);
-                                        Navigator.of(context).pop();
-                                        await Flushbar(
-                                          message: "Uspješno otkazan termin",
-                                          backgroundColor: Colors.green,
-                                          duration: const Duration(seconds: 3),
-                                        ).show(context);
-
-                                        setState(() {});
-                                      } catch (error) {
-                                        await Flushbar(
-                                          message:
-                                              "Došlo je do greške. Pokušajte ponovo.",
-                                          backgroundColor: Colors.red,
-                                          duration: const Duration(seconds: 3),
-                                        ).show(context);
-                                      }
-                                    },
-                                    child: const Text("Da"),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
+                          child: const Text("Otkaži termin"),
+                          onPressed: () async {
+                            showCustomDialog(
+                                context: context,
+                                title: "Otkazati termin?",
+                                message:
+                                    "Da li ste sigurni da želite otkazati termin?",
+                                confirmText: "Da",
+                                onConfirm: () async {
+                                  var request = {
+                                    "DatumTermina":
+                                        e.datumTermina!.toIso8601String(),
+                                    "VrijemeTermina":
+                                        e.vrijemeTermina.toString(),
+                                    "Otkazano": true
+                                  };
+                                  try {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (_) => const Center(
+                                          child: CircularProgressIndicator()),
+                                    );
+                                    await terminProvider.update(
+                                        e.terminId!, request);
+                                    if (!mounted) return;
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                    await Flushbar(
+                                      message: "Uspješno otkazan termin",
+                                      backgroundColor: Colors.green,
+                                      duration: const Duration(seconds: 3),
+                                    ).show(context);
+                                    if (mounted) {
+                                      fetchTermini();
+                                      setState(() {});
+                                    }
+                                  } catch (error) {
+                                    if (!mounted) return;
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                    await Flushbar(
+                                      message:
+                                          "Došlo je do greške. Pokušajte ponovo.",
+                                      backgroundColor: Colors.red,
+                                      duration: const Duration(seconds: 3),
+                                    ).show(context);
+                                  }
+                                });
+                          }),
                     ),
                     DataCell(
                       buildActionButtons(e, () {

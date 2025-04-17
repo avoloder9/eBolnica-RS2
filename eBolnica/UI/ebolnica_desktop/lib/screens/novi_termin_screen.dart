@@ -9,7 +9,6 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -105,7 +104,6 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   Future<void> fetchOdjeli() async {
     try {
       SearchResult<Odjel> fetchedResult = await odjelProvider.get();
-      debugPrint('Fetched Odjeli: ${fetchedResult.result}');
       setState(() {
         resultOdjel = fetchedResult;
       });
@@ -298,6 +296,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       String selectedTime =
                           "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
                       bool isZauzet = zauzetiTermini.contains(selectedTime);
+                      bool isSelektovan = selectedTime == time;
                       return ElevatedButton(
                         onPressed: isZauzet
                             ? null
@@ -305,10 +304,13 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                 setState(() {
                                   time = selectedTime;
                                 });
-                                debugPrint('Odabran termin: $time');
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isZauzet ? Colors.grey : Colors.blue,
+                          backgroundColor: isZauzet
+                              ? Colors.grey
+                              : isSelektovan
+                                  ? Colors.green
+                                  : Colors.blue,
                           foregroundColor: Colors.white,
                         ),
                         child: Text(selectedTime),

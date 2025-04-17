@@ -79,7 +79,7 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
           padding: EdgeInsets.all(20.0),
           child: Text(
             "Nema dostupnih nalaza",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           ),
         ),
       );
@@ -90,30 +90,58 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: DataTable(
-            columns: const [
-              DataColumn(label: Text("Doktor")),
-              DataColumn(label: Text("Datum nalaza")),
-              DataColumn(label: Text("")),
-            ],
-            rows: nalazi!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}")),
-                      DataCell(Text(formattedDate(e.datumNalaza))),
-                      DataCell(ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    NalazDetaljiScreen(laboratorijskiNalaz: e));
-                          },
-                          child: const Text("Prikazi nalaz"))),
-                    ],
+          headingRowColor: MaterialStateProperty.all(
+            Colors.blueGrey.shade50,
+          ),
+          headingTextStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+          dataRowHeight: 60,
+          columnSpacing: 24,
+          columns: const [
+            DataColumn(label: Text("Doktor")),
+            DataColumn(label: Text("Datum nalaza")),
+            DataColumn(label: Text("Akcija")),
+          ],
+          rows: List.generate(nalazi!.length, (index) {
+            final e = nalazi![index];
+            final isEven = index % 2 == 0;
+
+            return DataRow(
+              color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+                  return isEven ? Colors.grey[50] : null;
+                },
+              ),
+              cells: [
+                DataCell(Text(
+                    "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}")),
+                DataCell(Text(formattedDate(e.datumNalaza))),
+                DataCell(
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            NalazDetaljiScreen(laboratorijskiNalaz: e),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Prikazi nalaz"),
                   ),
-                )
-                .toList()),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }
