@@ -77,52 +77,100 @@ class _SobaListScreenState extends State<SobaListScreen> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: DataTable(
+          columnSpacing: 16,
+          headingRowHeight: 56,
           columns: const [
-            DataColumn(label: Text("Naziv")),
             DataColumn(
-                label:
-                    SizedBox(width: 100, child: Center(child: Text("Odjel")))),
+                label: Text("Naziv",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
             DataColumn(
-                label: SizedBox(width: 150, child: Text("Broj kreveta"))),
+              label: SizedBox(
+                  width: 100,
+                  child: Center(
+                      child: Text("Odjel",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)))),
+            ),
             DataColumn(
-                label:
-                    SizedBox(width: 160, child: Center(child: Text("Status")))),
-            DataColumn(label: Text("")),
+              label: SizedBox(
+                  width: 150,
+                  child: Text("Broj kreveta",
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold))),
+            ),
+            DataColumn(
+              label: SizedBox(
+                  width: 160,
+                  child: Center(
+                      child: Text("Status",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)))),
+            ),
+            DataColumn(
+                label: SizedBox(width: 120, child: Center(child: Text("")))),
           ],
-          rows: sobe
-                  ?.map<DataRow>((e) => DataRow(
-                        cells: [
-                          DataCell(Text(e.naziv.toString())),
-                          DataCell(SizedBox(
-                              width: 120,
-                              child: Center(child: Text(e.odjel!.naziv!)))),
-                          DataCell(SizedBox(
-                              width: 90,
-                              child: Center(
-                                  child: Text(e.brojKreveta.toString())))),
-                          DataCell(SizedBox(
-                              width: 170,
-                              child: Center(
-                                  child: Text(e.zauzeta == true
-                                      ? "Zauzeta"
-                                      : "Slobodna")))),
-                          DataCell(ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => KrevetListScreen(
-                                            sobaId: e.sobaId!,
-                                            odjelId: widget.odjelId,
-                                            userId: widget.userId,
-                                            userType: widget.userType,
-                                          )));
-                            },
-                            child: const Text("Detalji"),
-                          )),
-                        ],
-                      ))
-                  .toList() ??
+          rows: sobe?.map<DataRow>((e) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(e.naziv.toString(),
+                        style: const TextStyle(fontSize: 14))),
+                    DataCell(SizedBox(
+                      width: 120,
+                      child: Center(
+                          child: Text(e.odjel!.naziv!,
+                              style: const TextStyle(fontSize: 14))),
+                    )),
+                    DataCell(SizedBox(
+                      width: 90,
+                      child: Center(
+                          child: Text(e.brojKreveta.toString(),
+                              style: const TextStyle(fontSize: 14))),
+                    )),
+                    DataCell(SizedBox(
+                      width: 170,
+                      child: Center(
+                        child: Text(
+                          e.zauzeta == true ? "Zauzeta" : "Slobodna",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color:
+                                e.zauzeta == true ? Colors.red : Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    )),
+                    DataCell(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => KrevetListScreen(
+                                sobaId: e.sobaId!,
+                                odjelId: widget.odjelId,
+                                userId: widget.userId,
+                                userType: widget.userType,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text("Detalji",
+                            style: TextStyle(fontSize: 14)),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),

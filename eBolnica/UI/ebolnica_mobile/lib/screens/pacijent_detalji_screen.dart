@@ -1,6 +1,6 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_mobile/models/operacija_model.dart';
-import 'package:ebolnica_mobile/models/pregled_model.dart';
+import 'package:ebolnica_mobile/models/pregledi_response.dart';
 import 'package:ebolnica_mobile/models/terapija_model.dart';
 import 'package:ebolnica_mobile/models/termin_model.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
@@ -23,7 +23,7 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
   late TerminProvider terminProvider;
   late TerapijaProvider terapijaProvider;
   List<Termin>? termini = [];
-  List<Pregled>? pregledi = [];
+  List<PreglediResponse>? pregledi = [];
   List<Operacija>? operacije = [];
   int? pacijentId;
 
@@ -58,9 +58,11 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
       var result = await pacijentProvider.getPreglediByPacijentId(pacijentId!);
-      setState(() {
-        pregledi = result;
-      });
+      if (mounted) {
+        setState(() {
+          pregledi = result;
+        });
+      }
     } else {
       pregledi = [];
     }
@@ -281,7 +283,9 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
     return Padding(
       padding: const EdgeInsets.all(14.0),
       child: pregledi == null || pregledi!.isEmpty
-          ? const Center(child: Text("Nema dostupnih pregleda."))
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
           : ListView.builder(
               itemCount: pregledi!.length,
               itemBuilder: (context, index) {
@@ -297,19 +301,16 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                     leading: CircleAvatar(
                       backgroundColor: Colors.blue,
                       child: Text(
-                        e.uputnica?.termin?.doktor?.korisnik?.ime?.isNotEmpty ==
-                                true
-                            ? e.uputnica!.termin!.doktor!.korisnik!.ime![0]
-                            : "?",
+                        e.imeDoktora.isNotEmpty == true ? e.imeDoktora[0] : "?",
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),
                     title: Text(
-                      "${e.uputnica!.termin!.doktor!.korisnik!.ime} ${e.uputnica!.termin!.doktor!.korisnik!.prezime}",
+                      "${e.imeDoktora} ${e.prezimeDoktora}",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      "${formattedDate(e.uputnica!.termin!.datumTermina)} u ${formattedTime(e.uputnica!.termin!.vrijemeTermina!)}",
+                      "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina)}",
                       style: const TextStyle(color: Colors.grey),
                     ),
                     onTap: () => showPregledDetailsDialog(context, e),
@@ -361,7 +362,8 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
     );
   }
 
-  void showPregledDetailsDialog(BuildContext context, Pregled pregled) {
+  void showPregledDetailsDialog(
+      BuildContext context, PreglediResponse pregled) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -370,7 +372,7 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: FutureBuilder<Terapija?>(
-            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId!),
+            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId),
             builder: (context, snapshot) {
               bool hasTerapija = snapshot.hasData && snapshot.data != null;
               double dialogHeight = hasTerapija
@@ -411,20 +413,17 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildDetailRow(Icons.person, "Pacijent:",
-                                "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}"),
+                                "${pregled.imePacijenta} ${pregled.prezimePacijenta}"),
                             _buildDetailRow(
                                 Icons.calendar_today,
                                 "Datum pregleda:",
-                                formattedDate(
-                                    pregled.uputnica!.termin!.datumTermina)),
-                            _buildDetailRow(
-                                Icons.medical_services,
-                                "Glavna dijagnoza:",
-                                pregled.glavnaDijagnoza ?? "N/A"),
+                                formattedDate(pregled.datumTermina)),
+                            _buildDetailRow(Icons.medical_services,
+                                "Glavna dijagnoza:", pregled.glavnaDijagnoza),
                             _buildDetailRow(Icons.history_edu, "Anamneza:",
-                                pregled.anamneza ?? "N/A"),
+                                pregled.anamneza),
                             _buildDetailRow(Icons.assignment, "Zaključak:",
-                                pregled.zakljucak ?? "N/A"),
+                                pregled.zakljucak),
                             if (hasTerapija) ...[
                               const SizedBox(height: 10),
                               const Text(

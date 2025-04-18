@@ -16,8 +16,14 @@ class NoviTerminScreen extends StatefulWidget {
   final int? pacijentId;
   final int? odjelId;
   final int userId;
+  final String? userType;
+
   const NoviTerminScreen(
-      {super.key, this.pacijentId, this.odjelId, required this.userId});
+      {super.key,
+      this.pacijentId,
+      this.odjelId,
+      required this.userId,
+      this.userType});
 
   @override
   _NoviTerminScreenState createState() => _NoviTerminScreenState();
@@ -344,9 +350,23 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               "vrijemeTermina": "$time:00",
                               "otkazano": false,
                             };
-                            print(noviTermin);
                             try {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) {
+                                  return const Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 6.0,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
                               await terminProvider.insert(noviTermin);
+                              Navigator.pop(context);
                               await Flushbar(
                                       message: "Termin je uspješno dodan",
                                       backgroundColor: Colors.green,
@@ -367,7 +387,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                     builder: (context) {
                                       if (widget.odjelId != null) {
                                         return OdjelTerminiScreen(
-                                            userId: widget.userId);
+                                          userId: widget.userId,
+                                          userType: widget.userType,
+                                        );
                                       } else {
                                         return TerminiScreen(
                                           userId: widget.userId,
@@ -379,6 +401,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                 return;
                               }
                             } catch (e) {
+                              Navigator.pop(context);
                               await Flushbar(
                                       message:
                                           "Došlo je do greške. Pokušajte ponovo.",

@@ -120,8 +120,14 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text("Kreiranje pregleda"),
-              content: Container(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                "Kreiranje pregleda",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: Form(
                   key: _formKey,
@@ -131,8 +137,13 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                       children: [
                         TextFormField(
                           controller: dijagnozaController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: "Glavna dijagnoza",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -142,10 +153,17 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                           },
                           maxLines: 2,
                         ),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: anamnezaController,
-                          decoration:
-                              const InputDecoration(labelText: "Anamneza"),
+                          decoration: InputDecoration(
+                            labelText: "Anamneza",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Ovo polje je obavezno';
@@ -154,10 +172,17 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                           },
                           maxLines: 2,
                         ),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: zakljucakController,
-                          decoration:
-                              const InputDecoration(labelText: "Zakljucak"),
+                          decoration: InputDecoration(
+                            labelText: "Zaključak",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Ovo polje je obavezno';
@@ -166,21 +191,35 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                           },
                           maxLines: 2,
                         ),
+                        const SizedBox(height: 12),
                         TextButton(
                           onPressed: () {
                             setState(() {
                               prikaziTerapiju = !prikaziTerapiju;
                             });
                           },
-                          child: Text(prikaziTerapiju
-                              ? "Sakrij terapiju"
-                              : "Dodaj terapiju"),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.blue,
+                            textStyle: const TextStyle(fontSize: 16),
+                          ),
+                          child: Text(
+                            prikaziTerapiju
+                                ? "Sakrij terapiju"
+                                : "Dodaj terapiju",
+                          ),
                         ),
                         if (prikaziTerapiju) ...[
+                          const SizedBox(height: 12),
                           TextFormField(
                             controller: nazivTerapijeController,
-                            decoration: const InputDecoration(
-                                labelText: "Naziv terapije"),
+                            decoration: InputDecoration(
+                              labelText: "Naziv terapije",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                            ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Ovo polje je obavezno';
@@ -188,10 +227,17 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 12),
                           TextFormField(
                             controller: opisTerapijeController,
-                            decoration: const InputDecoration(
-                                labelText: "Opis terapije"),
+                            decoration: InputDecoration(
+                              labelText: "Opis terapije",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                            ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Ovo polje je obavezno';
@@ -199,6 +245,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(
@@ -208,6 +255,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                                         ? "Odaberite datum početka"
                                         : DateFormat('dd.MM.yyyy')
                                             .format(datumPocetka!),
+                                    style: const TextStyle(fontSize: 16),
                                   ),
                                   trailing: const Icon(Icons.calendar_today),
                                   onTap: () async {
@@ -238,6 +286,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                                         ? "Odaberite datum završetka"
                                         : DateFormat('dd.MM.yyyy')
                                             .format(datumZavrsetka!),
+                                    style: const TextStyle(fontSize: 16),
                                   ),
                                   trailing: const Icon(Icons.calendar_today),
                                   onTap: () async {
@@ -278,11 +327,30 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Odustani"),
+                  child: const Text(
+                    "Odustani",
+                    style: TextStyle(fontSize: 16, color: Colors.red),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const Dialog(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 6.0,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+
                       var dokumentacija = await dokumentacijaProvider
                           .getMedicinskaDokumentacijaByPacijentId(pacijentId);
                       try {
@@ -304,7 +372,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             "PregledId": pregled.pregledId
                           });
                         }
-
+                        Navigator.pop(context);
                         await Flushbar(
                           message: "Pregled je uspješno dodan",
                           backgroundColor: Colors.green,
@@ -312,16 +380,29 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                         ).show(context);
                         await Future.delayed(const Duration(seconds: 1));
                         Navigator.pop(context);
+                        fetchTermini();
                       } catch (e) {
                         await Flushbar(
                           message: "Došlo je do greške. Pokušajte ponovo.",
                           backgroundColor: Colors.red,
                           duration: const Duration(seconds: 2),
                         ).show(context);
+                        Navigator.pop(context);
                       }
                     }
                   },
-                  child: const Text("Sačuvaj"),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Sačuvaj",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             );
@@ -359,6 +440,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
         ),
       );
     }
+
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -371,28 +453,45 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
               DataColumn(label: Text("Vrijeme termina")),
               DataColumn(label: Text("")),
             ],
-            rows: termini!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.pacijent!.korisnik!.ime} ${e.pacijent!.korisnik!.prezime}")),
-                      DataCell(Text(formattedDate(e.datumTermina))),
-                      DataCell(Text(formattedTime(e.vrijemeTermina!))),
-                      DataCell(
-                        ElevatedButton(
+            rows: termini!.map<DataRow>(
+              (e) {
+                bool danas = isDanasnjiDan(e.datumTermina!, DateTime.now());
+
+                return DataRow(
+                  cells: [
+                    DataCell(Text(
+                        "${e.pacijent!.korisnik!.ime} ${e.pacijent!.korisnik!.prezime}")),
+                    DataCell(Text(formattedDate(e.datumTermina))),
+                    DataCell(Text(formattedTime(e.vrijemeTermina!))),
+                    DataCell(
+                      Tooltip(
+                        message: danas
+                            ? "Kliknite za obavljanje pregleda"
+                            : "Pregled nije moguće obaviti jer datum termina nije današnji",
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: danas ? Colors.blue : Colors.grey,
+                          ),
+                          onPressed: danas
+                              ? () => pregledDijalog(e.terminId!, e.pacijentId!)
+                              : null,
                           child: const Text("Obavi pregled"),
-                          onPressed: () =>
-                              pregledDijalog(e.terminId!, e.pacijentId!),
                         ),
                       ),
-                    ],
-                  ),
-                )
-                .toList(),
+                    ),
+                  ],
+                );
+              },
+            ).toList(),
           ),
         ),
       ),
     );
+  }
+
+  bool isDanasnjiDan(DateTime datum1, DateTime datum2) {
+    return datum1.year == datum2.year &&
+        datum1.month == datum2.month &&
+        datum1.day == datum2.day;
   }
 }

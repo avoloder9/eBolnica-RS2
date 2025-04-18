@@ -209,13 +209,30 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
         }
-        public async Task<List<Database.Pregled>> GetPreglediByPacijentIdAsync(int pacijentId)
+        public async Task<List<PreglediResponse>> GetPreglediByPacijentIdAsync(int pacijentId)
         {
-            return await Context.Pregleds.Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Odjel)
-                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
-                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Pacijent).ThenInclude(x => x.Korisnik)
-                .Where(p => p.MedicinskaDokumentacija!.PacijentId == pacijentId)
-                .ToListAsync();
+            var result = await Context.Pregleds.Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Odjel)
+                  .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                  .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Pacijent).ThenInclude(x => x.Korisnik)
+                  .Where(p => p.MedicinskaDokumentacija!.PacijentId == pacijentId)
+                  .ToListAsync();
+
+            var response = result.Select(p => new PreglediResponse
+            {
+                PregledId = p.PregledId,
+                PacijentId = p.Uputnica.Termin.PacijentId,
+                ImeDoktora = p.Uputnica!.Termin!.Doktor!.Korisnik!.Ime!,
+                PrezimeDoktora = p.Uputnica?.Termin?.Doktor?.Korisnik?.Prezime ?? "Nepoznato",
+                ImePacijenta = p.Uputnica?.Termin?.Pacijent.Korisnik.Ime ?? "Nepoznato",
+                PrezimePacijenta = p.Uputnica?.Termin?.Pacijent.Korisnik.Prezime ?? "Nepoznato",
+                NazivOdjela = p.Uputnica?.Termin?.Odjel?.Naziv ?? "Nepoznato",
+                DatumTermina = p.Uputnica?.Termin?.DatumTermina ?? DateTime.MinValue,
+                VrijemeTermina = p.Uputnica?.Termin?.VrijemeTermina ?? TimeSpan.Zero,
+                GlavnaDijagnoza = p.GlavnaDijagnoza ?? "Nema dijagnoze",
+                Anamneza = p.Anamneza ?? "Nema anamneze",
+                Zakljucak = p.Zakljucak ?? "Nema zaključka"
+            }).ToList();
+            return response;
         }
         public async Task<List<Database.Hospitalizacija>> GetHospitalizacijeByPacijentIdAsync(int pacijentId)
         {

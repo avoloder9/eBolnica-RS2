@@ -4,9 +4,9 @@ import 'package:ebolnica_desktop/providers/auth_provider.dart';
 import 'package:ebolnica_desktop/providers/base_provider.dart';
 import 'package:ebolnica_desktop/providers/korisnik_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
-import 'package:ebolnica_desktop/screens/dashboard_doctor.dart';
-import 'package:ebolnica_desktop/screens/dashboard_medical_staff.dart';
 import 'package:ebolnica_desktop/screens/dashboard_admin.dart';
+import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
+import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
 import 'package:ebolnica_desktop/screens/registration_screen.dart';
 import 'package:flutter/material.dart';
@@ -176,13 +176,16 @@ class _LoginScreenState extends State<LoginScreen> {
             );
             break;
           case 'doktor':
-            dashboard = DashboardDoctor(
+            dashboard = DoktorTerminiScreen(
               userId: userId,
               nazivOdjela: nazivOdjela!,
             );
             break;
           case 'medicinsko osoblje':
-            dashboard = DashboardMedicalStaff(userId: userId);
+            dashboard = OdjelTerminiScreen(
+              userId: userId,
+              userType: userType,
+            );
             break;
           case 'pacijent':
             dashboard = TerminiScreen(

@@ -1,4 +1,4 @@
-import 'package:ebolnica_desktop/models/pregled_model.dart';
+import 'package:ebolnica_desktop/models/Response/pregledi_response.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
@@ -21,7 +21,7 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
   late TerapijaProvider terapijaProvider;
   int? pacijentId;
   Terapija? terapija;
-  List<Pregled>? pregledi = [];
+  List<PreglediResponse>? pregledi = [];
   bool _isLoading = true;
   @override
   void initState() {
@@ -135,34 +135,67 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
             ],
             rows: pregledi!.map<DataRow>(
               (e) {
-                final doktor = e.uputnica!.termin!.doktor!.korisnik!;
-                final odjel = e.uputnica!.termin!.odjel!;
-                final datum = e.uputnica!.termin!.datumTermina;
                 return DataRow(
                   cells: [
-                    DataCell(Text("${doktor.ime} ${doktor.prezime}")),
-                    DataCell(Text(odjel.naziv ?? "")),
-                    DataCell(Text(formattedDate(datum))),
-                    DataCell(Text(e.glavnaDijagnoza ?? "")),
-                    DataCell(Text(e.anamneza ?? "")),
-                    DataCell(Text(e.zakljucak ?? "")),
+                    DataCell(Text("${e.imeDoktora} ${e.prezimeDoktora}")),
+                    DataCell(Text(e.nazivOdjela)),
+                    DataCell(Text(formattedDate(e.datumTermina))),
                     DataCell(
-                      FutureBuilder<Terapija?>(
-                        future: terapijaProvider
-                            .getTerapijabyPregledId(e.pregledId!),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Text(
-                              "Nije određena terapija nakon pregleda",
-                              style: TextStyle(color: Colors.red),
-                            );
-                          } else if (!snapshot.hasData ||
-                              snapshot.data == null) {
-                            return const Text("—");
-                          } else {
-                            return Text(snapshot.data!.opis ?? "");
-                          }
-                        },
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: Text(
+                          e.glavnaDijagnoza,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: Text(
+                          e.anamneza,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: Text(
+                          e.zakljucak,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: FutureBuilder<Terapija?>(
+                          future: terapijaProvider
+                              .getTerapijabyPregledId(e.pregledId),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return const Text(
+                                "Nije određena terapija nakon pregleda",
+                                style: TextStyle(color: Colors.red),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            } else if (!snapshot.hasData ||
+                                snapshot.data == null) {
+                              return const Text("—");
+                            } else {
+                              return Text(
+                                snapshot.data!.opis ?? "",
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ],

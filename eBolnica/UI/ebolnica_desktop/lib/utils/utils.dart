@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -44,22 +43,6 @@ class PhoneNumberFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: text.length),
     );
   }
-}
-
-int? getPacijentIdByUserId(int? userId, List<Pacijent> pacijenti) {
-  if (userId == null) return null;
-
-  final pacijent = pacijenti.firstWhere(
-    (pacijent) => pacijent.korisnikId == userId,
-    orElse: () => Pacijent(),
-  );
-
-  return pacijent.pacijentId;
-}
-
-Future<List<Pacijent>> fetchPacijenti() async {
-  final response = await pacijentProvider.get();
-  return response.result;
 }
 
 String formattedDate(date) {
@@ -110,7 +93,7 @@ class DurationConverter implements JsonConverter<Duration?, String?> {
   Duration? fromJson(String? json) {
     if (json == null) return null;
     List<String> parts = json.split(':');
-    if (parts.length != 3) return null; // Ako format nije HH:mm:ss
+    if (parts.length != 3) return null;
 
     int hours = int.tryParse(parts[0]) ?? 0;
     int minutes = int.tryParse(parts[1]) ?? 0;
@@ -397,4 +380,35 @@ class TerminiPoMjesecima {
       brojTermina: json['brojTermina'],
     );
   }
+}
+
+Widget buildDetailRowWithIcon({
+  required IconData icon,
+  required String label,
+  required String value,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.blueGrey),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 16, color: Colors.black),
+              children: [
+                TextSpan(
+                  text: "$label ",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                TextSpan(text: value),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

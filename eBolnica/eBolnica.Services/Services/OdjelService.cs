@@ -102,9 +102,9 @@ namespace eBolnica.Services.Services
                 .ThenInclude(k => k.Korisnik).Include(d => d.Doktor).ThenInclude(k => k.Korisnik).Include(o => o.Odjel)
                 .Where(x => x.DatumTermina > DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina)
                 .ToList();
-            if (termini.Count == 0)
+            if (!termini.Any())
             {
-                throw new Exception("Nema zakazanih termina na ovom odjelu");
+                return new List<Model.Models.Termin>();
             }
             var terminModel = termini.Select(t => new Model.Models.Termin
             {

@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 
 class OdjelTerminiScreen extends StatefulWidget {
   final int userId;
-  const OdjelTerminiScreen({super.key, required this.userId});
+  final String? userType;
+  const OdjelTerminiScreen({super.key, required this.userId, this.userType});
   @override
   State<OdjelTerminiScreen> createState() => _OdjelTerminiScreenState();
 }
@@ -75,6 +76,7 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                     return NoviTerminScreen(
                       userId: widget.userId,
                       odjelId: odjelId,
+                      userType: widget.userType,
                     );
                   },
                   barrierDismissible: false);
@@ -85,7 +87,7 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
         ],
       ),
       drawer: SideBar(
-        userType: 'medicinsko osoblje',
+        userType: widget.userType!,
         userId: widget.userId,
       ),
       body: Column(
@@ -95,6 +97,16 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
   }
 
   Widget _buildResultView() {
+    if (termini == null || termini!.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            "Nemate zakazanih termina",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

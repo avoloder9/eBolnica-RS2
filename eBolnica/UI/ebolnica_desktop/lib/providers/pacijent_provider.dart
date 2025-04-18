@@ -1,10 +1,10 @@
 import 'package:ebolnica_desktop/models/Response/broj_pacijenata_response.dart';
+import 'package:ebolnica_desktop/models/Response/pregledi_response.dart';
 import 'package:ebolnica_desktop/models/hospitalizacija_model.dart';
 import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
 import 'package:ebolnica_desktop/models/otpusno_pismo_model.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
-import 'package:ebolnica_desktop/models/pregled_model.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
 import 'package:ebolnica_desktop/providers/base_provider.dart';
@@ -102,7 +102,7 @@ class PacijentProvider extends BaseProvider<Pacijent> {
     throw Exception("Greska");
   }
 
-  Future<List<Pregled>> getPreglediByPacijentId(int pacijentId) async {
+  Future<List<PreglediResponse>> getPreglediByPacijentId(int pacijentId) async {
     var url =
         "${BaseProvider.baseUrl}Pacijent/getPregledByPacijentId/$pacijentId";
     var uri = Uri.parse(url);
@@ -112,7 +112,7 @@ class PacijentProvider extends BaseProvider<Pacijent> {
 
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body) as List;
-      return data.map((item) => Pregled.fromJson(item)).toList();
+      return data.map((item) => PreglediResponse.fromJson(item)).toList();
     }
 
     throw Exception("Greška pri dobavljanju pregleda.");

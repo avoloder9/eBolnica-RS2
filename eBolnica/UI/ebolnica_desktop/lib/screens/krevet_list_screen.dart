@@ -88,30 +88,78 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: DataTable(
+          columnSpacing: 20,
+          headingRowHeight: 56,
           columns: const [
-            DataColumn(label: Center(child: Text("Broj kreveta"))),
-            DataColumn(label: Center(child: Text("Soba"))),
-            DataColumn(label: Center(child: Text("Status"))),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Broj kreveta",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Soba",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Status",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
           ],
-          rows: kreveti
-                  ?.map<DataRow>((e) => DataRow(
-                        cells: [
-                          DataCell(SizedBox(
-                              width: 100,
-                              child:
-                                  Center(child: Text(e.krevetId.toString())))),
-                          DataCell(SizedBox(
-                              width: 50,
-                              child: Center(child: Text(e.soba!.naziv!)))),
-                          DataCell(SizedBox(
-                              width: 70,
-                              child: Center(
-                                  child: Text(e.zauzet == true
-                                      ? "Zauzet"
-                                      : "Slobodan")))),
-                        ],
-                      ))
-                  .toList() ??
+          rows: kreveti?.map<DataRow>((e) {
+                return DataRow(
+                  cells: [
+                    DataCell(
+                      SizedBox(
+                        width: 100,
+                        child: Center(
+                          child: Text(
+                            e.krevetId.toString(),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      SizedBox(
+                        width: 50,
+                        child: Center(
+                          child: Text(
+                            e.soba!.naziv!,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      SizedBox(
+                        width: 70,
+                        child: Center(
+                          child: Text(
+                            e.zauzet == true ? "Zauzet" : "Slobodan",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color:
+                                  e.zauzet == true ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),

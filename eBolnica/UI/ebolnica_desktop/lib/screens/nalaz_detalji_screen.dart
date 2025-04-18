@@ -72,7 +72,7 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Pacijent: ${widget.laboratorijskiNalaz.pacijent?.korisnik?.ime} "
+                        "${widget.laboratorijskiNalaz.pacijent?.korisnik?.ime} "
                         "${widget.laboratorijskiNalaz.pacijent?.korisnik?.prezime} "
                         "(${formattedDate(widget.laboratorijskiNalaz.pacijent?.korisnik?.datumRodjenja)}, "
                         "${widget.laboratorijskiNalaz.pacijent?.korisnik?.spol})",
@@ -206,7 +206,8 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
     pdf.addPage(
       pw.MultiPage(
         build: (pw.Context context) => [
-          pw.Text('Laboratorijski nalaz', style: pw.TextStyle(fontSize: 24)),
+          pw.Text('Laboratorijski nalaz',
+              style: const pw.TextStyle(fontSize: 24)),
           pw.SizedBox(height: 16),
           pw.Text(
             'Pacijent: ${pacijent?.ime ?? ""} ${pacijent?.prezime ?? ""} '

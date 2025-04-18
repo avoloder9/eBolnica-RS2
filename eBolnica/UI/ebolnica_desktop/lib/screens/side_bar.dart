@@ -120,8 +120,8 @@ class SideBar extends StatelessWidget {
           ] else if (userType == 'medicinsko osoblje') ...[
             _buildListTile(context, 'Odjeli',
                 OdjelListScreen(userId: userId, userType: userType)),
-            _buildListTile(
-                context, 'Termini', OdjelTerminiScreen(userId: userId)),
+            _buildListTile(context, 'Termini',
+                OdjelTerminiScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Pacijenti',
                 PacijentListScreen(userId: userId, userType: userType)),
             _buildListTile(context, 'Smjene',

@@ -176,7 +176,7 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 10.0,
                           mainAxisSpacing: 10.0,
-                          childAspectRatio: 1.8,
+                          childAspectRatio: 1.9,
                         ),
                         itemCount: filteredDoctors.length,
                         itemBuilder: (context, index) {
@@ -246,7 +246,7 @@ class DoktorCard extends StatelessWidget {
                       ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             Text(
               '$ime $prezime',
               style: const TextStyle(

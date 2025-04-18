@@ -1,9 +1,9 @@
+import 'package:ebolnica_desktop/models/Response/pregledi_response.dart';
 import 'package:ebolnica_desktop/models/hospitalizacija_model.dart';
 import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/medicinska_dokumentacija_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
 import 'package:ebolnica_desktop/models/otpusno_pismo_model.dart';
-import 'package:ebolnica_desktop/models/pregled_model.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
@@ -23,7 +23,7 @@ class MedicinskaDokumentacijaScreen extends StatefulWidget {
 
 class _MedicinskaDokumentacijaScreenState
     extends State<MedicinskaDokumentacijaScreen> {
-  List<Pregled>? pregledi = [];
+  List<PreglediResponse>? pregledi = [];
   List<Hospitalizacija>? hospizalizacije = [];
   List<OtpusnoPismo>? otpusnaPisma = [];
   List<Terapija>? terapije = [];
@@ -58,7 +58,6 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greška: $e");
       setState(() {
         isLoading = false;
       });
@@ -73,7 +72,6 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greška: $e");
       setState(() {
         isLoading = false;
       });
@@ -89,7 +87,6 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greska: $e");
       setState(() {
         isLoading = false;
       });
@@ -105,7 +102,6 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greska: $e");
       setState(() {
         isLoading = false;
       });
@@ -120,7 +116,6 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greska: $e");
       setState(() {
         isLoading = false;
       });
@@ -135,18 +130,23 @@ class _MedicinskaDokumentacijaScreenState
         isLoading = false;
       });
     } catch (e) {
-      print("Greska: $e");
       setState(() {
         isLoading = false;
       });
     }
   }
 
+  Future<MedicinskaDokumentacija> fetchMedicinskaDokumentacija() async {
+    dokumentacija = await dokumentacijaProvider
+        .getMedicinskaDokumentacijaByPacijentId(widget.pacijentId);
+    return dokumentacija!;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.height * 0.8,
         child: DefaultTabController(
@@ -209,63 +209,44 @@ class _MedicinskaDokumentacijaScreenState
     return ListView.builder(
       itemCount: pregledi!.length,
       itemBuilder: (context, index) {
-        var pregled = pregledi![index];
+        final pregled = pregledi![index];
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Datum pregleda",
-                    formattedDate(pregled.uputnica!.termin!.datumTermina),
+          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => showPregledDetailsDialog(context, pregled),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildDetailRowWithIcon(
+                    icon: Icons.calendar_today,
+                    label: "Datum pregleda:",
+                    value: formattedDate(pregled.datumTermina),
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Odjel",
-                    pregled.uputnica!.termin!.odjel!.naziv ?? 'Nepoznato',
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.local_hospital,
+                    label: "Odjel:",
+                    value: pregled.nazivOdjela,
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Doktor",
-                    "${pregled.uputnica!.termin!.doktor!.korisnik!.ime ?? ''} "
-                        "${pregled.uputnica!.termin!.doktor!.korisnik!.prezime ?? ''}",
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.person,
+                    label: "Doktor:",
+                    value: "${pregled.imeDoktora} ${pregled.prezimeDoktora}",
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              showPregledDetailsDialog(context, pregled);
-            },
           ),
         );
       },
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value) {
-    return Row(
-      children: [
-        Text(
-          "$label: ",
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-        ),
-      ],
     );
   }
 
@@ -277,46 +258,51 @@ class _MedicinskaDokumentacijaScreenState
     return ListView.builder(
       itemCount: hospizalizacije!.length,
       itemBuilder: (context, index) {
-        var hospitalizacija = hospizalizacije![index];
+        final hospitalizacija = hospizalizacije![index];
+        final doktor = hospitalizacija.doktor!.korisnik!;
+
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Datum prijema",
-                    formattedDate(hospitalizacija.datumPrijema),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Datum otpusta",
-                    hospitalizacija.datumOtpusta != null
-                        ? formattedDate(hospitalizacija.datumOtpusta)
-                        : '',
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Doktor",
-                    "${hospitalizacija.doktor!.korisnik!.ime ?? ''} "
-                        "${hospitalizacija.doktor!.korisnik!.prezime ?? ''}",
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                      "Odjel", hospitalizacija.odjel!.naziv.toString()),
-                ),
-              ],
-            ),
+          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
             onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildDetailRowWithIcon(
+                    icon: Icons.date_range,
+                    label: "Datum prijema:",
+                    value: formattedDate(hospitalizacija.datumPrijema),
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.exit_to_app,
+                    label: "Datum otpusta:",
+                    value: hospitalizacija.datumOtpusta != null
+                        ? formattedDate(hospitalizacija.datumOtpusta!)
+                        : "N/A",
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.person,
+                    label: "Doktor:",
+                    value: "${doktor.ime} ${doktor.prezime}",
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.local_hospital,
+                    label: "Odjel:",
+                    value: hospitalizacija.odjel!.naziv!,
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -332,44 +318,48 @@ class _MedicinskaDokumentacijaScreenState
       itemCount: otpusnaPisma!.length,
       itemBuilder: (context, index) {
         var otpusnoPismo = otpusnaPisma![index];
+
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                      "Datum otpusta",
-                      formattedDate(
-                          otpusnoPismo.hospitalizacija!.datumOtpusta)),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Dijagnoza",
-                    otpusnoPismo.dijagnoza.toString(),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Anamneza",
-                    otpusnoPismo.anamneza.toString(),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Zakljucak",
-                    otpusnoPismo.zakljucak.toString(),
-                  ),
-                ),
-              ],
-            ),
+          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
             onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildDetailRowWithIcon(
+                    icon: Icons.calendar_today,
+                    label: "Datum otpusta:",
+                    value: formattedDate(
+                        otpusnoPismo.hospitalizacija!.datumOtpusta),
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.local_hospital,
+                    label: "Dijagnoza:",
+                    value: otpusnoPismo.dijagnoza ?? "N/A",
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.note,
+                    label: "Anamneza:",
+                    value: otpusnoPismo.anamneza ?? "N/A",
+                  ),
+                  const SizedBox(height: 8),
+                  buildDetailRowWithIcon(
+                    icon: Icons.check_circle,
+                    label: "Zaključak:",
+                    value: otpusnoPismo.zakljucak ?? "N/A",
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -386,39 +376,52 @@ class _MedicinskaDokumentacijaScreenState
       itemBuilder: (context, index) {
         var terapija = terapije![index];
         return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Naziv prijema",
-                    terapija.naziv.toString(),
-                  ),
+                const Row(
+                  children: [
+                    Icon(Icons.medication, color: Colors.teal),
+                    SizedBox(width: 8),
+                    Text(
+                      "Terapija",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Opis",
-                    terapija.opis.toString(),
-                  ),
+                const SizedBox(height: 12),
+                buildDetailRowWithIcon(
+                  icon: Icons.label,
+                  label: "Naziv terapije:",
+                  value: terapija.naziv ?? "N/A",
                 ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                      "Datum pocetka", formattedDate(terapija.datumPocetka)),
+                buildDetailRowWithIcon(
+                  icon: Icons.description,
+                  label: "Opis:",
+                  value: terapija.opis ?? "N/A",
                 ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem("Datum završetka",
-                      formattedDate(terapija.datumZavrsetka)),
+                buildDetailRowWithIcon(
+                  icon: Icons.calendar_today,
+                  label: "Datum početka:",
+                  value: formattedDate(terapija.datumPocetka),
+                ),
+                buildDetailRowWithIcon(
+                  icon: Icons.event_available,
+                  label: "Datum završetka:",
+                  value: formattedDate(terapija.datumZavrsetka),
                 ),
               ],
             ),
-            onTap: () {},
           ),
         );
       },
@@ -435,36 +438,53 @@ class _MedicinskaDokumentacijaScreenState
       itemBuilder: (context, index) {
         var nalaz = nalazi![index];
         return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Naručio",
-                    "${nalaz.doktor!.korisnik!.ime ?? ''} "
-                        "${nalaz.doktor!.korisnik!.prezime ?? ''}",
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Datum nalaza",
-                    formattedDate(nalaz.datumNalaza),
-                  ),
-                ),
-              ],
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
             onTap: () {
               showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      NalazDetaljiScreen(laboratorijskiNalaz: nalaz));
+                context: context,
+                builder: (BuildContext context) =>
+                    NalazDetaljiScreen(laboratorijskiNalaz: nalaz),
+              );
             },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.science, color: Colors.deepPurple),
+                      SizedBox(width: 8),
+                      Text(
+                        "Laboratorijski nalaz",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  buildDetailRowWithIcon(
+                    icon: Icons.person,
+                    label: "Naručio:",
+                    value:
+                        "${nalaz.doktor?.korisnik?.ime ?? ''} ${nalaz.doktor?.korisnik?.prezime ?? ''}",
+                  ),
+                  buildDetailRowWithIcon(
+                    icon: Icons.calendar_today,
+                    label: "Datum nalaza:",
+                    value: formattedDate(nalaz.datumNalaza),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -481,66 +501,65 @@ class _MedicinskaDokumentacijaScreenState
       itemBuilder: (context, index) {
         var operacija = operacije![index];
         return Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Datum operacije",
-                    formattedDate(operacija.datumOperacije),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                    "Doktor",
-                    "${operacija.doktor!.korisnik!.ime} ${operacija.doktor!.korisnik!.prezime}",
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: _buildInfoItem(
-                      "Tip operacije", operacija.tipOperacije.toString()),
-                ),
-                Expanded(
-                  flex: 3,
-                  child:
-                      _buildInfoItem("Komentar", operacija.komentar.toString()),
-                ),
-              ],
-            ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
             onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.medical_services, color: Colors.redAccent),
+                      SizedBox(width: 8),
+                      Text(
+                        "Operacija",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  buildDetailRowWithIcon(
+                    icon: Icons.calendar_today,
+                    label: "Datum operacije:",
+                    value: formattedDate(operacija.datumOperacije),
+                  ),
+                  buildDetailRowWithIcon(
+                    icon: Icons.person,
+                    label: "Doktor:",
+                    value:
+                        "${operacija.doktor?.korisnik?.ime ?? ''} ${operacija.doktor?.korisnik?.prezime ?? ''}",
+                  ),
+                  buildDetailRowWithIcon(
+                    icon: Icons.healing,
+                    label: "Tip operacije:",
+                    value: operacija.tipOperacije ?? "Nepoznato",
+                  ),
+                  buildDetailRowWithIcon(
+                    icon: Icons.comment,
+                    label: "Komentar:",
+                    value: operacija.komentar ?? "Nema komentara",
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildListView(List<String>? items) {
-    if (items == null || items.isEmpty) {
-      return const Center(child: Text("Nema podataka"));
-    }
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(items[index]),
-        );
-      },
-    );
-  }
-
-  Future<MedicinskaDokumentacija> fetchMedicinskaDokumentacija() async {
-    dokumentacija = await dokumentacijaProvider
-        .getMedicinskaDokumentacijaByPacijentId(widget.pacijentId);
-    return dokumentacija!;
-  }
-
-  void showPregledDetailsDialog(BuildContext context, Pregled pregled) {
+  void showPregledDetailsDialog(
+      BuildContext context, PreglediResponse pregled) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -549,24 +568,24 @@ class _MedicinskaDokumentacijaScreenState
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: FutureBuilder<Terapija?>(
-            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId!),
+            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId),
             builder: (context, snapshot) {
               bool hasTerapija = snapshot.hasData && snapshot.data != null;
               double dialogHeight = hasTerapija
-                  ? MediaQuery.of(context).size.height * 0.57
-                  : MediaQuery.of(context).size.height * 0.35;
+                  ? MediaQuery.of(context).size.height * 0.50
+                  : MediaQuery.of(context).size.height * 0.3;
 
               return Container(
                 width: MediaQuery.of(context).size.width * 0.7,
                 height: dialogHeight,
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Detalji pregleda",
+                      "🩺 Detalji pregleda",
                       style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     Expanded(
@@ -574,48 +593,90 @@ class _MedicinskaDokumentacijaScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDetailRow("Pacijent:",
-                                "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}"),
-                            _buildDetailRow(
-                                "Datum pregleda:",
-                                formattedDate(
-                                    pregled.uputnica!.termin!.datumTermina)),
-                            _buildDetailRow("Glavna dijagnoza:",
-                                pregled.glavnaDijagnoza.toString()),
-                            _buildDetailRow(
-                                "Anamneza:", pregled.anamneza.toString()),
-                            _buildDetailRow(
-                                "Zaključak:", pregled.zakljucak.toString()),
+                            buildDetailRowWithIcon(
+                              icon: Icons.person,
+                              label: "Pacijent:",
+                              value:
+                                  "${pregled.imePacijenta} ${pregled.prezimePacijenta}",
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.calendar_today,
+                              label: "Datum pregleda:",
+                              value: formattedDate(pregled.datumTermina),
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.assignment,
+                              label: "Glavna dijagnoza:",
+                              value: pregled.glavnaDijagnoza,
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.notes,
+                              label: "Anamneza:",
+                              value: pregled.anamneza,
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.check_circle_outline,
+                              label: "Zaključak:",
+                              value: pregled.zakljucak,
+                            ),
                             if (hasTerapija) ...[
-                              const SizedBox(height: 20),
-                              const Text(
-                                "Terapija",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
+                              const SizedBox(height: 10),
                               const Divider(),
-                              _buildDetailRow("Naziv terapije:",
-                                  snapshot.data!.naziv.toString()),
-                              _buildDetailRow(
-                                  "Opis:", snapshot.data!.opis.toString()),
-                              _buildDetailRow("Datum početka:",
-                                  formattedDate(snapshot.data!.datumPocetka)),
-                              _buildDetailRow("Datum završetka:",
-                                  formattedDate(snapshot.data!.datumZavrsetka)),
+                              const Row(
+                                children: [
+                                  Icon(Icons.medical_services,
+                                      size: 22, color: Colors.blueGrey),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Terapija",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              buildDetailRowWithIcon(
+                                icon: Icons.label,
+                                label: "Naziv terapije:",
+                                value: snapshot.data!.naziv!,
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.description,
+                                label: "Opis:",
+                                value: snapshot.data!.opis ?? "N/A",
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.calendar_today,
+                                label: "Datum početka:",
+                                value:
+                                    formattedDate(snapshot.data!.datumPocetka),
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.event_available,
+                                label: "Datum završetka:",
+                                value: formattedDate(
+                                    snapshot.data!.datumZavrsetka),
+                              ),
                             ],
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("Zatvori",
-                            style: TextStyle(fontSize: 18)),
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 12),
+                        ),
+                        child: const Text(
+                          "Zatvori",
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   ],
@@ -625,28 +686,6 @@ class _MedicinskaDokumentacijaScreenState
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "$label ",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-              softWrap: true,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
