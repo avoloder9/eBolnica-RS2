@@ -26,9 +26,13 @@ namespace eBolnica.Services.Services
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Soba);
 
-            if (searchObject?.KrevetId != null && searchObject.KrevetId > 0)
+            if (searchObject?.KrevetId != null || searchObject!.KrevetId > 0)
             {
                 query = query.Where(x => x.SobaId == searchObject.KrevetId);
+            }
+            if (searchObject?.SobaId != null || searchObject!.SobaId > 0)
+            {
+                query = query.Where(x => x.SobaId == searchObject.SobaId);
             }
             return query;
         }
@@ -79,7 +83,6 @@ namespace eBolnica.Services.Services
 
             return Mapper.Map<Krevet>(entity);
         }
-
         public override void BeforeUpdate(KrevetUpdateRequest request, Database.Krevet entity)
         {
             var novaSobaExists = Context.Sobas.Any(o => o.SobaId == request.SobaId);
@@ -103,27 +106,6 @@ namespace eBolnica.Services.Services
 
             base.BeforeUpdate(request, entity);
         }
-        public List<Model.Models.Krevet> GetKrevetBySobaId(int sobaId)
-        {
-            var krevetDatabase = Context.Set<Database.Krevet>().Include(s => s.Soba).Where(x => x.SobaId == sobaId).ToList();
-            if (!krevetDatabase.Any())
-            {
-                return new List<Model.Models.Krevet>();
-            }
-            var krevetModel = krevetDatabase.Select(s => new Model.Models.Krevet
-            {
-                SobaId = s.SobaId,
-                KrevetId = s.KrevetId,
-                Zauzet = s.Zauzet,
-                Soba = new Model.Models.Soba
-                {
-                    Naziv = s.Soba.Naziv,
-                    BrojKreveta = s.Soba.BrojKreveta,
-                    Zauzeta = s.Soba.Zauzeta,
-                }
-            }).ToList();
-            return krevetModel;
-        }
         public List<Model.Models.Krevet> GetSlobodanKrevetBySobaId(int sobaId)
         {
             var krevetDatabase = Context.Set<Database.Krevet>().Include(s => s.Soba).Where(x => x.SobaId == sobaId && x.Zauzet == false).ToList();
@@ -145,7 +127,6 @@ namespace eBolnica.Services.Services
             }).ToList();
             return krevetModel;
         }
-
         public PopunjenostBolniceResponse GetPopunjenostBolnice()
         {
             var ukupnoKreveta = Context.Krevets.Count(k => !k.Obrisano);

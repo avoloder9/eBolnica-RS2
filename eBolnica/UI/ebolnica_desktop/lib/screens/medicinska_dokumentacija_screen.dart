@@ -5,7 +5,11 @@ import 'package:ebolnica_desktop/models/medicinska_dokumentacija_model.dart';
 import 'package:ebolnica_desktop/models/operacija_model.dart';
 import 'package:ebolnica_desktop/models/otpusno_pismo_model.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
+import 'package:ebolnica_desktop/providers/hospitalizacija_provider.dart';
+import 'package:ebolnica_desktop/providers/laboratorijski_nalaz_provider.dart';
 import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dart';
+import 'package:ebolnica_desktop/providers/operacija_provider.dart';
+import 'package:ebolnica_desktop/providers/otpusno_pismo_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
 import 'package:ebolnica_desktop/screens/nalaz_detalji_screen.dart';
@@ -33,28 +37,36 @@ class _MedicinskaDokumentacijaScreenState
       MedicinskaDokumentacijaProvider();
   bool isLoading = true;
   PacijentProvider pacijentProvider = PacijentProvider();
+  HospitalizacijaProvider hospitalizacijaProvider = HospitalizacijaProvider();
+  OtpusnoPismoProvider otpusnoPismoProvider = OtpusnoPismoProvider();
   MedicinskaDokumentacija? dokumentacija;
   TerapijaProvider terapijaProvider = TerapijaProvider();
+  LaboratorijskiNalazProvider nalazProvider = LaboratorijskiNalazProvider();
+  OperacijaProvider operacijaProvider = OperacijaProvider();
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
     terapijaProvider = TerapijaProvider();
+    hospitalizacijaProvider = HospitalizacijaProvider();
+    otpusnoPismoProvider = OtpusnoPismoProvider();
+    nalazProvider = LaboratorijskiNalazProvider();
+    operacijaProvider = OperacijaProvider();
     fetchMedicinskaDokumentacija();
     fetchPregledi(widget.pacijentId);
     fetchHospitalizacije(widget.pacijentId);
-    fetchOtpusnaPisma(widget.pacijentId);
     fetchTerapije(widget.pacijentId);
+    fetchOtpusnaPisma(widget.pacijentId);
     fetchOperacije(widget.pacijentId);
     fetchNalazi(widget.pacijentId);
   }
 
   void fetchNalazi(int pacijentId) async {
     try {
-      var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId);
+      var result = await nalazProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        nalazi = result;
+        nalazi = result.result;
         isLoading = false;
       });
     } catch (e) {
@@ -81,9 +93,9 @@ class _MedicinskaDokumentacijaScreenState
   void fetchHospitalizacije(int pacijentId) async {
     try {
       var result =
-          await pacijentProvider.getHospitalizacijeByPacijentId(pacijentId);
+          await hospitalizacijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        hospizalizacije = result;
+        hospizalizacije = result.result;
         isLoading = false;
       });
     } catch (e) {
@@ -96,9 +108,9 @@ class _MedicinskaDokumentacijaScreenState
   void fetchOtpusnaPisma(int pacijentId) async {
     try {
       var result =
-          await pacijentProvider.getOtpusnaPismaByPacijentId(pacijentId);
+          await otpusnoPismoProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        otpusnaPisma = result;
+        otpusnaPisma = result.result;
         isLoading = false;
       });
     } catch (e) {
@@ -110,9 +122,10 @@ class _MedicinskaDokumentacijaScreenState
 
   void fetchTerapije(int pacijentId) async {
     try {
-      var result = await pacijentProvider.getTerapijaByPacijentId(pacijentId);
+      var result =
+          await terapijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        terapije = result;
+        terapije = result.result;
         isLoading = false;
       });
     } catch (e) {
@@ -124,9 +137,10 @@ class _MedicinskaDokumentacijaScreenState
 
   void fetchOperacije(int pacijentId) async {
     try {
-      var result = await pacijentProvider.GetOperacijeByPacijentId(pacijentId);
+      var result =
+          await operacijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        operacije = result;
+        operacije = result.result;
         isLoading = false;
       });
     } catch (e) {

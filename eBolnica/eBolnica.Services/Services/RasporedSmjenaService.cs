@@ -40,7 +40,7 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Datum.Date == searchObject.Datum.Value.Date);
             }
-            if (searchObject?.OdjelId != null && searchObject.OdjelId > 0)
+            if (searchObject?.OdjelId != null || searchObject!.OdjelId > 0)
             {
                 query = query.Where(x =>
                     Context.Doktors.Any(d => d.KorisnikId == x.KorisnikId && d.OdjelId == searchObject.OdjelId) ||
@@ -74,7 +74,6 @@ namespace eBolnica.Services.Services
             }
             base.BeforeInsert(request, entity);
         }
-
         public override void BeforeUpdate(RasporedSmjenaUpdateRequest request, Database.RasporedSmjena entity)
         {
             var smjenaExists = Context.Smjenas.Any(s => s.SmjenaId == request.SmjenaId);
@@ -90,31 +89,15 @@ namespace eBolnica.Services.Services
             request.Adapt(entity);
             base.BeforeUpdate(request, entity);
         }
-
         public async Task GenerisiRasporedSmjena(DateTime startDate, DateTime endDate)
         {
-            var osoblje = await Context.MedicinskoOsobljes
-                .AsNoTracking()
-                .Select(o => o.KorisnikId)
-                .ToListAsync();
+            var osoblje = await Context.MedicinskoOsobljes.AsNoTracking().Select(o => o.KorisnikId).ToListAsync();
+            var odjeli = await Context.Odjels.AsNoTracking().ToListAsync();
+            var smjene = await Context.Smjenas.AsNoTracking().ToListAsync();
 
-            var odjeli = await Context.Odjels
-                .AsNoTracking()
-                .ToListAsync();
+            var slobodniDani = await Context.SlobodniDans.AsNoTracking().Where(s => s.Datum >= startDate && s.Datum <= endDate).ToListAsync();
 
-            var smjene = await Context.Smjenas
-                .AsNoTracking()
-                .ToListAsync();
-
-            var slobodniDani = await Context.SlobodniDans
-                .AsNoTracking()
-                .Where(s => s.Datum >= startDate && s.Datum <= endDate)
-                .ToListAsync();
-
-            var sviRasporedi = await Context.RasporedSmjenas
-                .Include(rs => rs.Smjena)
-                .Where(rs => rs.Datum >= startDate.AddDays(-1) && rs.Datum <= endDate)
-                .ToListAsync();
+            var sviRasporedi = await Context.RasporedSmjenas.Include(rs => rs.Smjena).Where(rs => rs.Datum >= startDate.AddDays(-1) && rs.Datum <= endDate).ToListAsync();
 
             var rasporedPoDanu = new Dictionary<DateTime, HashSet<int>>();
 
@@ -128,14 +111,9 @@ namespace eBolnica.Services.Services
                     {
                         var brojRadnikaPoSmjeni = osoblje.Count / (smjene.Count * odjeli.Count);
 
-                        var dostupnoOsoblje = osoblje
-                            .Where(o =>
-                                !rasporedPoDanu[date].Contains(o) &&
-                                !JeRadioTrecePrekoNoci(o, date, sviRasporedi) &&
-                                !ImaSlobodanDan(o, date, slobodniDani)
-                            )
-                            .OrderBy(o => sviRasporedi.Count(rs => rs.KorisnikId == o))
-                            .ToList();
+                        var dostupnoOsoblje = osoblje.Where(o => !rasporedPoDanu[date].Contains(o) && !JeRadioTrecePrekoNoci(o, date, sviRasporedi) &&
+                                !ImaSlobodanDan(o, date, slobodniDani))
+                            .OrderBy(o => sviRasporedi.Count(rs => rs.KorisnikId == o)).ToList();
 
                         if (dostupnoOsoblje.Count < brojRadnikaPoSmjeni)
                         {
@@ -164,7 +142,6 @@ namespace eBolnica.Services.Services
 
             await Context.SaveChangesAsync();
         }
-
         private bool JeRadioTrecePrekoNoci(int korisnikId, DateTime currentDate, List<Database.RasporedSmjena> sviRasporedi)
         {
             var danPrije = currentDate.AddDays(-1).Date;
@@ -175,7 +152,6 @@ namespace eBolnica.Services.Services
                 rs.Smjena != null &&
                 rs.Smjena.NazivSmjene == "Treća");
         }
-
         private bool ImaSlobodanDan(int korisnikId, DateTime date, List<Database.SlobodniDan> slobodniDani)
         {
             return slobodniDani.Any(s => s.KorisnikId == korisnikId && s.Datum.Date == date.Date);

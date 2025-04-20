@@ -130,11 +130,11 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   Future<void> fetchDoktor() async {
     try {
       if (odabraniOdjel != null && odabraniOdjel!.odjelId != null) {
-        List<Doktor> fetchedResult =
-            await odjelProvider.getDoktorByOdjelId(odabraniOdjel!.odjelId!);
+        SearchResult<Doktor> fetchedResult = await doktorProvider
+            .get(filter: {"OdjelId": odabraniOdjel!.odjelId!});
         debugPrint('Fetched Doktor: $fetchedResult');
         setState(() {
-          resultDoktor = fetchedResult;
+          resultDoktor = fetchedResult.result;
         });
       } else {
         debugPrint("Odabrani odjel je null");
@@ -203,7 +203,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   )
                 else
                   const SizedBox.shrink(),
-                if (widget.pacijentId == null && widget.doktor == null)
+                if (widget.doktor == null)
                   _buildDropdown<Doktor>(
                     label: "Doktor",
                     icon: Icons.medical_services,

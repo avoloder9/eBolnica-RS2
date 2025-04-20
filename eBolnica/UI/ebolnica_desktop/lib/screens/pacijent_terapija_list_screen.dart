@@ -40,9 +40,10 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getTerapijaByPacijentId(pacijentId!);
+      var result =
+          await terapijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        terapije = result;
+        terapije = result.result;
         _isLoading = false;
       });
     } else {

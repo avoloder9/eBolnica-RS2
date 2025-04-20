@@ -77,7 +77,6 @@ namespace eBolnica.Services.Services
 
             base.BeforeInsert(request, entity);
         }
-
         public override void BeforeUpdate(KorisnikUpdateRequest request, Database.Korisnik entity)
         {
             base.BeforeUpdate(request, entity);
@@ -107,7 +106,6 @@ namespace eBolnica.Services.Services
                 entity.LozinkaHash = HashGenerator.GenerateHash(entity.LozinkaSalt, request.Lozinka);
             }
         }
-
         public async Task<AuthenticationResponse> AuthenticateUser(string username, string password)
         {
             var user = Context.Korisniks.FirstOrDefault(u => u.KorisnickoIme == username);
@@ -126,7 +124,6 @@ namespace eBolnica.Services.Services
 
             return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId, Korisnik=user};
         }
-
         public bool isKorisnikDoktor(int korisnikId)
         {
             var user=Context.Doktors.Any(x=>x.KorisnikId== korisnikId);

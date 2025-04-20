@@ -36,9 +36,9 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
     pregledi = [];
     doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
     if (doktorId != null) {
-      var result = await doktorProvider.getPreglediByDoktorId(doktorId!);
+      var result = await pregledProvider.get(filter: {"DoktorId": doktorId});
       setState(() {
-        pregledi = result;
+        pregledi = result.result;
       });
       if (pregledi == null) {
         print("Nema pregleda za ovog doktora");

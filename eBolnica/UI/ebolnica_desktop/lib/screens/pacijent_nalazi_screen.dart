@@ -51,9 +51,9 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.GetNalaziByPacijentId(pacijentId!);
+      var result = await nalazProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        nalazi = result;
+        nalazi = result.result;
         _isLoading = false;
       });
     } else {

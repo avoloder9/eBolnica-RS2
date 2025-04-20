@@ -84,7 +84,7 @@ namespace eBolnica.Subscriber.MailSenderService
                     return potentialEnvPath;
                 }
 
-                currentDir = Directory.GetParent(currentDir)?.FullName;
+                currentDir = Directory.GetParent(currentDir)?.FullName!;
             }
 
             return null;

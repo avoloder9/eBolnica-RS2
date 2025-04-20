@@ -18,7 +18,8 @@ namespace eBolnica.API.Controllers
         {
             _administratorService = service;
         }
-        [Authorize]
+
+        [Authorize(Roles = "Administrator")]
         [HttpGet("GetAdministratorIdByKorisnikId/{korisnikId}")]
         public IActionResult GetAdministratorIdByUserId(int korisnikId)
         {
@@ -33,7 +34,7 @@ namespace eBolnica.API.Controllers
                 return NotFound();
             }
         }
-
+        [Authorize(Roles = "Administrator")]
         [HttpGet("dashboard-data")]
         public IActionResult GetDashboardData()
         {

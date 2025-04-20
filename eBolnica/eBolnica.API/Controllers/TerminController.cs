@@ -23,15 +23,5 @@ namespace eBolnica.API.Controllers
             return Ok(zauzetiTermini);
         }
 
-        [HttpGet("uputnica/{terminId}")]
-        public async Task<IActionResult> GetUputnicaByTerminId(int terminId)
-        {
-            var uputnica =await _terminService.GetUputnicaByTerminId(terminId);
-            if (uputnica == null)
-            {
-                return NotFound();
-            }
-            return Ok(uputnica);
-        }
     }
 }

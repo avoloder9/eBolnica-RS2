@@ -70,9 +70,10 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
     if (widget.doktorId == null) {
       return;
     }
-    var result = await odjelProvider.getOdjelByDoktorId(widget.doktorId!);
+    var result =
+        await odjelProvider.get(filter: {"DoktorId": widget.doktorId!});
     setState(() {
-      odjelId = result!.odjelId;
+      odjelId = result.result.first.odjelId!;
     });
     fetchSobe();
   }

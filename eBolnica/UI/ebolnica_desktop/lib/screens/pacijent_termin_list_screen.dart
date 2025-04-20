@@ -44,9 +44,10 @@ class _TerminiScreenState extends State<TerminiScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
+      var result =
+          await terminProvider.get(filter: {"PacijentId": pacijentId!});
       setState(() {
-        termini = result;
+        termini = result.result;
         _isLoading = false;
       });
     } else {
@@ -69,7 +70,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Termini"),
-        actions: widget.userType == "pacijent"
+        actions: pacijentId == null
             ? null
             : [
                 ElevatedButton.icon(
@@ -82,6 +83,7 @@ class _TerminiScreenState extends State<TerminiScreen> {
                                 return NoviTerminScreen(
                                   pacijentId: pacijentId!,
                                   userId: widget.userId,
+                                  userType: widget.userType,
                                 );
                               },
                               barrierDismissible: false);
@@ -92,8 +94,8 @@ class _TerminiScreenState extends State<TerminiScreen> {
               ],
       ),
       drawer: SideBar(
-        userType: widget.userType!,
         userId: widget.userId,
+        userType: widget.userType!,
       ),
       body: Column(
         children: [_buildResultView()],

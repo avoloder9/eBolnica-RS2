@@ -17,44 +17,6 @@ namespace eBolnica.API.Controllers
         {
             odjelService = service;
         }
-        [HttpGet("GetDoktorByOdjel")]
-        public IActionResult GetDoktorByOdjel(int odjelId)
-        {
-            try
-            {
-                var doktori = odjelService.GetDoktorByOdjelId(odjelId);
-                return Ok(doktori);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("GetTerminByOdjelId")]
-        public IActionResult GetTerminByOdjelId(int odjelId)
-        {
-            try
-            {
-                var termini = odjelService.GetTerminByOdjelId(odjelId);
-                return Ok(termini);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("get-odjel/{doktorId}")]
-        public IActionResult GetOdjelByDoktorId(int doktorId)
-        {
-            var odjel = odjelService.GetOdjelByDoktorId(doktorId);
-
-            if (odjel == null)
-                return NotFound("Odjel nije pronađen za datog doktora.");
-
-            return Ok(odjel);
-        }
 
         [HttpGet("broj-zaposlenih")]
         public IActionResult GetUkupanBrojZaposlenihPoOdjelima()

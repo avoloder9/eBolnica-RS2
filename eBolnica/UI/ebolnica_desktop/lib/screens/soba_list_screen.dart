@@ -27,10 +27,10 @@ class _SobaListScreenState extends State<SobaListScreen> {
   }
 
   Future<void> _fetchSobe() async {
-    var result = await sobaProvider.getSobeByOdjelId(widget.odjelId);
+    var result = await sobaProvider.get(filter: {"OdjelId": widget.odjelId});
 
     setState(() {
-      sobe = result;
+      sobe = result.result;
     });
   }
 

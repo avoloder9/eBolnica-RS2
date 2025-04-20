@@ -39,9 +39,9 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
       odjelId =
           await osobljeProvider.getOdjelIdByMedicinskoOsoljeId(osobljeId!);
       if (odjelId != null) {
-        var result = await odjelProvider.getTerminByOdjelId(odjelId!);
+        var result = await terminProvider.get(filter: {"OdjelId": odjelId!});
         setState(() {
-          termini = result;
+          termini = result.result;
         });
         if (termini == null) {
           print("error");

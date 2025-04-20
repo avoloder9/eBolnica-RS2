@@ -32,9 +32,9 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
   }
 
   Future<void> _fetchKreveti() async {
-    var result = await provider.getKrevetBySobaId(widget.sobaId);
+    var result = await provider.get(filter: {"SobaId": widget.sobaId});
     setState(() {
-      kreveti = result;
+      kreveti = result.result;
     });
   }
 

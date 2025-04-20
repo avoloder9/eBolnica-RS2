@@ -57,8 +57,7 @@ namespace eBolnica.Services.Services
             {
                 throw new Exception("Datum dolaska ne odgovara datumu smjene.");
             }
-            var postojiRadniSati = Context.RadniSatis
-       .Any(x => x.MedicinskoOsobljeId == request.MedicinskoOsobljeId &&
+            var postojiRadniSati = Context.RadniSatis.Any(x => x.MedicinskoOsobljeId == request.MedicinskoOsobljeId &&
                  x.RasporedSmjenaId == request.RasporedSmjenaId &&
                  x.VrijemeDolaska.Hours == request.VrijemeDolaska.Hours &&
                  x.VrijemeDolaska.Minutes == request.VrijemeDolaska.Minutes &&

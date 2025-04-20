@@ -1,4 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
 import 'package:ebolnica_desktop/models/uputnica_model.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
@@ -6,7 +7,9 @@ import 'package:ebolnica_desktop/providers/medicinska_dokumentacija_provider.dar
 import 'package:ebolnica_desktop/providers/pregled_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
+import 'package:ebolnica_desktop/providers/uputnica_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,6 +28,7 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
   late PregledProvider pregledProvider;
   late MedicinskaDokumentacijaProvider dokumentacijaProvider;
   late TerapijaProvider terapijaProvider;
+  late UputnicaProvider uputnicaProvider;
   List<Termin>? termini = [];
   int? doktorId;
   List<Uputnica>? uputnica = [];
@@ -38,27 +42,17 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
     pregledProvider = PregledProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
     terapijaProvider = TerapijaProvider();
+    uputnicaProvider = UputnicaProvider();
     fetchTermini();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
-  }
-
-  String formattedTime(Duration time) {
-    final hours = time.inHours.toString().padLeft(2, '0');
-    final minutes = (time.inMinutes % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes';
   }
 
   Future<void> fetchTermini() async {
     termini = [];
     doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
     if (doktorId != null) {
-      var result = await doktorProvider.getTerminByDoktorId(doktorId!);
+      var result = await terminProvider.get(filter: {"DoktorId": doktorId});
       setState(() {
-        termini = result;
+        termini = result.result;
       });
       if (termini == null) {
         print("Nema termina za ovog doktora");
@@ -69,14 +63,16 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
   }
 
   Future<bool> isUputnicaAktivna(int terminId) async {
-    Uputnica? uputnica = await terminProvider.getUputnicaByTerminId(terminId);
-    return uputnica.stateMachine == "active";
+    SearchResult<Uputnica>? uputnica =
+        await uputnicaProvider.get(filter: {"TerminId": terminId});
+    return uputnica.result.first.stateMachine == "active";
   }
 
   Future<int?> getUputnicaIdByTerminId(int terminId) async {
     try {
-      Uputnica? uputnica = await terminProvider.getUputnicaByTerminId(terminId);
-      return uputnica.uputnicaId;
+      SearchResult<Uputnica>? uputnica =
+          await uputnicaProvider.get(filter: {"TerminId": terminId});
+      return uputnica.result.first.uputnicaId;
     } catch (e) {
       return null;
     }

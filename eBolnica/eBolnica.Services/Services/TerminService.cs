@@ -8,6 +8,7 @@ using eBolnica.Services.Interfaces;
 using eBolnica.Services.RabbitMQ;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,12 +27,26 @@ namespace eBolnica.Services.Services
         {
             _rabbitMQService = rabbitMQService;
         }
-
         public override IQueryable<Database.Termin> AddFilter(TerminSearchObject searchObject, IQueryable<Database.Termin> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
-                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina >= DateTime.Now).OrderBy(x=>x.DatumTermina);
+            var usedTerminIds = Context.Pregleds.Include(x => x.Uputnica)
+        .Where(p => p.Uputnica != null && p.Uputnica!.TerminId != null)
+        .Select(p => p.Uputnica.TerminId);
 
+            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
+                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina.Date >= DateTime.Today && x.Otkazano == false && !usedTerminIds.Contains(x.TerminId)).OrderBy(x => x.DatumTermina);
+            if (searchObject!.DoktorId != null)
+            {
+                query = query.Where(x => x.Doktor.DoktorId == searchObject.DoktorId);
+            }
+            if (searchObject!.OdjelId != null)
+            {
+                query = query.Where(x => x.OdjelId == searchObject.OdjelId);
+            }
+            if (searchObject!.PacijentId != null)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId);
+            }
             return base.AddFilter(searchObject, query);
         }
 
@@ -148,14 +163,9 @@ namespace eBolnica.Services.Services
 
             base.BeforeUpdate(request, entity);
         }
-
         public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId)
         {
             return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId == doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
-        }
-        public Task<Database.Uputnica?> GetUputnicaByTerminId(int terminId)
-        {
-            return Context.Uputnicas.Include(x=>x.Termin).FirstOrDefaultAsync(x => x.TerminId == terminId);
         }
     }
 }

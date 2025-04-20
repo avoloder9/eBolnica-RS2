@@ -3,6 +3,7 @@ import 'package:ebolnica_mobile/models/operacija_model.dart';
 import 'package:ebolnica_mobile/models/pregledi_response.dart';
 import 'package:ebolnica_mobile/models/terapija_model.dart';
 import 'package:ebolnica_mobile/models/termin_model.dart';
+import 'package:ebolnica_mobile/providers/operacija_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/providers/terapija_provider.dart';
 import 'package:ebolnica_mobile/providers/termin_provider.dart';
@@ -22,6 +23,7 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
   late PacijentProvider pacijentProvider;
   late TerminProvider terminProvider;
   late TerapijaProvider terapijaProvider;
+  late OperacijaProvider operacijaProvider;
   List<Termin>? termini = [];
   List<PreglediResponse>? pregledi = [];
   List<Operacija>? operacije = [];
@@ -33,6 +35,7 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
     pacijentProvider = PacijentProvider();
     terminProvider = TerminProvider();
     terapijaProvider = TerapijaProvider();
+    operacijaProvider = OperacijaProvider();
     fetchTermini();
     fetchPregledi();
     fetchOperacije();
@@ -43,9 +46,10 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
+      var result =
+          await terminProvider.get(filter: {"PacijentId": pacijentId!});
       setState(() {
-        termini = result;
+        termini = result.result;
       });
     } else {
       termini = [];
@@ -73,9 +77,10 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getOperacijeByPacijentId(pacijentId!);
+      var result =
+          await operacijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        operacije = result;
+        operacije = result.result;
       });
     } else {
       operacije = [];

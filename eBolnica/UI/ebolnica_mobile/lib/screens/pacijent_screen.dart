@@ -3,6 +3,7 @@ import 'package:ebolnica_mobile/models/doktor_model.dart';
 import 'package:ebolnica_mobile/models/termin_model.dart';
 import 'package:ebolnica_mobile/providers/doktor_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
+import 'package:ebolnica_mobile/providers/termin_provider.dart';
 import 'package:ebolnica_mobile/screens/doktor_list_screen.dart';
 import 'package:ebolnica_mobile/screens/novi_termin_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
@@ -21,6 +22,8 @@ class _PacijentScreenState extends State<PacijentScreen> {
   int? pacijentId;
   late PacijentProvider pacijentProvider;
   late DoktorProvider doktorProvider;
+  late TerminProvider terminProvider;
+
   List<Termin>? termini = [];
   List<Doktor> recommendedDoktori = [];
   bool isLoading = true;
@@ -30,6 +33,7 @@ class _PacijentScreenState extends State<PacijentScreen> {
     super.initState();
     pacijentProvider = PacijentProvider();
     doktorProvider = DoktorProvider();
+    terminProvider = TerminProvider();
     fetchTermini();
     fetchRecommendedDoktori();
     fetchDoktori();
@@ -40,9 +44,9 @@ class _PacijentScreenState extends State<PacijentScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getTerminByPacijentId(pacijentId!);
+      var result = await terminProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        termini = result;
+        termini = result.result;
       });
     } else {
       termini = [];

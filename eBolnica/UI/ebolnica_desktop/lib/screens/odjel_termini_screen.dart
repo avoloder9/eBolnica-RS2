@@ -1,4 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/models/termin_model.dart';
 import 'package:ebolnica_desktop/models/uputnica_model.dart';
 import 'package:ebolnica_desktop/providers/medicinsko_osoblje_provider.dart';
@@ -44,9 +45,9 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
       odjelId =
           await osobljeProvider.getOdjelIdByMedicinskoOsoljeId(osobljeId!);
       if (odjelId != null) {
-        var result = await odjelProvider.getTerminByOdjelId(odjelId!);
+        var result = await terminProvider.get(filter: {"OdjelId": odjelId!});
         setState(() {
-          termini = result;
+          termini = result.result;
         });
         if (termini == null) {
           print("error");
@@ -249,10 +250,10 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
   }
 
   Widget buildActionButtons(Termin termin, VoidCallback onActionCompleted) {
-    return FutureBuilder<Uputnica?>(
-      future: terminProvider.getUputnicaByTerminId(termin.terminId!),
+    return FutureBuilder<SearchResult<Uputnica?>>(
+      future: uputnicaProvider.get(filter: {"TerminId": termin.terminId}),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data!.result.isEmpty) {
           return ElevatedButton(
             child: const Text("Kreiraj uputnicu"),
             onPressed: () {
@@ -262,7 +263,7 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
           );
         }
         return uputnicaProvider.buildUputnicaButtons(
-            context, snapshot.data!.uputnicaId!);
+            context, snapshot.data!.result.first!.uputnicaId!);
       },
     );
   }

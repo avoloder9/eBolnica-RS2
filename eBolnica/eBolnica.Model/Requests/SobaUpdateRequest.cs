@@ -7,7 +7,7 @@ namespace eBolnica.Model.Requests
     public class SobaUpdateRequest
     {
         public int OdjelId { get; set; }
-        public string Naziv { get; set; }
+        public string Naziv { get; set; } = null!;
 
         public int? BrojKreveta { get; set; }
 

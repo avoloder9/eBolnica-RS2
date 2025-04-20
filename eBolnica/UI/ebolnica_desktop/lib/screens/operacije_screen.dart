@@ -34,9 +34,9 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
     operacije = [];
     doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
     if (doktorId != null) {
-      var result = await doktorProvider.getOperacijeByDoktorId(doktorId!);
+      var result = await operacijaProvider.get(filter: {"DoktorId": doktorId});
       setState(() {
-        operacije = result;
+        operacije = result.result;
       });
       if (operacije == null) {
         print("Nema operacija za ovog doktora");

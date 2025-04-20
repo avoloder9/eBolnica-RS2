@@ -15,28 +15,28 @@ namespace eBolnica.API.Controllers
         [HttpPut("{id}/activate")]
         public Uputnica Activate(int id)
         {
-            return (_service as IUputnicaService).Activate(id);
+            return (_service as IUputnicaService)!.Activate(id);
         }
         [HttpPut("{id}/edit")]
         public Uputnica Edit(int id)
         {
-            return (_service as IUputnicaService).Edit(id);
+            return (_service as IUputnicaService)!.Edit(id);
         }
 
         [HttpPut("{id}/hide")]
         public Uputnica Hide(int id)
         {
-            return (_service as IUputnicaService).Hide(id);
+            return (_service as IUputnicaService)!.Hide(id);
         }
         [HttpPut("{id}/close")]
         public Uputnica Close(int id)
         {
-            return (_service as IUputnicaService).Close(id);
+            return (_service as IUputnicaService)!.Close(id);
         }
         [HttpGet("{id}/allowedActions")]
         public List<string> AllowedActions(int id)
         {
-            return (_service as IUputnicaService).AllowedActions(id);
+            return (_service as IUputnicaService)!.AllowedActions(id);
         }
     }
 }

@@ -4,6 +4,7 @@ using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,18 @@ namespace eBolnica.Services.Services
         public OtpusnoPismoService(Database.EBolnicaContext context, IMapper mapper, SobaHelper sobaHelper) : base(context, mapper)
         {
             _sobaHelper = sobaHelper;
+        }
+        public override IQueryable<Database.OtpusnoPismo> AddFilter(OtpusnoPismoSearchObject searchObject, IQueryable<Database.OtpusnoPismo> query)
+        {
+            query = base.AddFilter(searchObject, query);
+            query = query.Include(x => x.Hospitalizacija).ThenInclude(x => x!.MedicinskaDokumentacija);
+
+            if (searchObject?.PacijentId != null || searchObject!.PacijentId > 0)
+            {
+                query = query.Where(x => x.Hospitalizacija!.MedicinskaDokumentacija!.PacijentId == searchObject.PacijentId);
+            }
+
+            return query;
         }
         public override void BeforeInsert(OtpusnoPismoInsertRequest request, Database.OtpusnoPismo entity)
         {

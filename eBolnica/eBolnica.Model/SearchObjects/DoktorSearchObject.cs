@@ -8,5 +8,6 @@ namespace eBolnica.Model.SearchObjects
     {
         public string? ImeGTE { get; set; }
         public string? PrezimeGTE { get; set; }
+        public int? OdjelId { get; set; }
     }
 }

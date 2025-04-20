@@ -1,8 +1,5 @@
 import 'package:ebolnica_mobile/models/dnevnI_raspored_response.dart';
 import 'package:ebolnica_mobile/models/doktor_model.dart';
-import 'package:ebolnica_mobile/models/operacija_model.dart';
-import 'package:ebolnica_mobile/models/pregled_model.dart';
-import 'package:ebolnica_mobile/models/termin_model.dart';
 import 'package:ebolnica_mobile/providers/base_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -33,68 +30,6 @@ class DoktorProvider extends BaseProvider<Doktor> {
     }
 
     throw Exception("Failed to get Doktor");
-  }
-
-  Future<List<Termin>> getTerminByDoktorId(int doktorId) async {
-    var url = "${BaseProvider.baseUrl}Doktor/GetTerminByDoktorId/$doktorId";
-    var uri = Uri.parse(url);
-    var headers = createHeaders();
-
-    var response = await http.get(uri, headers: headers);
-
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-
-      if (data is List) {
-        List<Termin> lista = data.map((item) => Termin.fromJson(item)).toList();
-        return lista;
-      } else {
-        throw Exception("Ocekivana lista iz JSON odgovora");
-      }
-    }
-    throw Exception("Greska");
-  }
-
-  Future<List<Pregled>> getPreglediByDoktorId(int doktorId) async {
-    var url = "${BaseProvider.baseUrl}Doktor/GetPregledByDoktorId/$doktorId";
-    var uri = Uri.parse(url);
-    var headers = createHeaders();
-
-    var response = await http.get(uri, headers: headers);
-
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-
-      if (data is List) {
-        List<Pregled> lista =
-            data.map((item) => Pregled.fromJson(item)).toList();
-        return lista;
-      } else {
-        throw Exception("Ocekivana lista iz JSON odgovora");
-      }
-    }
-    throw Exception("Greska");
-  }
-
-  Future<List<Operacija>> getOperacijeByDoktorId(int doktorId) async {
-    var url = "${BaseProvider.baseUrl}Doktor/GetOperacijeByDoktorId/$doktorId";
-    var uri = Uri.parse(url);
-    var headers = createHeaders();
-
-    var response = await http.get(uri, headers: headers);
-
-    if (isValidResponse(response)) {
-      var data = jsonDecode(response.body);
-
-      if (data is List) {
-        List<Operacija> lista =
-            data.map((item) => Operacija.fromJson(item)).toList();
-        return lista;
-      } else {
-        throw Exception("Ocekivana lista iz JSON odgovora");
-      }
-    }
-    throw Exception("Greska");
   }
 
   Future<DnevniRasporedResponse> getDnevniRaspored(int doktorId) async {
