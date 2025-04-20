@@ -5,6 +5,7 @@ import 'package:ebolnica_mobile/main.dart';
 import 'package:ebolnica_mobile/providers/doktor_provider.dart';
 import 'package:ebolnica_mobile/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
+import 'package:ebolnica_mobile/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -49,11 +50,6 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
     osobljeProvider = MedicinskoOsobljeProvider();
     pacijentProvider = PacijentProvider();
     _fetchUserData();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
   }
 
   dynamic userData;
@@ -139,11 +135,6 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
       if (emailController.text.isNotEmpty) {
         updatedData["Email"] = emailController.text;
       }
-      if (datumRodjenjaController.text.isNotEmpty) {
-        updatedData["DatumRodjenja"] = DateFormat("yyyy-MM-dd")
-            .parse(datumRodjenjaController.text)
-            .toIso8601String();
-      }
       if (specijalizacijaController.text.isNotEmpty) {
         updatedData["Specijalizacija"] = specijalizacijaController.text;
       }
@@ -211,11 +202,26 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        title: const Text("Postavke", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
         toolbarHeight: 80,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.deepPurple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           if (_isEditing)
             IconButton(
-              icon: const Icon(Icons.close, size: 32),
+              icon: const Icon(
+                Icons.close,
+                size: 32,
+                color: Colors.white,
+              ),
               onPressed: () {
                 setState(() {
                   _resetFields();
@@ -226,6 +232,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
           IconButton(
             icon: Icon(
               _isEditing ? Icons.save : Icons.edit,
+              color: Colors.white,
               size: 32,
             ),
             onPressed: () {
@@ -362,9 +369,8 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         : "";
 
     if (widget.userType == "doktor") {
-      specijalizacijaController.text =
-          userData?.korisnik?.specijalizacija ?? "";
-      biografijaController.text = userData?.korisnik?.biografija ?? "";
+      specijalizacijaController.text = userData?.specijalizacija ?? "";
+      biografijaController.text = userData?.biografija ?? "";
     } else if (widget.userType == "pacijent") {
       adresaController.text = userData?.adresa ?? "";
     }
@@ -379,6 +385,12 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
       bool isOptional = false,
       bool isDate = false,
       bool isBiografija = false}) {
+    if (isDate && controller.text.isNotEmpty) {
+      try {
+        DateTime parsedDate = DateTime.parse(controller.text);
+        controller.text = formattedDate(parsedDate);
+      } catch (e) {}
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(

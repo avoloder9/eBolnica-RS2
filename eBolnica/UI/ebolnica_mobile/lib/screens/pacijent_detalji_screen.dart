@@ -148,43 +148,74 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
 
   Widget _buildTerminiTab() {
     return Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.all(16.0),
       child: termini == null || termini!.isEmpty
-          ? const Center(child: Text("Nema dostupnih termina."))
+          ? const Center(
+              child: Text(
+                "Nema dostupnih termina.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            )
           : ListView.builder(
               itemCount: termini!.length,
               itemBuilder: (context, index) {
                 var e = termini![index];
+                var doktor = e.doktor?.korisnik;
+
                 return Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  elevation: 6,
+                  shadowColor: Colors.black12,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
+                      radius: 26,
+                      backgroundColor: Colors.teal,
                       child: Text(
-                        e.doktor?.korisnik?.ime?.isNotEmpty == true
-                            ? e.doktor!.korisnik!.ime![0]
-                            : "?",
-                        style: const TextStyle(color: Colors.white),
+                        doktor?.ime?.isNotEmpty == true ? doktor!.ime![0] : "?",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                     title: Text(
-                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      "${doktor?.ime ?? 'Nepoznato'} ${doktor?.prezime ?? ''}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
                     ),
-                    subtitle: Text(
-                      "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina!)}",
-                      style: const TextStyle(color: Colors.grey),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.event,
+                                size: 16, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Text(
+                              "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina!)}",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     trailing: IconButton(
                       icon: const Icon(
                         Icons.cancel,
-                        color: Colors.red,
-                        size: 30,
+                        color: Colors.redAccent,
+                        size: 28,
                       ),
                       onPressed: () {
                         showDialog(
@@ -281,38 +312,59 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
 
   Widget _buildPreglediTab() {
     return Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.all(16.0),
       child: pregledi == null || pregledi!.isEmpty
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: pregledi!.length,
               itemBuilder: (context, index) {
                 var e = pregledi![index];
                 return Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  color: Colors.white,
+                  shadowColor: Colors.black12,
+                  elevation: 6,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
+                      radius: 26,
+                      backgroundColor: Colors.blueAccent,
                       child: Text(
-                        e.imeDoktora.isNotEmpty == true ? e.imeDoktora[0] : "?",
-                        style: const TextStyle(color: Colors.white),
+                        e.imeDoktora.isNotEmpty ? e.imeDoktora[0] : "?",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     title: Text(
                       "${e.imeDoktora} ${e.prezimeDoktora}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
                     ),
-                    subtitle: Text(
-                      "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina)}",
-                      style: const TextStyle(color: Colors.grey),
+                    subtitle: Row(
+                      children: [
+                        const Icon(Icons.calendar_today,
+                            size: 16, color: Colors.grey),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${formattedDate(e.datumTermina)} u ${formattedTime(e.vrijemeTermina)}",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
+                    trailing: const Icon(Icons.chevron_right_rounded,
+                        color: Colors.grey, size: 28),
                     onTap: () => showPregledDetailsDialog(context, e),
                   ),
                 );
@@ -323,37 +375,84 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
 
   Widget _buildOperacijeTab() {
     return Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.all(16.0),
       child: operacije == null || operacije!.isEmpty
-          ? const Center(child: Text("Nema dostupnih operacija."))
+          ? const Center(
+              child: Text(
+                "Nema dostupnih operacija.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            )
           : ListView.builder(
               itemCount: operacije!.length,
               itemBuilder: (context, index) {
                 var e = operacije![index];
+                var doktor = e.doktor?.korisnik;
                 return Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  elevation: 6,
+                  shadowColor: Colors.black12,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
+                      radius: 26,
+                      backgroundColor: Colors.deepPurpleAccent,
                       child: Text(
-                        e.doktor?.korisnik?.ime?.isNotEmpty == true
-                            ? e.doktor!.korisnik!.ime![0]
-                            : "?",
-                        style: const TextStyle(color: Colors.white),
+                        doktor?.ime?.isNotEmpty == true ? doktor!.ime![0] : "?",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                     title: Text(
-                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      "${doktor?.ime ?? 'Nepoznato'} ${doktor?.prezime ?? ''}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
                     ),
-                    subtitle: Text(
-                      formattedDate(e.datumOperacije),
-                      style: const TextStyle(color: Colors.grey),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.event,
+                                size: 16, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Text(
+                              formattedDate(e.datumOperacije),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.local_hospital,
+                                size: 16, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                e.tipOperacije ?? "Nepoznat tip",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 );

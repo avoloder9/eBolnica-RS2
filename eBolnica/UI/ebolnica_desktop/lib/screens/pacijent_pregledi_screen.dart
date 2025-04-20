@@ -132,6 +132,7 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
               DataColumn(label: Text("Anamneza")),
               DataColumn(label: Text("Zaključak")),
               DataColumn(label: Text("Terapija")),
+              DataColumn(label: Text("")),
             ],
             rows: pregledi!.map<DataRow>(
               (e) {
@@ -198,6 +199,12 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
                         ),
                       ),
                     ),
+                    DataCell(ElevatedButton(
+                      child: const Text("Detalji"),
+                      onPressed: () {
+                        showPregledDetailsDialog(context, e);
+                      },
+                    ))
                   ],
                 );
               },
@@ -205,6 +212,137 @@ class _PacijentPreglediScreenState extends State<PacijentPreglediScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void showPregledDetailsDialog(
+      BuildContext context, PreglediResponse pregled) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: FutureBuilder<Terapija?>(
+            future: terapijaProvider.getTerapijabyPregledId(pregled.pregledId),
+            builder: (context, snapshot) {
+              bool hasTerapija = snapshot.hasData && snapshot.data != null;
+              double dialogHeight = hasTerapija
+                  ? MediaQuery.of(context).size.height * 0.50
+                  : MediaQuery.of(context).size.height * 0.3;
+
+              return Container(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "🩺 Detalji pregleda",
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildDetailRowWithIcon(
+                              icon: Icons.person,
+                              label: "Doktor:",
+                              value:
+                                  "${pregled.imeDoktora} ${pregled.prezimeDoktora}",
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.calendar_today,
+                              label: "Datum pregleda:",
+                              value: formattedDate(pregled.datumTermina),
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.assignment,
+                              label: "Glavna dijagnoza:",
+                              value: pregled.glavnaDijagnoza,
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.notes,
+                              label: "Anamneza:",
+                              value: pregled.anamneza,
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.check_circle_outline,
+                              label: "Zaključak:",
+                              value: pregled.zakljucak,
+                            ),
+                            if (hasTerapija) ...[
+                              const SizedBox(height: 10),
+                              const Divider(),
+                              const Row(
+                                children: [
+                                  Icon(Icons.medical_services,
+                                      size: 22, color: Colors.blueGrey),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Terapija",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              buildDetailRowWithIcon(
+                                icon: Icons.label,
+                                label: "Naziv terapije:",
+                                value: snapshot.data!.naziv!,
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.description,
+                                label: "Opis:",
+                                value: snapshot.data!.opis ?? "N/A",
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.calendar_today,
+                                label: "Datum početka:",
+                                value:
+                                    formattedDate(snapshot.data!.datumPocetka),
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.event_available,
+                                label: "Datum završetka:",
+                                value: formattedDate(
+                                    snapshot.data!.datumZavrsetka),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 12),
+                        ),
+                        child: const Text(
+                          "Zatvori",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

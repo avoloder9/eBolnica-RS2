@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -308,7 +309,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      var response = await korisnikProvider.login(username, password, 'mobile');
+      var response = await korisnikProvider
+          .login(username, password, 'mobile')
+          .timeout(const Duration(seconds: 3));
 
       if (response.containsKey('userType') && response.containsKey('userId')) {
         String userType = response['userType'];
@@ -354,14 +357,16 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       String errorMessage = "Greška u komunikaciji s serverom.";
 
-      if (e is SocketException) {
+      if (e is TimeoutException) {
+        errorMessage = "Server ne odgovara. Pokušajte kasnije";
+      } else if (e is SocketException) {
         errorMessage = "Nema internet konekcije.";
       } else if (e is UserFriendlyException) {
         errorMessage = e.message;
+      } else if (e is http.ClientException) {
+        errorMessage = "Nema internet konekcije.";
       } else if (e is FormatException) {
         errorMessage = "Neispravan odgovor sa servera.";
-      } else if (e is http.ClientException) {
-        errorMessage = "Greška u mrežnoj komunikaciji.";
       } else if (e is http.Response) {
         if (e.statusCode == 400) {
           errorMessage = "Pogrešno korisničko ime ili lozinka.";

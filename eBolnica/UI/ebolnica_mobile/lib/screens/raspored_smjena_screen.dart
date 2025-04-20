@@ -27,7 +27,6 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
     var filter = {
       "korisnikId": widget.userId.toString(),
     };
-
     var result = await rasporedSmjenaProvider.get(filter: filter);
     return result.result;
   }
@@ -210,8 +209,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.2),
-                    color: isDolazak ? Colors.green[100] : Colors.white,
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    color: isDolazak ? Colors.blue[50] : Colors.white,
                     child: ListTile(
                       leading: const Icon(
                         Icons.schedule,
@@ -234,7 +233,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                             Text(
                               'Datum: $datum',
                               style: TextStyle(
-                                color: Colors.black.withOpacity(0.6),
+                                color: Colors.black.withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -242,7 +241,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                             Text(
                               '${formattedTime(smjena!.vrijemePocetka!)} - ${formattedTime(smjena.vrijemeZavrsetka!)}',
                               style: TextStyle(
-                                color: Colors.black.withOpacity(0.6),
+                                color: Colors.black.withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -252,7 +251,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                       trailing: IconButton(
                         icon: Icon(
                           isDolazak ? Icons.check_circle : Icons.circle,
-                          color: isDolazak ? Colors.green : Colors.red,
+                          color: isDolazak ? Colors.green : Colors.redAccent,
                         ),
                         onPressed: danas
                             ? () {

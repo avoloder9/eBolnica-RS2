@@ -51,6 +51,7 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
       }
       gotoviZadaci = null;
     }
+    if (!mounted) return;
     setState(() {});
   }
 

@@ -119,7 +119,6 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   Future<void> fetchOdjeli() async {
     try {
       SearchResult<Odjel> fetchedResult = await odjelProvider.get();
-      debugPrint('Fetched Odjeli: ${fetchedResult.result}');
       setState(() {
         resultOdjel = fetchedResult;
       });
@@ -231,7 +230,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(context).pop(false),
                       child: const Text("Odustani"),
                     ),
                     ElevatedButton(

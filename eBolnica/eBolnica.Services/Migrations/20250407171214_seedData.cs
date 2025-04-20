@@ -356,20 +356,20 @@ namespace eBolnica.Services.Migrations
             });
             migrationBuilder.InsertData(table: "Soba", columns: new[] { "SobaID", "OdjelID", "BrojKreveta", "Zauzeta", "Naziv", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {
-                {1,1,0,false,"Soba 1",false,null },
-                {2,1,0,false,"Soba 2",false,null },
-                {3,2,0,false,"Soba 1",false,null },
-                {4,2,0,false,"Soba 2",false,null },
-                {5,3,0,false,"Soba 1",false,null },
-                {6,3,0,false,"Soba 2",false,null },
-                {7,4,0,false,"Soba 1",false,null },
-                {8,4,0,false,"Soba 2",false,null },
-                {9,5,0,false,"Soba 1",false,null },
-                {10,5,0,false,"Soba 2",false,null },
-                {11,6,0,false,"Soba 1",false,null },
-                {12,6,0,false,"Soba 2",false,null },
-                {13,7,0,false,"Soba 1",false,null },
-                {14,7,0,false,"Soba 2",false,null }
+                {1,1,2,false,"Soba 1",false,null },
+                {2,1,2,false,"Soba 2",false,null },
+                {3,2,2,false,"Soba 1",false,null },
+                {4,2,2,false,"Soba 2",false,null },
+                {5,3,2,false,"Soba 1",false,null },
+                {6,3,2,false,"Soba 2",false,null },
+                {7,4,2,false,"Soba 1",false,null },
+                {8,4,2,false,"Soba 2",false,null },
+                {9,5,2,false,"Soba 1",false,null },
+                {10,5,2,false,"Soba 2",false,null },
+                {11,6,2,false,"Soba 1",false,null },
+                {12,6,2,false,"Soba 2",false,null },
+                {13,7,2,false,"Soba 1",false,null },
+                {14,7,2,false,"Soba 2",false,null }
             });
             migrationBuilder.InsertData(table: "Krevet", columns: new[] { "KrevetID", "SobaID", "Zauzet", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {

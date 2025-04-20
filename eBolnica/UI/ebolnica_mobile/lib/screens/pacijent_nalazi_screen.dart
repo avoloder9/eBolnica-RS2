@@ -83,44 +83,63 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
 
   Widget _buildResultView() {
     return Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.all(16.0),
       child: nalazi == null || nalazi!.isEmpty
-          ? const Center(child: Text("Nema dostupnih nalaza."))
+          ? const Center(
+              child: Text(
+                "Nema dostupnih nalaza.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            )
           : ListView.builder(
               itemCount: nalazi!.length,
               itemBuilder: (context, index) {
                 var e = nalazi![index];
+
                 return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    leading: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.blue.shade100,
+                      child: const Icon(Icons.description, color: Colors.blue),
                     ),
-                    elevation: 3,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => NalazDetaljiScreen(
-                            laboratorijskiNalaz: e,
-                            hospizalizacija: widget.hospitalizacija,
-                          ),
-                        );
-                      },
-                      contentPadding: const EdgeInsets.all(14),
-                      title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Doktor: ${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              formattedDate(e.datumNalaza),
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ]),
-                    ));
+                    title: Text(
+                      "${e.doktor!.korisnik!.ime} ${e.doktor!.korisnik!.prezime}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 6.0),
+                      child: Text(
+                        "Datum nalaza: ${formattedDate(e.datumNalaza)}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded,
+                        size: 18, color: Colors.grey),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => NalazDetaljiScreen(
+                          laboratorijskiNalaz: e,
+                          hospizalizacija: widget.hospitalizacija,
+                        ),
+                      );
+                    },
+                  ),
+                );
               },
             ),
     );

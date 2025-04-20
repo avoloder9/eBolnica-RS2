@@ -166,6 +166,13 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (widget.userType == "administrator")
+                              buildDetailRowWithIcon(
+                                icon: Icons.person,
+                                label: "Doktor:",
+                                value:
+                                    "${pregled.uputnica!.termin!.doktor!.korisnik!.ime} ${pregled.uputnica!.termin!.doktor!.korisnik!.prezime}",
+                              ),
                             buildDetailRowWithIcon(
                               icon: Icons.person,
                               label: "Pacijent:",

@@ -1,6 +1,29 @@
 #version: '3'
 services:
 #mssql docker
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: rabbitmq
+    hostname: "rabbitmq"
+    labels:
+        NAME: "rabbitmq"
+    restart: unless-stopped
+    environment:
+        - RABBITMQ_DEFAULT_USER=${_rabbitMqUser}
+        - RABBITMQ_DEFAULT_PASS=${_rabbitMqPassword}
+    ports:
+        - "15672:15672"
+        - "5672:5672"
+    expose:
+        - 5672
+        - 15672
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 30s
+        timeout: 10s
+        retries: 10
+    networks:
+        - ebolnicanet2024
   ebolnica-sql:
     image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
     restart: unless-stopped
