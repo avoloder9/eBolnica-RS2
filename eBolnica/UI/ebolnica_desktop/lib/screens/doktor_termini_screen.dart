@@ -55,10 +55,12 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
         termini = result.result;
       });
       if (termini == null) {
-        print("Nema termina za ovog doktora");
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Nema termina za ovog doktora')));
       }
     } else {
-      print("Nije pronadjen doktor");
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Nije pronađen doktor')));
     }
   }
 

@@ -15,8 +15,7 @@ namespace eBolnica.Services.Services
     public class VitalniParemetriService : BaseCRUDService<VitalniParametri, VitalniParametriSearchObject, Database.VitalniParametri, VitalniParametriInsertRequest, VitalniParametriUpdateRequest>, IVitalniParametriService
     {
         public VitalniParemetriService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
-        {
-        }
+        { }
         public override IQueryable<Database.VitalniParametri> AddFilter(VitalniParametriSearchObject searchObject, IQueryable<Database.VitalniParametri> query)
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Pacijent).ThenInclude(y => y.Korisnik);

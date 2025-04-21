@@ -3,8 +3,8 @@ import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/nalaz_parametar_model.dart';
 import 'package:ebolnica_desktop/providers/bolnica_provider.dart';
 import 'package:ebolnica_desktop/providers/nalaz_parametar_provider.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -17,11 +17,6 @@ class NalazDetaljiScreen extends StatefulWidget {
 }
 
 class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
-  String formattedDate(date) {
-    final formatter = DateFormat('dd.MM.yyyy');
-    return formatter.format(date);
-  }
-
   List<NalazParametar>? parametri;
   late BolnicaProvider bolnicaProvider;
   late NalazParametarProvider nalazParametarProvider;

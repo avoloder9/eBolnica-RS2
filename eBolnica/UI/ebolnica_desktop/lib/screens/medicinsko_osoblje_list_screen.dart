@@ -7,7 +7,6 @@ import 'package:ebolnica_desktop/screens/novi_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class MedicinskoOsobljeListScreen extends StatefulWidget {
   final int userId;
@@ -33,11 +32,6 @@ class _MedicinskoOsobljeListScreenState
     super.initState();
     provider = MedicinskoOsobljeProvider();
     fetchOsoblje();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
   }
 
   Future<void> fetchOsoblje() async {

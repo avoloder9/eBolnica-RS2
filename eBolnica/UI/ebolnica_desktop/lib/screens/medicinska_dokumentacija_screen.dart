@@ -283,7 +283,6 @@ class _MedicinskaDokumentacijaScreenState
           elevation: 4,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {},
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -341,7 +340,6 @@ class _MedicinskaDokumentacijaScreenState
           elevation: 4,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {},
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -521,7 +519,6 @@ class _MedicinskaDokumentacijaScreenState
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () {},
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

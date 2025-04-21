@@ -1,4 +1,5 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
@@ -34,6 +35,7 @@ namespace eBolnica.API.Controllers
                 return NotFound();
             }
         }
+
         [Authorize(Roles = "Administrator")]
         [HttpGet("dashboard-data")]
         public IActionResult GetDashboardData()
@@ -42,5 +44,34 @@ namespace eBolnica.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Administrator")]
+        public override Administrator Insert(AdministratorInsertRequest request)
+        {
+            return base.Insert(request);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override Administrator Update(int id, AdministratorUpdateRequest request)
+        {
+            return base.Update(id, request);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override Administrator GetById(int id)
+        {
+            return base.GetById(id);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override PagedResult<Administrator> GetList([FromQuery] AdministratorSearchObject searchObject)
+        {
+            return base.GetList(searchObject);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
+        }
     }
 }

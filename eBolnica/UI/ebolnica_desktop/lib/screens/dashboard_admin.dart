@@ -30,6 +30,7 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   late TerminProvider terminProvider;
   List<Termin>? termini;
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Administrator')),

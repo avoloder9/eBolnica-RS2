@@ -11,7 +11,6 @@ import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
-import 'package:intl/intl.dart';
 
 class PacijentListScreen extends StatefulWidget {
   final int userId;
@@ -48,11 +47,6 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
   Future<void> _loadInitialData() async {
     result = await provider.get(filter: {}, page: page, pageSize: pageSize);
     setState(() {});
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
   }
 
   @override

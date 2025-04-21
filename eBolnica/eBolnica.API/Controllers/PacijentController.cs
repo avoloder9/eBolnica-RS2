@@ -1,4 +1,5 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
@@ -39,7 +40,31 @@ namespace eBolnica.API.Controllers
         {
             return base.Insert(request);
         }
+        [Authorize(Roles = "Administrator,Pacijent,Doktor,MedicinskoOsoblje")]
+        public override PagedResult<Pacijent> GetList([FromQuery] PacijentSearchObject searchObject)
+        {
+            return base.GetList(searchObject);
+        }
+      
+        [Authorize(Roles = "Administrator,Pacijent,Doktor,MedicinskoOsoblje")]
+        public override Pacijent GetById(int id)
+        {
+            return base.GetById(id);
+        }
+     
+        [Authorize(Roles = "Administrator,Pacijent")]
+        public override Pacijent Update(int id, PacijentUpdateRequest request)
+        {
+            return base.Update(id, request);
+        }
 
+        [Authorize(Roles = "Administrator")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
+        }
+
+        [Authorize(Roles = "Administrator,Pacijent")]
         [HttpGet("GetPacijentIdByKorisnikId/{korisnikId}")]
         public IActionResult GetPacijentIdByKorisnikId(int korisnikId)
         {
@@ -55,18 +80,21 @@ namespace eBolnica.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrator,Doktor,MedicinskoOsoblje")]
         [HttpGet("GetPacijentSaDokumenticijom")]
         public ActionResult<List<Pacijent>> GetPacijentiSaMedicinskomDokumentacijom()
         {
             return Ok(_pacijentService.GetPacijentSaDokumentacija());
         }
 
+        [Authorize(Roles = "Doktor")]
         [HttpGet("GetPacijentiZaHospitalizaciju")]
         public ActionResult<List<Pacijent>> GetPacijentiZaHospitalizaciju()
         {
             return Ok(_pacijentService.GetPacijentiZaHospitalizaciju());
         }
 
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
         [HttpGet("getPregledByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetPregledByPacijentId(int pacijentId)
         {
@@ -78,6 +106,7 @@ namespace eBolnica.API.Controllers
             return Ok(pacijent);
         }
 
+        [Authorize(Roles = "Pacijent")]
         [HttpGet("getAktivneTerapijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetAktivneTerapijeByPacijentId(int pacijentId)
         {
@@ -89,6 +118,7 @@ namespace eBolnica.API.Controllers
             return Ok(pacijent);
         }
 
+        [Authorize(Roles = "Pacijent")]
         [HttpGet("getGotoveTerapijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetGotoveTerapijeByPacijentId(int pacijentId)
         {
@@ -99,7 +129,8 @@ namespace eBolnica.API.Controllers
             }
             return Ok(pacijent);
         }
-   
+
+        [Authorize(Roles = "Administrator")]
         [HttpGet("broj-pacijenata")]
         public IActionResult GetBrojPacijenata()
         {
@@ -107,6 +138,7 @@ namespace eBolnica.API.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpGet("{pacijentId}/recommended-doktori")]
         public ActionResult<List<Model.Models.Doktor>> GetRecommendedDoktori(int pacijentId)
         {
@@ -114,10 +146,12 @@ namespace eBolnica.API.Controllers
             return Ok(recommended);
         }
 
+        [AllowAnonymous]
         [HttpGet("train-model")]
         public void TrainModel()
         {
             _pacijentService.TrainModel();
         }
+
     }
 }

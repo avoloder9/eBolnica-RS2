@@ -40,7 +40,7 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Datum.Date == searchObject.Datum.Value.Date);
             }
-            if (searchObject?.OdjelId != null || searchObject!.OdjelId > 0)
+            if (searchObject?.OdjelId != null && searchObject!.OdjelId > 0)
             {
                 query = query.Where(x =>
                     Context.Doktors.Any(d => d.KorisnikId == x.KorisnikId && d.OdjelId == searchObject.OdjelId) ||

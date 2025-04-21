@@ -145,8 +145,8 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
             builder: (context, snapshot) {
               bool hasTerapija = snapshot.hasData && snapshot.data != null;
               double dialogHeight = hasTerapija
-                  ? MediaQuery.of(context).size.height * 0.50
-                  : MediaQuery.of(context).size.height * 0.3;
+                  ? MediaQuery.of(context).size.height * 0.52
+                  : MediaQuery.of(context).size.height * 0.33;
 
               return Container(
                 width: MediaQuery.of(context).size.width * 0.7,

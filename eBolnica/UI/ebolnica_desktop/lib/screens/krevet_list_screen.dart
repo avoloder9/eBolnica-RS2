@@ -21,18 +21,18 @@ class KrevetListScreen extends StatefulWidget {
 }
 
 class _KrevetListScreenState extends State<KrevetListScreen> {
-  late KrevetProvider provider;
+  late KrevetProvider krevetProvider;
   List<Krevet>? kreveti = [];
 
   @override
   void initState() {
     super.initState();
-    provider = KrevetProvider();
+    krevetProvider = KrevetProvider();
     _fetchKreveti();
   }
 
   Future<void> _fetchKreveti() async {
-    var result = await provider.get(filter: {"SobaId": widget.sobaId});
+    var result = await krevetProvider.get(filter: {"SobaId": widget.sobaId});
     setState(() {
       kreveti = result.result;
     });

@@ -41,10 +41,14 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
         pregledi = result.result;
       });
       if (pregledi == null) {
-        print("Nema pregleda za ovog doktora");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Greška pri dohvaćanju doktora: ')),
+        );
       }
     } else {
-      print("Nije pronadjen doktor");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('nije pronađen doktor')),
+      );
     }
   }
 

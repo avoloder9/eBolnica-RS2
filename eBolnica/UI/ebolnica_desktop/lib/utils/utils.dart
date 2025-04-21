@@ -46,7 +46,7 @@ class PhoneNumberFormatter extends TextInputFormatter {
 }
 
 String formattedDate(date) {
-  final formatter = DateFormat('dd/MM/yyyy');
+  final formatter = DateFormat('dd.MM.yyyy');
   return formatter.format(date);
 }
 

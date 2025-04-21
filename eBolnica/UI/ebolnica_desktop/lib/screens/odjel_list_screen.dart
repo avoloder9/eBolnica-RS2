@@ -276,11 +276,11 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
   }
 
   Widget setGlavniDoktor(int odjelId, String nazivOdjela, String nazivDoktora) {
-    final TextEditingController _nazivOdjelaController =
+    final TextEditingController nazivOdjelaController =
         TextEditingController(text: nazivOdjela);
 
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: 400,
         height: 260,
         child: FutureBuilder<SearchResult<Doktor>>(
@@ -332,7 +332,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextField(
-                      controller: _nazivOdjelaController,
+                      controller: nazivOdjelaController,
                       enabled: false,
                       decoration: InputDecoration(
                         labelText: "Naziv",
@@ -402,7 +402,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                           onPressed: () async {
                             if (_selectedDoktorId != null) {
                               final updateRequest = {
-                                "Naziv": _nazivOdjelaController.text,
+                                "Naziv": nazivOdjelaController.text,
                                 "GlavniDoktorId": _selectedDoktorId
                               };
 

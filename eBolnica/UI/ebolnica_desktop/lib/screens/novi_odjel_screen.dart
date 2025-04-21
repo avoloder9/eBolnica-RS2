@@ -72,7 +72,7 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                     controller: nazivController,
                     decoration: InputDecoration(
                       labelText: 'Naziv',
-                      labelStyle: TextStyle(color: Colors.black54),
+                      labelStyle: const TextStyle(color: Colors.black54),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
