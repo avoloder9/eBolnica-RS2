@@ -50,7 +50,6 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
       setState(() {
         _isLoading = false;
       });
-      print("error");
     }
   }
 

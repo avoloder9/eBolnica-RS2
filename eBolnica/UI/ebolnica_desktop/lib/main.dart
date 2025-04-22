@@ -9,6 +9,8 @@ import 'package:ebolnica_desktop/screens/doktor_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
 import 'package:ebolnica_desktop/screens/registration_screen.dart';
+import 'package:ebolnica_desktop/utils/password_validator.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? usernameError;
   String? passwordError;
   late KorisnikProvider korisnikProvider;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -56,72 +59,131 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              Image.asset(
-                'assets/images/logo.jpg',
-                height: 120,
-              ),
-              const SizedBox(height: 40),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.person),
-                  labelText: 'Korisničko ime',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  errorText: usernameError,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.lock),
-                  labelText: 'Lozinka',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  errorText: passwordError,
-                ),
-                onSubmitted: (_) {
-                  _login();
-                },
-              ),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _login,
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Prijavi se',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const RegistrationScreen(),
-                  ));
-                },
-                child: const Text('Nemate račun? Registrujte se'),
-              ),
-            ],
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Image.asset(
+              'assets/images/pozadina2.jpg',
+              fit: BoxFit.cover,
+              height: double.infinity,
+            ),
           ),
-        ),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Dobrodošli',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Prijavite se da nastavite',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 40),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _usernameController,
+                            style: const TextStyle(fontSize: 16),
+                            decoration: const InputDecoration(
+                              labelText: 'Korisničko ime',
+                              labelStyle: TextStyle(color: Colors.grey),
+                              border: UnderlineInputBorder(),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent),
+                              ),
+                            ),
+                            validator: (value) =>
+                                generalValidator(value, 'korisničko ime', [
+                              notEmpty,
+                            ]),
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            style: const TextStyle(fontSize: 16),
+                            onFieldSubmitted: (_) => _login(),
+                            decoration: const InputDecoration(
+                              labelText: 'Lozinka',
+                              labelStyle: TextStyle(color: Colors.grey),
+                              border: UnderlineInputBorder(),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Molimo unesite lozinku';
+                              }
+                              if (value.trim().length < 8) {
+                                return 'Lozinka mora imati najmanje 8 karaktera.';
+                              }
+
+                              String passwordValidation =
+                                  PasswordValidator.checkPasswordStrength(
+                                      value);
+                              if (passwordValidation.isNotEmpty) {
+                                return passwordValidation;
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text(
+                                'Prijavi se',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const RegistrationScreen(),
+                        ));
+                      },
+                      child: const Text('Nemate račun? Registrujte se'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -136,26 +198,10 @@ class _LoginScreenState extends State<LoginScreen> {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (username.isEmpty) {
-      setState(() {
-        usernameError = "Molimo unesite korisničko ime";
-        isLoading = false;
-      });
-      return;
-    }
-    if (password.isEmpty) {
-      setState(() {
-        passwordError = "Molimo unesite lozinku";
-      });
-      return;
-    }
-    if (password.length < 8) {
-      setState(() {
-        passwordError = "Lozinka mora imati najmanje 8 karaktera.";
-      });
-      return;
-    }
-
+    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      isLoading = true;
+    });
     try {
       var response =
           await korisnikProvider.login(username, password, 'desktop');

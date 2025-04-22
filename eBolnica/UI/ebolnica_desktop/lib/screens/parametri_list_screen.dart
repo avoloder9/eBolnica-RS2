@@ -4,6 +4,7 @@ import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/parametar_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 
 class ParametriListScreen extends StatefulWidget {
@@ -157,7 +158,7 @@ class _ParametriListScreenState extends State<ParametriListScreen> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     validator: (value) =>
-                        value == null || value.isEmpty ? "Unesite naziv" : null,
+                        generalValidator(value, 'naziv', [notEmpty]),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

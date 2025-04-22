@@ -7,6 +7,7 @@ import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/password_validator.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +94,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
           break;
 
         default:
-          print("Nepoznat tip korisnika: ${widget.userType}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Nepoznat tip korisnika: ${widget.userType}')),
+          );
           return;
       }
       if (userData != null) {
@@ -128,7 +132,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         });
       }
     } catch (e) {
-      print("Error fetching user data :$e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Greška pri dohvaćanju korisničkih podataka')),
+      );
     }
   }
 
@@ -218,7 +225,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
             break;
 
           default:
-            print("Nepoznat tip korisnika: ${widget.userType}");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Nepoznat tip korisnika ${widget.userType}')),
+            );
             return;
         }
         setState(() {
@@ -417,8 +427,22 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
             return "$label ne može biti prazno";
           }
           if (isPassword && value != null && value.isNotEmpty) {
-            if (value.length < 8) {
-              return "Lozinka mora imati najmanje 8 karaktera";
+            String passwordValidation =
+                PasswordValidator.checkPasswordStrength(value);
+            if (passwordValidation.isNotEmpty) {
+              return passwordValidation;
+            }
+
+            if (label == "Lozinka" &&
+                lozinkaPotvrdaController.text.isNotEmpty &&
+                value != lozinkaPotvrdaController.text) {
+              return "Lozinke se ne poklapaju";
+            }
+
+            if (label == "Potvrda lozinke" &&
+                lozinkaController.text.isNotEmpty &&
+                value != lozinkaController.text) {
+              return "Lozinke se ne poklapaju";
             }
           }
           if (isBiografija && value != null && value.isNotEmpty) {

@@ -50,12 +50,20 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
           termini = result.result;
         });
         if (termini == null) {
-          print("error");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Greška pri učitavanju termina')),
+          );
         }
-      } else
-        print("error");
-    } else
-      print("error");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Greška pri dohvaćanju odjela')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri dohvaćanju osoblja')),
+      );
+    }
   }
 
   @override

@@ -6,13 +6,15 @@ import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/pacijent_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class NoviPacijentScreen extends StatefulWidget {
   final int userId;
+  final String? userType;
 
-  const NoviPacijentScreen({super.key, required this.userId});
+  const NoviPacijentScreen({super.key, required this.userId, this.userType});
 
   @override
   _NoviPacijentScreenState createState() => _NoviPacijentScreenState();
@@ -83,15 +85,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       ),
                       prefixIcon: const Icon(Icons.person),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite ime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Ime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'ime', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(
@@ -105,15 +100,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       ),
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite prezime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Prezime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'prezime', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(
@@ -127,14 +115,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       ),
                       prefixIcon: const Icon(Icons.email),
                     ),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return 'Molimo unesite validan email';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'email', [notEmpty, validEmail]),
                   ),
                 ),
                 Padding(
@@ -155,12 +137,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       FilteringTextInputFormatter.digitsOnly,
                       PhoneNumberFormatter()
                     ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite broj telefona';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        generalValidator(value, 'telefon', [notEmpty]),
                   ),
                 ),
                 Padding(
@@ -181,12 +159,7 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                     onChanged: (value) {
                       spol = value ?? '';
                     },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo odaberite spol';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(value, 'spol'),
                   ),
                 ),
                 Padding(
@@ -200,12 +173,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       ),
                       prefixIcon: const Icon(Icons.home),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite adresu';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        generalValidator(value, 'adresu', [notEmpty]),
                   ),
                 ),
                 GestureDetector(
@@ -234,12 +203,8 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                           ),
                         ),
                         controller: datumController,
-                        validator: (value) {
-                          if (datumRodjenja == null) {
-                            return 'Molimo unesite datum rođenja';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            dateValidator(datumRodjenja, 'datum rođenja'),
                       ),
                     ),
                   ),
@@ -293,6 +258,7 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                             MaterialPageRoute(
                                 builder: (context) => PacijentListScreen(
                                       userId: widget.userId,
+                                      userType: widget.userType,
                                     )),
                           ),
                         ]);

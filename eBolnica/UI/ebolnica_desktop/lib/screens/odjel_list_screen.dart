@@ -60,7 +60,9 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
         setState(() {});
       });
     } catch (e) {
-      print("Greska prilikom ucitavanja doktora");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju doktora')),
+      );
     }
   }
 

@@ -115,8 +115,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                   barrierDismissible: false,
                   builder: (BuildContext context) {
                     return NoviPacijentScreen(
-                      userId: widget.userId,
-                    );
+                        userId: widget.userId, userType: widget.userType);
                   },
                 );
               },

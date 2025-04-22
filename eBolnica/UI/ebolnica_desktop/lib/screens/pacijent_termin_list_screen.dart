@@ -54,7 +54,6 @@ class _TerminiScreenState extends State<TerminiScreen> {
       setState(() {
         _isLoading = false;
       });
-      print("error");
     }
   }
 

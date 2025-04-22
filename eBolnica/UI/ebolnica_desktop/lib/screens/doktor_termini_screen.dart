@@ -10,6 +10,7 @@ import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/providers/uputnica_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -143,12 +144,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Ovo polje je obavezno';
-                            }
-                            return null;
-                          },
+                          validator: (value) => generalValidator(
+                              value, 'glavnu dijagnozu', [notEmpty]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -162,12 +159,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Ovo polje je obavezno';
-                            }
-                            return null;
-                          },
+                          validator: (value) =>
+                              generalValidator(value, 'anamnezu', [notEmpty]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -181,12 +174,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Ovo polje je obavezno';
-                            }
-                            return null;
-                          },
+                          validator: (value) =>
+                              generalValidator(value, 'zaključak', [notEmpty]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -218,12 +207,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Ovo polje je obavezno';
-                              }
-                              return null;
-                            },
+                            validator: (value) =>
+                                generalValidator(value, 'naziv', [notEmpty]),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
@@ -236,12 +221,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Ovo polje je obavezno';
-                              }
-                              return null;
-                            },
+                            validator: (value) => generalValidator(
+                                value, 'opis terapije', [notEmpty]),
                           ),
                           const SizedBox(height: 12),
                           Row(

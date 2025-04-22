@@ -6,6 +6,7 @@ import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -57,12 +58,13 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
   Future<void> fetchOdjeli() async {
     try {
       SearchResult<Odjel> fetchedResult = await odjelProvider.get();
-      debugPrint('Fetched Odjeli: ${fetchedResult.result}');
       setState(() {
         resultOdjel = fetchedResult;
       });
     } catch (e) {
-      debugPrint('Error fetching odjeli: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju odjela')),
+      );
     }
   }
 
@@ -91,19 +93,11 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Ime',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.person),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite ime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Ime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'ime', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(
@@ -113,19 +107,11 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Prezime',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite prezime';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Prezime mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'prezime', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(
@@ -135,18 +121,11 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.email),
                     ),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return 'Molimo unesite validan email';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'email', [notEmpty, validEmail]),
                   ),
                 ),
                 Padding(
@@ -156,8 +135,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Telefon',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.phone),
                       counterText: '',
                     ),
@@ -167,12 +145,8 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                       FilteringTextInputFormatter.digitsOnly,
                       PhoneNumberFormatter()
                     ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite broj telefona';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        generalValidator(value, 'telefon', [notEmpty]),
                   ),
                 ),
                 Padding(
@@ -182,8 +156,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Spol',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.transgender),
                     ),
                     items: const [
@@ -193,12 +166,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     onChanged: (value) {
                       spol = value ?? '';
                     },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo odaberite spol';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(value, 'spol'),
                   ),
                 ),
                 GestureDetector(
@@ -223,16 +191,11 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                           labelText: 'Datum Rođenja',
                           suffixIcon: const Icon(Icons.calendar_today),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
+                              borderRadius: BorderRadius.circular(10.0)),
                         ),
                         controller: datumController,
-                        validator: (value) {
-                          if (datumRodjenja == null) {
-                            return 'Molimo unesite datum rođenja';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            dateValidator(datumRodjenja, 'datum rođenja'),
                       ),
                     ),
                   ),
@@ -244,19 +207,11 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Specijalizacija',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.medical_services_outlined),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite specijalizaciju';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Specijalizacija mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(value,
+                        'specijalizaciju', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(
@@ -266,8 +221,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Odjel',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                          borderRadius: BorderRadius.circular(10.0)),
                       prefixIcon: const Icon(Icons.business),
                     ),
                     items: resultOdjel?.result
@@ -281,12 +235,8 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                         odabraniOdjel = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null || value.naziv == "") {
-                        return 'Molimo odaberite odjel';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        dropdownValidator(value?.naziv, 'odjel'),
                   ),
                 ),
                 const SizedBox(height: 20),

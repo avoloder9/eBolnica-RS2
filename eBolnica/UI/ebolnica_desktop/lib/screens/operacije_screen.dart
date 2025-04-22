@@ -39,10 +39,14 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
         operacije = result.result;
       });
       if (operacije == null) {
-        print("Nema operacija za ovog doktora");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nema operacija za ovog doktora')),
+        );
       }
     } else {
-      print("Nije pronadjen doktor");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nije pronadjen doktor')),
+      );
     }
   }
 

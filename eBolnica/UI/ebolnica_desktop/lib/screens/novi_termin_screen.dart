@@ -9,6 +9,7 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -103,7 +104,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         zauzetiTermini = result;
       });
     } catch (e) {
-      debugPrint('Greška pri učitavanju zauzetih termina: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju zauzetih termina')),
+      );
     }
   }
 
@@ -114,7 +117,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         resultOdjel = fetchedResult;
       });
     } catch (e) {
-      debugPrint('Error fetching odjeli: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju odjela')),
+      );
     }
   }
 
@@ -123,15 +128,19 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
       if (odabraniOdjel != null && odabraniOdjel!.odjelId != null) {
         SearchResult<Doktor> fetchedResult = await doktorProvider
             .get(filter: {"OdjelId": odabraniOdjel!.odjelId!});
-        debugPrint('Fetched Doktor: $fetchedResult');
         setState(() {
           resultDoktor = fetchedResult.result;
         });
       } else {
-        debugPrint("Odabrani odjel je null");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Greška prilikom učitavanja odabranog odjela')),
+        );
       }
     } catch (e) {
-      debugPrint('Error fetching doktori: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška prilikom učitavanja doktora')),
+      );
     }
   }
 
@@ -178,12 +187,12 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               odabraniPacijent = value;
                             });
                           },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Molimo odaberite pacijenta';
-                            }
-                            return null;
-                          },
+                          validator: (value) => dropdownValidator(
+                            value?.korisnik != null
+                                ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                                : null,
+                            'pacijenta',
+                          ),
                         ),
                       ),
                 Padding(
@@ -213,12 +222,8 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                             });
                             fetchDoktor();
                           },
-                    validator: (value) {
-                      if (value == null || value.naziv == "") {
-                        return 'Molimo odaberite odjel';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        dropdownValidator(value?.naziv, 'odjel'),
                   ),
                 ),
                 const SizedBox(
@@ -251,12 +256,12 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       });
                       loadZauzetiTermini();
                     },
-                    validator: (value) {
-                      if (value == null || value.korisnik!.ime == "") {
-                        return 'Molimo odaberite odjel';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(
+                      value?.korisnik != null
+                          ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                          : null,
+                      'doktora',
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -290,38 +295,65 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: Wrap(
-                    spacing: 11,
-                    direction: Axis.horizontal,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.spaceBetween,
-                    children: List.generate(12, (index) {
-                      int hour = 9 + index ~/ 3;
-                      int minute = (index % 3) * 20;
+                  child: FormField<String>(
+                    validator: (value) {
+                      if ((time?.isEmpty ?? true)) {
+                        return 'Molimo odaberite termin';
+                      }
+                      return null;
+                    },
+                    builder: (FormFieldState<String> field) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 11,
+                            direction: Axis.horizontal,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.spaceBetween,
+                            children: List.generate(12, (index) {
+                              int hour = 9 + index ~/ 3;
+                              int minute = (index % 3) * 20;
 
-                      String selectedTime =
-                          "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
-                      bool isZauzet = zauzetiTermini.contains(selectedTime);
-                      bool isSelektovan = selectedTime == time;
-                      return ElevatedButton(
-                        onPressed: isZauzet
-                            ? null
-                            : () {
-                                setState(() {
-                                  time = selectedTime;
-                                });
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isZauzet
-                              ? Colors.grey
-                              : isSelektovan
-                                  ? Colors.green
-                                  : Colors.blue,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(selectedTime),
+                              String selectedTime =
+                                  "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+                              bool isZauzet =
+                                  zauzetiTermini.contains(selectedTime);
+                              bool isSelektovan = selectedTime == time;
+
+                              return ElevatedButton(
+                                onPressed: isZauzet
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          time = selectedTime;
+                                          field.didChange(selectedTime);
+                                        });
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isZauzet
+                                      ? Colors.grey
+                                      : isSelektovan
+                                          ? Colors.green
+                                          : Colors.blue,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: Text(selectedTime),
+                              );
+                            }),
+                          ),
+                          if (field.hasError)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                field.errorText!,
+                                style: TextStyle(
+                                    color: Colors.red[700], fontSize: 13),
+                              ),
+                            ),
+                        ],
                       );
-                    }),
+                    },
                   ),
                 ),
                 const SizedBox(

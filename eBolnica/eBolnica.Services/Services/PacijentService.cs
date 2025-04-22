@@ -235,5 +235,23 @@ namespace eBolnica.Services.Services
         {
             recommenderService.TrainModel();
         }
+
+        public override void Delete(int id)
+        {
+            var entity = Context.Set<Database.Pacijent>().Find(id);
+            if (entity == null) { throw new Exception("Pacijent nije pronadjen"); }
+            entity.Obrisano = true;
+            entity.VrijemeBrisanja = DateTime.Now;
+            Context.Update(entity);
+            var korisnik = Context.Set<Database.Korisnik>().Find(entity.KorisnikId);
+            if (korisnik == null) { throw new Exception("Korisnik nije pronadjen"); }
+
+            korisnik.Obrisano = true;
+            korisnik.VrijemeBrisanja = DateTime.Now;
+
+            Context.Update(korisnik);
+            Context.SaveChanges();
+        }
+
     }
 }

@@ -60,7 +60,6 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
       setState(() {
         _isLoading = false;
       });
-      print("error");
     }
   }
 

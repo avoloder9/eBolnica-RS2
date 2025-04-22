@@ -11,6 +11,7 @@ import 'package:ebolnica_desktop/providers/raspored_smjena_provider.dart';
 import 'package:ebolnica_desktop/providers/slobodan_dan_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -900,12 +901,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Unesite razlog zahtjeva";
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          generalValidator(value, 'razlog', [notEmpty]),
                     ),
                   ],
                 ),

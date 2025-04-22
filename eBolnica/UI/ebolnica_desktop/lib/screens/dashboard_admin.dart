@@ -58,7 +58,10 @@ class _DashboardAdminState extends State<DashboardAdmin> {
                         _generateAndPrintReport(popunjenost, zaposleni,
                             pacijenti, dashboardData[0]);
                       } catch (e) {
-                        print("Greška prilikom generisanja izvještaja: $e");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Greška prilikom generisanja izvještaja')));
                       }
                     },
                     child: const Text(
