@@ -13,6 +13,14 @@ class OperacijaProvider extends BaseProvider<Operacija> {
     return Operacija.fromJson(data);
   }
 
+  final Map<String, String> actionDescriptions = {
+    "Activate": "aktivirati ovu operaciju",
+    "Edit": "urediti podatke",
+    "Hide": "sakriti ovu operaciju",
+    "Close": "završiti ovu operaciju",
+    "Update": "ažurirati operaciju",
+    "Cancel": "otkazati ovu operaciju",
+  };
   Future<List<String>> getZauzetiTermini(
       int doktorId, DateTime datumOperacije) async {
     var url =
@@ -67,35 +75,19 @@ class OperacijaProvider extends BaseProvider<Operacija> {
               duration: const Duration(seconds: 3))
           .show(context);
     }
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
   }
 
   void showConfirmationDialog(BuildContext context, int operacijaId,
       String action, VoidCallback onUpdate) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Center(child: Text("Potvrda akcije")),
-          content: Text("Da li ste sigurni da želite $action?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Ne"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                sendActionRequest(context, operacijaId, action, onUpdate);
-              },
-              child: const Text("Da"),
-            ),
-          ],
-        );
-      },
-    );
+    String actionDescription = actionDescriptions[action] ?? "Nepoznata akcija";
+    showCustomDialog(
+        context: context,
+        title: "Potvrda akcije",
+        message: "Da li ste sigurni da želite $actionDescription?",
+        confirmText: "Da",
+        onConfirm: () {
+          sendActionRequest(context, operacijaId, action, onUpdate);
+        });
   }
 
   Widget buildOperacijaButtons(
@@ -147,6 +139,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
                     onPressed: () => showConfirmationDialog(
                         context, operacijaId, "Close", () {
                       setState(() {});
+                      onActionCompleted();
                     }),
                     child: const Text("Završi"),
                   ),
@@ -201,80 +194,128 @@ class OperacijaProvider extends BaseProvider<Operacija> {
         showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
-              title: const Text("Uredi operaciju"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: tipOperacijeController,
-                    decoration:
-                        const InputDecoration(labelText: "Tip operacije"),
-                  ),
-                  TextField(
-                    controller: komentarController,
-                    decoration: const InputDecoration(labelText: "Komentar"),
-                  ),
-                  TextField(
-                    controller: datumController,
-                    decoration:
-                        const InputDecoration(labelText: "Datum operacije"),
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: datumOperacije,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if (pickedDate != null) {
-                        datumController.text = formattedDate(pickedDate);
-                        datumOperacije = pickedDate;
-                      }
-                    },
-                  ),
-                ],
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Odustani"),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    var updateData = {
-                      "tipOperacije": tipOperacijeController.text,
-                      "komentar": komentarController.text,
-                      "doktorId": doktorId,
-                      "datumOperacije": datumOperacije.toIso8601String(),
-                    };
+              elevation: 10,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Uredi operaciju",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: tipOperacijeController,
+                      decoration: const InputDecoration(
+                        labelText: "Tip operacije",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: komentarController,
+                      decoration: const InputDecoration(
+                        labelText: "Komentar",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: datumController,
+                      decoration: const InputDecoration(
+                        labelText: "Datum operacije",
+                        border: OutlineInputBorder(),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: datumOperacije,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          datumController.text = formattedDate(pickedDate);
+                          datumOperacije = pickedDate;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.redAccent,
+                          ),
+                          child: const Text(
+                            "Odustani",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () async {
+                            var updateData = {
+                              "tipOperacije": tipOperacijeController.text,
+                              "komentar": komentarController.text,
+                              "doktorId": doktorId,
+                              "datumOperacije":
+                                  datumOperacije.toIso8601String(),
+                            };
 
-                    var updateResponse = await http.put(
-                      uri,
-                      headers: headers,
-                      body: jsonEncode(updateData),
-                    );
+                            var updateResponse = await http.put(
+                              uri,
+                              headers: headers,
+                              body: jsonEncode(updateData),
+                            );
 
-                    if (updateResponse.statusCode == 200) {
-                      await Flushbar(
-                        message: "Operacija uspješno ažurirana",
-                        backgroundColor: Colors.green,
-                        duration: const Duration(seconds: 3),
-                      ).show(context);
-                      onUpdate();
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    } else {
-                      await Flushbar(
-                        message: "Greška prilikom ažuriranja",
-                        backgroundColor: Colors.red,
-                        duration: const Duration(seconds: 3),
-                      ).show(context);
-                    }
-                  },
-                  child: const Text("Sačuvaj"),
+                            if (updateResponse.statusCode == 200) {
+                              await Flushbar(
+                                message: "Operacija uspješno ažurirana",
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 3),
+                              ).show(context);
+                              onUpdate();
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              await Flushbar(
+                                message: "Greška prilikom ažuriranja",
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 3),
+                              ).show(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            "Sačuvaj",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         );

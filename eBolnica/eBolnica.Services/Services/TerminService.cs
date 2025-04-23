@@ -29,12 +29,12 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Termin> AddFilter(TerminSearchObject searchObject, IQueryable<Database.Termin> query)
         {
-            var usedTerminIds = Context.Pregleds.Include(x => x.Uputnica)
-        .Where(p => p.Uputnica != null && p.Uputnica!.TerminId != null)
-        .Select(p => p.Uputnica.TerminId);
+            var usedTerminIds = Context.Pregleds.Include(x => x.Uputnica).Where(p => p.Uputnica != null && p.Uputnica!.TerminId != null)
+                .Select(p => p.Uputnica.TerminId);
 
-            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
-                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina.Date >= DateTime.Today && x.Otkazano == false && !usedTerminIds.Contains(x.TerminId)).OrderBy(x => x.DatumTermina);
+            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik).
+                Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik)
+                .Where(x => x.DatumTermina.Date >= DateTime.Today && x.Otkazano == false && !usedTerminIds.Contains(x.TerminId)).OrderBy(x => x.DatumTermina);
             if (searchObject!.DoktorId != null)
             {
                 query = query.Where(x => x.Doktor.DoktorId == searchObject.DoktorId);
@@ -49,7 +49,6 @@ namespace eBolnica.Services.Services
             }
             return base.AddFilter(searchObject, query);
         }
-
         public override void BeforeInsert(TerminInsertRequest request, Database.Termin entity)
         {
             var pacijentExists = Context.Pacijents.Any(p => p.PacijentId == request.PacijentId);

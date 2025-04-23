@@ -13,7 +13,7 @@ namespace eBolnica.Services.Migrations
             migrationBuilder.InsertData(table: "Korisnik", columns: new[] { "KorisnikID", "Ime", "Prezime", "Email", "KorisnickoIme", "LozinkaHash", "LozinkaSalt", "Slika", "SlikaThumb", "DatumRodjenja", "Telefon", "Spol", "Status", "Obrisano", "VrijemeBrisanja" }, values: new object[,] {
                 {1,"Admin","Admin","admin@gmail.com","admin","eiwRDZM/lCVOIo4CNIq/LPHuHco=","Fdve4bDuc8nirLMPpjle0A==", null,null, new DateTime(1995, 2, 20),"061545697","Muški",true,false,null},
                 {2,"Doktor","Doktor","doktor@gmail.com","doktor","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==", null,null, new DateTime(1985, 3, 20),"061545697","Muški",true,false,null},
-                {3,"Amar","Mehić","amar.mehic@gmail.com","amar.mehic","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==",null,null, new DateTime(1982, 5, 15), "061101001","Muški", true, false, null},
+                {3,"Hirurg","Mehić","hirurg.mehic@gmail.com","hirurg","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==",null,null, new DateTime(1982, 5, 15), "061101001","Muški", true, false, null},
                 {4,"Lejla","Kovačević","lejla.kovacevic@gmail.com","lejla.kovacevic","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==",null,null, new DateTime(1990, 8, 23), "061101002","Ženski", true, false, null},
                 {5,"Haris","Smajić","haris.smajic@gmail.com","haris.smajic","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==",null,null, new DateTime(1979, 12, 11), "061101003","Muški", true, false, null},
                 {6,"Amina","Dedić","amina.dedic@gmail.com","amina.dedic","id9jOLR4pXjJqAMB1D48VDycgE0=","hbKVJnR+b+S90aIoAgoP6g==",null,null, new DateTime(1987, 3, 29), "061101004", "Ženski",true, false, null},
@@ -211,13 +211,13 @@ namespace eBolnica.Services.Migrations
             migrationBuilder.InsertData(table: "Bolnica", columns: new[] { "BolnicaID", "Naziv", "Adresa", "Telefon", "Email", "UkupanBrojSoba", "UkupanBrojOdjela", "UkupanBrojKreveta", "TrenutniBrojHospitalizovanih", "Obrisano", "VrijemeBrisanja" }, values: new object[,] { { 1, "Kantonalna Bolnica dr.Safet Mujić", "Maršala Tita 294", "036503300", "bolnica@gmail.com", 14, 7, 28, 2, false, null } });
             migrationBuilder.InsertData(table: "Odjel", columns: new[] { "OdjelID", "Naziv", "BrojSoba", "BrojKreveta", "BrojSlobodnihKreveta", "BolnicaID", "GlavniDoktorID", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {
-                {1,"Ortopedija",0,0,0,1,null,false,null },
-                {2,"Hirurgija",0,0,0,1,null,false,null },
-                {3,"Pulmologija",0,0,0,1,null,false,null },
-                {4,"Urologija",0,0,0,1,null,false,null },
-                {5,"Ginekologija",0,0,0,1,null,false,null },
-                {6,"Gastroenterologija",0,0,0,1,null,false,null },
-                {7,"Neurologija",0,0,0,1,null,false,null },
+                {1,"Ortopedija",2,4,3,1,null,false,null },
+                {2,"Hirurgija",2,4,3,1,null,false,null },
+                {3,"Pulmologija",2,4,4,1,null,false,null },
+                {4,"Urologija",2,4,4,1,null,false,null },
+                {5,"Ginekologija",2,4,4,1,null,false,null },
+                {6,"Gastroenterologija",2,4,4,1,null,false,null },
+                {7,"Neurologija",2,4,4,1,null,false,null },
             });
             migrationBuilder.InsertData(table: "MedicinskoOsoblje", columns: new[] { "MedicinskoOsobljeID", "KorisnikID", "OdjelID", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {
@@ -565,10 +565,10 @@ namespace eBolnica.Services.Migrations
             });
             migrationBuilder.InsertData(table: "Operacija", columns: new[] { "OperacijaID", "PacijentID", "DoktorID", "DatumOperacije", "TerapijaID", "TipOperacije", "StateMachine", "Komentar", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {
-                {1, 5, 1, new DateTime(2025, 4, 2), null, "Operacija stopala", "closed", null, false, null},
-                {2, 2, 1, new DateTime(2025, 3, 4), null, "Operacija koljena", "closed", null, false, null},
+                {1, 5, 2, new DateTime(2025, 4, 2), null, "Operacija stopala", "closed", null, false, null},
+                {2, 2, 2, new DateTime(2025, 3, 4), null, "Operacija koljena", "closed", null, false, null},
                 {3, 3, 2, new DateTime(2025, 4, 5), null, "Operacija žučne kese", "closed", null, false, null},
-                {4, 4, 2, new DateTime(2025, 3, 19), null, "Operacija žučne kese", "closed", null, false, null}
+                {4, 4, 9, new DateTime(2025, 3, 19), null, "Operacija žučne kese", "closed", null, false, null}
             });
             migrationBuilder.InsertData(table: "OtpusnoPismo", columns: new[] { "OtpusnoPismoID", "HospitalizacijaID", "Dijagnoza", "TerapijaID", "Anamneza", "Zakljucak", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {

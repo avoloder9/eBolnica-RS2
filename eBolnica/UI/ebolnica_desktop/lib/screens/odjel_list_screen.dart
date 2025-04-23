@@ -258,7 +258,11 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                                           userType: widget.userType,
                                         ),
                                       ),
-                                    );
+                                    ).then((refresh) {
+                                      if (refresh == true) {
+                                        _loadInitialData();
+                                      }
+                                    });
                                   },
                                   icon: const Icon(Icons.visibility),
                                   label: const Text("Detalji"),

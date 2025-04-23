@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/krevet_model.dart';
 import 'package:ebolnica_desktop/providers/krevet_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_krevet_screen.dart';
@@ -67,6 +68,12 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
               label: const Text("Dodaj novi krevet"),
             ),
         ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
       ),
       body: kreveti == null || kreveti!.isEmpty
           ? buildEmptyView(
@@ -77,7 +84,12 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                 userId: widget.userId,
                 userType: widget.userType,
               ),
-              message: "Nema kreveta na ovom odjelu")
+              message: "Nema kreveta na ovom odjelu",
+              onDialogClosed: () {
+                setState(() {});
+                _fetchKreveti();
+              },
+            )
           : _buildResultView(),
     );
   }
@@ -115,6 +127,7 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                 ),
               ),
             ),
+            DataColumn(label: Text("")),
           ],
           rows: kreveti?.map<DataRow>((e) {
                 return DataRow(
@@ -157,6 +170,37 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                         ),
                       ),
                     ),
+                    DataCell(ElevatedButton.icon(
+                      icon: const Icon(Icons.delete),
+                      label: const Text("Ukloni krevet"),
+                      onPressed: () async {
+                        showCustomDialog(
+                          context: context,
+                          title: "Obrisati krevet?",
+                          message:
+                              "Da li ste sigurni da želite ukloniti krevet?",
+                          confirmText: "Da",
+                          onConfirm: () async {
+                            try {
+                              await krevetProvider.delete(e.krevetId!);
+                              await Flushbar(
+                                message: "Krevet je uspješno uklonjen!",
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.green,
+                              ).show(context);
+                            } catch (error) {
+                              await Flushbar(
+                                message:
+                                    "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.red,
+                              ).show(context);
+                            }
+                            _fetchKreveti();
+                          },
+                        );
+                      },
+                    )),
                   ],
                 );
               }).toList() ??

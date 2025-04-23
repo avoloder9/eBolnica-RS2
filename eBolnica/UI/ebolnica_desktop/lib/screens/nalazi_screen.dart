@@ -54,7 +54,12 @@ class _NalaziScreenState extends State<NalaziScreen> {
                 userId: widget.userId,
                 userType: widget.userType,
               ),
-              message: "Nema kreiranih nalaza")
+              message: "Nema kreiranih nalaza",
+              onDialogClosed: () {
+                setState(() {});
+                fetchNalaz();
+              },
+            )
           : _buildResultView(),
     );
   }

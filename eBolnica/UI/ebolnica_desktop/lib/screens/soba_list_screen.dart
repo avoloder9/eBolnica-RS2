@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/soba_model.dart';
 import 'package:ebolnica_desktop/providers/soba_provider.dart';
 import 'package:ebolnica_desktop/screens/krevet_list_screen.dart';
@@ -58,6 +59,12 @@ class _SobaListScreenState extends State<SobaListScreen> {
                 label: const Text("Dodaj novu sobu"),
               ),
           ],
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
         ),
         body: sobe == null || sobe!.isEmpty
             ? buildEmptyView(
@@ -67,7 +74,12 @@ class _SobaListScreenState extends State<SobaListScreen> {
                   userId: widget.userId,
                   userType: widget.userType,
                 ),
-                message: "Nema soba na ovom odjelu")
+                message: "Nema soba na ovom odjelu",
+                onDialogClosed: () {
+                  setState(() {});
+                  _fetchSobe();
+                },
+              )
             : _buildResultView());
   }
 
@@ -109,6 +121,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
             ),
             DataColumn(
                 label: SizedBox(width: 120, child: Center(child: Text("")))),
+            DataColumn(label: Text("")),
           ],
           rows: sobe?.map<DataRow>((e) {
                 return DataRow(
@@ -153,21 +166,68 @@ class _SobaListScreenState extends State<SobaListScreen> {
                         ),
                         onPressed: () {
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => KrevetListScreen(
-                                sobaId: e.sobaId!,
-                                odjelId: widget.odjelId,
-                                userId: widget.userId,
-                                userType: widget.userType,
-                              ),
-                            ),
-                          );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => KrevetListScreen(
+                                  sobaId: e.sobaId!,
+                                  odjelId: widget.odjelId,
+                                  userId: widget.userId,
+                                  userType: widget.userType,
+                                ),
+                              )).then((refresh) {
+                            if (refresh == true) {
+                              _fetchSobe();
+                            }
+                          });
                         },
                         child: const Text("Detalji",
                             style: TextStyle(fontSize: 14)),
                       ),
                     ),
+                    DataCell(Tooltip(
+                      message: e.brojKreveta == 0
+                          ? "Ukloni sobu"
+                          : "Ne možete ukloniti sobu dok sadrži krevete",
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.delete),
+                        label: const Text("Ukloni sobu"),
+                        onPressed: e.brojKreveta == 0
+                            ? () async {
+                                showCustomDialog(
+                                  context: context,
+                                  title: "Obrisati sobu?",
+                                  message:
+                                      "Da li ste sigurni da želite ukloniti sobu?",
+                                  confirmText: "Da",
+                                  onConfirm: () async {
+                                    try {
+                                      await sobaProvider.delete(e.sobaId!);
+                                      await Flushbar(
+                                        message: "Soba je uspješno uklonjena!",
+                                        duration: const Duration(seconds: 3),
+                                        backgroundColor: Colors.green,
+                                      ).show(context);
+                                    } catch (error) {
+                                      await Flushbar(
+                                        message:
+                                            "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                        duration: const Duration(seconds: 3),
+                                        backgroundColor: Colors.red,
+                                      ).show(context);
+                                    }
+                                    _fetchSobe();
+                                  },
+                                );
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: e.brojKreveta == 0
+                              ? Colors.red
+                              : Colors.grey.shade400,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    )),
                   ],
                 );
               }).toList() ??

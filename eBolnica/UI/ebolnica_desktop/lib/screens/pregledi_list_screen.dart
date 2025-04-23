@@ -82,10 +82,7 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
                   label: Text("Zakljucak",
                       style: TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(
-                  label: Text("Akcija",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
+              DataColumn(label: Text("")),
             ],
             rows: pregledi!
                 .map<DataRow>(

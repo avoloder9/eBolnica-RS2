@@ -94,7 +94,7 @@ class _ParametriListScreenState extends State<ParametriListScreen> {
                                   context: context,
                                   title: "Obrisati parametar?",
                                   message:
-                                      "Da li ste sigurni da zelite ukloniti parametar",
+                                      "Da li ste sigurni da želite ukloniti parametar",
                                   confirmText: "Da",
                                   onConfirm: () async {
                                     try {

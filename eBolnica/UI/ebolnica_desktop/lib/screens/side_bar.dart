@@ -48,7 +48,7 @@ class SideBar extends StatelessWidget {
                   Icon(Icons.local_hospital, color: Colors.white, size: 40),
                   SizedBox(height: 8),
                   Text(
-                    'Kantonalna bolnica\nDr. Safet Mujić',
+                    'eBolnica',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,

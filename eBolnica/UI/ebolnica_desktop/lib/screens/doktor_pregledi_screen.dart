@@ -70,6 +70,16 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
   }
 
   Widget _buildResultView() {
+    if (pregledi == null || pregledi!.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            "Nemate obavljenih pregleda",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
         child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,

@@ -235,7 +235,6 @@ namespace eBolnica.Services.Services
         {
             recommenderService.TrainModel();
         }
-
         public override void Delete(int id)
         {
             var entity = Context.Set<Database.Pacijent>().Find(id);

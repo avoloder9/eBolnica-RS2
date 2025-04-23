@@ -49,7 +49,8 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   List<String> zauzetiTermini = [];
   DateTime selectedDate = DateTime.now();
   String? time;
-
+  bool _isDateValid = true;
+  bool _isTimeValid = true;
   @override
   void initState() {
     super.initState();
@@ -264,72 +265,101 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         decoration: _inputDecoration(label, icon),
         items: items,
         onChanged: onChanged,
-        validator: (value) => value == null ? 'Odaberite $label' : null,
+        validator: (value) => value == null ? 'Odaberite ${label}a' : null,
       ),
     );
   }
 
   Widget _buildDatePicker() {
-    return GestureDetector(
-      onTap: pickDate,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: pickDate,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isDateValid ? Colors.grey.shade400 : Colors.red,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('yyyy-MM-dd').format(selectedDate),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const Icon(Icons.calendar_today, color: Colors.blue),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(DateFormat('yyyy-MM-dd').format(selectedDate),
-                style: const TextStyle(fontSize: 16)),
-            const Icon(Icons.calendar_today, color: Colors.blue),
-          ],
-        ),
-      ),
+        if (!_isDateValid)
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0, bottom: 8),
+            child:
+                Text("Odaberite datum.", style: TextStyle(color: Colors.red)),
+          ),
+      ],
     );
   }
 
   Widget _buildTimeSelector() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
-      children: List.generate(12, (index) {
-        int hour = 9 + index ~/ 3;
-        int minute = (index % 3) * 20;
-        String selectedTime =
-            "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: List.generate(12, (index) {
+            int hour = 9 + index ~/ 3;
+            int minute = (index % 3) * 20;
+            String selectedTime =
+                "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
 
-        bool isZauzet = zauzetiTermini.contains(selectedTime);
-        bool isSelected = selectedTime == time;
-        return GestureDetector(
-          onTap: isZauzet
-              ? null
-              : () {
-                  setState(() {
-                    time = selectedTime;
-                  });
-                },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isZauzet
-                  ? Colors.grey.shade400
-                  : isSelected
-                      ? Colors.green
-                      : Colors.blue,
-            ),
-            child: Text(
-              selectedTime,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
+            bool isZauzet = zauzetiTermini.contains(selectedTime);
+            bool isSelected = selectedTime == time;
+
+            return GestureDetector(
+              onTap: isZauzet
+                  ? null
+                  : () {
+                      setState(() {
+                        time = selectedTime;
+                        _isTimeValid = true;
+                      });
+                    },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: isZauzet
+                      ? Colors.grey.shade400
+                      : isSelected
+                          ? Colors.green
+                          : Colors.blue,
+                ),
+                child: Text(
+                  selectedTime,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            );
+          }),
+        ),
+        if (!_isTimeValid)
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0, left: 8),
+            child:
+                Text("Odaberite termin.", style: TextStyle(color: Colors.red)),
           ),
-        );
-      }),
+      ],
     );
   }
 
@@ -387,6 +417,11 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
           duration: const Duration(seconds: 2),
         ).show(context);
       }
+    } else {
+      setState(() {
+        _isDateValid = true;
+        _isTimeValid = time != null;
+      });
     }
   }
 

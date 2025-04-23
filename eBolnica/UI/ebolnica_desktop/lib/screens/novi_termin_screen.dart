@@ -9,6 +9,7 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -383,20 +384,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               "otkazano": false,
                             };
                             try {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  return const Dialog(
-                                    backgroundColor: Colors.transparent,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 6.0,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
+                              showFullScreenLoading(context);
                               await terminProvider.insert(noviTermin);
                               Navigator.pop(context);
                               await Flushbar(

@@ -56,10 +56,12 @@ String formattedTime(Duration time) {
   return '$hours:$minutes';
 }
 
-Widget buildEmptyView(
-    {required BuildContext context,
-    required Widget screen,
-    required String message}) {
+Widget buildEmptyView({
+  required BuildContext context,
+  required Widget screen,
+  required String message,
+  required VoidCallback onDialogClosed,
+}) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +75,9 @@ Widget buildEmptyView(
                 return screen;
               },
               barrierDismissible: false,
-            );
+            ).then((value) {
+              onDialogClosed();
+            });
           },
         ),
         const SizedBox(height: 10),
@@ -410,5 +414,26 @@ Widget buildDetailRowWithIcon({
         ),
       ],
     ),
+  );
+}
+
+void showFullScreenLoading(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Container(
+        color: Colors.white,
+        child: const Center(
+          child: SizedBox(
+            width: 70,
+            height: 70,
+            child: CircularProgressIndicator(
+              strokeWidth: 8,
+            ),
+          ),
+        ),
+      );
+    },
   );
 }

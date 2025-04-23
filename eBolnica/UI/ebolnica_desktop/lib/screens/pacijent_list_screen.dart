@@ -41,11 +41,31 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
     super.initState();
     provider = PacijentProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
-    _loadInitialData();
+    _loadData();
   }
 
-  Future<void> _loadInitialData() async {
-    result = await provider.get(filter: {}, page: page, pageSize: pageSize);
+  Future<void> _loadData({bool useFilters = false}) async {
+    var filter = <String, dynamic>{};
+
+    if (useFilters) {
+      if (_imeEditingController.text.isNotEmpty) {
+        filter['imeGTE'] = _imeEditingController.text;
+      }
+      if (_prezimeEditingController.text.isNotEmpty) {
+        filter['prezimeGTE'] = _prezimeEditingController.text;
+      }
+      if (_brojKarticeController.text.isNotEmpty) {
+        final broj = int.tryParse(_brojKarticeController.text);
+        if (broj != null) {
+          filter['brojZdravstveneKartice'] = broj;
+        }
+      }
+    }
+    result = await provider.get(
+      filter: filter,
+      page: page,
+      pageSize: pageSize,
+    );
     setState(() {});
   }
 
@@ -80,7 +100,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               controller: _imeEditingController,
               decoration: const InputDecoration(labelText: "Ime"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -90,7 +110,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               controller: _prezimeEditingController,
               decoration: const InputDecoration(labelText: "Prezime"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -101,7 +121,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               decoration:
                   const InputDecoration(labelText: "Broj zdravstvene kartice"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -124,27 +144,6 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _performSearch() async {
-    var filter = <String, dynamic>{
-      'imeGTE': _imeEditingController.text.isNotEmpty
-          ? _imeEditingController.text
-          : null,
-      'prezimeGTE': _prezimeEditingController.text.isNotEmpty
-          ? _prezimeEditingController.text
-          : null,
-      'brojZdravstveneKartice': _brojKarticeController.text.isNotEmpty
-          ? int.tryParse(_brojKarticeController.text)
-          : null,
-    };
-
-    result = await provider.get(
-      filter: filter,
-      page: page,
-      pageSize: pageSize,
-    );
-    setState(() {});
   }
 
   Widget _buildResultView() {
@@ -259,7 +258,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                       builder: (context) => EditPacijentScreen(
                                         pacijentId: e.pacijentId!,
                                         onSave: () {
-                                          _loadInitialData();
+                                          _loadData();
                                         },
                                       ),
                                     );
@@ -291,7 +290,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                                 const Duration(seconds: 3),
                                             backgroundColor: Colors.green)
                                         .show(context);
-                                    _loadInitialData();
+                                    _loadData();
                                     setState(() {});
                                   },
                                 )),
@@ -304,7 +303,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                       context: context,
                                       title: "Obrisati pacijenta?",
                                       message:
-                                          "Da li ste sigurni da zelite ukloniti pacijenta",
+                                          "Da li ste sigurni da želite ukloniti pacijenta?",
                                       confirmText: "Da",
                                       onConfirm: () async {
                                         try {
@@ -325,7 +324,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                             backgroundColor: Colors.red,
                                           ).show(context);
                                         }
-                                        _loadInitialData();
+                                        _loadData();
                                       },
                                     );
                                   },
@@ -345,7 +344,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                                 .showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                    "Ovaj pacijent nema medicinsku dokumentaciju."),
+                                                    "Ovaj pacijent nema medicinsku dokumentaciju. Medicinsko osoblje je ovlašteno o kreiranju medicinske dokumentacije."),
                                               ),
                                             );
                                           } else {

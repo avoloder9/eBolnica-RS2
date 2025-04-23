@@ -61,7 +61,8 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
       nalazi = [];
       isLoading = true;
     });
-    if (widget.userType == "doktor") {
+    if (widget.userType == "doktor" ||
+        widget.userType == "medicinsko osoblje") {
       pacijentId = widget.hospitalizacija!.pacijentId;
     } else {
       pacijentId =

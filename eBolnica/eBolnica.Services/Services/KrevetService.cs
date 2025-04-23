@@ -24,7 +24,7 @@ namespace eBolnica.Services.Services
 
         public override IQueryable<Database.Krevet> AddFilter(KrevetSearchObject searchObject, IQueryable<Database.Krevet> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Soba);
+            query = base.AddFilter(searchObject, query).Include(x => x.Soba).Where(x => x.Obrisano == false);
 
             if (searchObject?.KrevetId != null || searchObject!.KrevetId > 0)
             {
@@ -138,6 +138,49 @@ namespace eBolnica.Services.Services
                 ZauzetiKreveta = zauzetiKreveta,
                 SlobodniKreveta = slobodniKreveti
             };
+        }
+
+        public override void Delete(int id)
+        {
+
+            var krevet = Context.Krevets.Include(k => k.Soba).ThenInclude(s => s.Odjel).ThenInclude(o => o.Bolnica).FirstOrDefault(k => k.KrevetId == id);
+
+            if (krevet == null)
+            {
+                throw new Exception("Krevet nije moguće pronaći.");
+            }
+
+            if (krevet is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.Obrisano = true;
+                softDeleteEntity.VrijemeBrisanja = DateTime.Now;
+                Context.Update(krevet);
+
+                if (krevet.Soba.BrojKreveta.HasValue && krevet.Soba.BrojKreveta > 0)
+                {
+                    krevet.Soba.BrojKreveta--;
+                    Context.Update(krevet.Soba);
+                }
+
+                if (krevet.Soba.Odjel.BrojKreveta > 0)
+                {
+                    krevet.Soba.Odjel.BrojKreveta--;
+                    krevet.Soba.Odjel.BrojSlobodnihKreveta--;
+                    Context.Update(krevet.Soba.Odjel);
+                }
+
+                if (krevet.Soba.Odjel.Bolnica.UkupanBrojKreveta > 0)
+                {
+                    krevet.Soba.Odjel.Bolnica.UkupanBrojKreveta--;
+                    Context.Update(krevet.Soba.Odjel.Bolnica);
+                }
+            }
+            else
+            {
+                Context.Remove(krevet);
+            }
+
+            Context.SaveChanges();
         }
     }
 }

@@ -325,11 +325,11 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.OperacijaId).HasColumnName("OperacijaID");
             entity.Property(e => e.DatumOperacije).HasColumnType("datetime");
             entity.Property(e => e.DoktorId).HasColumnName("DoktorID");
-            entity.Property(e => e.Komentar).HasMaxLength(20);
+            entity.Property(e => e.Komentar).HasMaxLength(100);
             entity.Property(e => e.PacijentId).HasColumnName("PacijentID");
             entity.Property(e => e.StateMachine).HasMaxLength(20);
             entity.Property(e => e.TerapijaId).HasColumnName("TerapijaID");
-            entity.Property(e => e.TipOperacije).HasMaxLength(20);
+            entity.Property(e => e.TipOperacije).HasMaxLength(100);
 
             entity.HasOne(d => d.Doktor).WithMany(p => p.Operacijas)
                 .HasForeignKey(d => d.DoktorId)
@@ -548,7 +548,7 @@ public partial class EBolnicaContext : DbContext
             entity.Property(e => e.DatumPocetka).HasColumnType("date");
             entity.Property(e => e.DatumZavrsetka).HasColumnType("date");
             entity.Property(e => e.Naziv).HasMaxLength(50);
-            entity.Property(e => e.Opis).HasMaxLength(100);
+            entity.Property(e => e.Opis).HasMaxLength(200);
             entity.Property(e => e.PregledId).HasColumnName("PregledID");
 
             entity.HasOne(d => d.Pregled).WithMany(p => p.Terapijas)
