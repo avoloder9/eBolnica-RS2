@@ -162,7 +162,7 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                                                 ),
                                                 const SizedBox(height: 8),
                                                 const Text(
-                                                  "Da li ste sigurni da želite otkazati termin?",
+                                                  "Da li ste sigurni da zelite otkazati termin?",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.grey,

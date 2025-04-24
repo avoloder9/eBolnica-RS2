@@ -50,8 +50,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
         return AlertDialog(
           title: Text(isDolazak ? 'Prijavi dolazak' : 'Prijavi odlazak'),
           content: Text(isDolazak
-              ? 'Želite li prijaviti dolazak na smjenu?'
-              : 'Želite li prijaviti odlazak sa smjene?'),
+              ? 'zelite li prijaviti dolazak na smjenu?'
+              : 'zelite li prijaviti odlazak sa smjene?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

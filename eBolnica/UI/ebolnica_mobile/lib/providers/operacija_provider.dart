@@ -79,7 +79,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
       builder: (context) {
         return AlertDialog(
           title: const Center(child: Text("Potvrda akcije")),
-          content: Text("Da li ste sigurni da želite $action?"),
+          content: Text("Da li ste sigurni da zelite $action?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -130,7 +130,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
                         context, operacijaId, "Edit", () {
                       setState(() {});
                     }),
-                    child: const Text("Ažuriraj"),
+                    child: const Text("Azuriraj"),
                   ),
                 if (allowedActions.contains("Hide"))
                   ElevatedButton(
@@ -166,7 +166,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
                         context, operacijaId, "Cancel", () {
                       setState(() {});
                     }),
-                    child: const Text("Otkaži"),
+                    child: const Text("Otkazi"),
                   ),
               ],
             );
@@ -256,7 +256,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
 
                     if (updateResponse.statusCode == 200) {
                       await Flushbar(
-                        message: "Operacija uspješno ažurirana",
+                        message: "Operacija uspješno azurirana",
                         backgroundColor: Colors.green,
                         duration: const Duration(seconds: 3),
                       ).show(context);
@@ -266,7 +266,7 @@ class OperacijaProvider extends BaseProvider<Operacija> {
                       }
                     } else {
                       await Flushbar(
-                        message: "Greška prilikom ažuriranja",
+                        message: "Greška prilikom azuriranja",
                         backgroundColor: Colors.red,
                         duration: const Duration(seconds: 3),
                       ).show(context);

@@ -54,7 +54,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
       builder: (context) {
         return AlertDialog(
           title: const Center(child: Text("Potvrda akcije")),
-          content: Text("Da li ste sigurni da želite $action?"),
+          content: Text("Da li ste sigurni da zelite $action?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -102,7 +102,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
                 if (allowedActions.contains("Update"))
                   ElevatedButton(
                     onPressed: () => executeAction("Edit"),
-                    child: const Text("Ažuriraj"),
+                    child: const Text("Azuriraj"),
                   ),
                 if (allowedActions.contains("Hide"))
                   ElevatedButton(
@@ -112,7 +112,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
                 if (allowedActions.contains("Close"))
                   ElevatedButton(
                     onPressed: () => executeAction("Close"),
-                    child: const Text("Otkaži"),
+                    child: const Text("Otkazi"),
                   ),
               ],
             );

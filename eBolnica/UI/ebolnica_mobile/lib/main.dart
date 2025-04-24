@@ -323,7 +323,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (userType == 'administrator') {
           setState(() {
             Flushbar(
-              message: "Administrator ne može koristiti mobilnu aplikaciju.",
+              message: "Administrator ne moze koristiti mobilnu aplikaciju.",
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 3),
             ).show(context);

@@ -109,12 +109,16 @@ namespace eBolnica.Services.Services
                 {
                     foreach (var smjena in smjene)
                     {
-                        var brojRadnikaPoSmjeni = osoblje.Count / (smjene.Count * odjeli.Count);
 
-                        var dostupnoOsoblje = osoblje.Where(o => !rasporedPoDanu[date].Contains(o) && !JeRadioTrecePrekoNoci(o, date, sviRasporedi) &&
-                                !ImaSlobodanDan(o, date, slobodniDani))
+                        var osobljeZaOdjel = await Context.MedicinskoOsobljes.Where(m => m.OdjelId == odjel.OdjelId).Select(m => m.KorisnikId).ToListAsync();
+
+                        var brojRadnikaPoSmjeni = osobljeZaOdjel.Count / smjene.Count;
+
+                        var dostupnoOsoblje = osobljeZaOdjel.Where(o => !rasporedPoDanu[date].Contains(o)
+                                     && !JeRadioTrecePrekoNoci(o, date, sviRasporedi)
+                                     && !ImaSlobodanDan(o, date, slobodniDani))
                             .OrderBy(o => sviRasporedi.Count(rs => rs.KorisnikId == o)).ToList();
-
+                        
                         if (dostupnoOsoblje.Count < brojRadnikaPoSmjeni)
                         {
                             Console.WriteLine($"Nedovoljno osoblja za odjel {odjel.Naziv} smjena {smjena.NazivSmjene} na datum {date}");

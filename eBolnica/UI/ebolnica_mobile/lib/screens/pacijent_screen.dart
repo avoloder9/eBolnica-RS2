@@ -119,7 +119,7 @@ class _PacijentScreenState extends State<PacijentScreen> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                   TextButton(
-                    child: const Text("Prikaži sve",
+                    child: const Text("Prikazi sve",
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -160,7 +160,7 @@ class _PacijentScreenState extends State<PacijentScreen> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                   TextButton(
-                      child: const Text("Prikaži sve",
+                      child: const Text("Prikazi sve",
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w600)),
                       onPressed: () async {
@@ -432,7 +432,7 @@ class _PacijentScreenState extends State<PacijentScreen> {
                   minimumSize: const Size(double.infinity, 60),
                 ),
                 child: const Text(
-                  "Zakaži termin",
+                  "Zakazi termin",
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
               ),

@@ -183,13 +183,13 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         });
 
         Flushbar(
-          message: "Podaci uspješno ažurirani!",
+          message: "Podaci uspješno azurirani!",
           duration: const Duration(seconds: 3),
           backgroundColor: Colors.green,
         ).show(context);
       } catch (e) {
         Flushbar(
-          message: "Greška prilikom ažuriranja: ${e.toString()}",
+          message: "Greška prilikom azuriranja: ${e.toString()}",
           duration: const Duration(seconds: 3),
           backgroundColor: Colors.red,
         ).show(context);
@@ -404,7 +404,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         ),
         validator: (value) {
           if (!isOptional && (value == null || value.isEmpty)) {
-            return "$label ne može biti prazno";
+            return "$label ne moze biti prazno";
           }
           if (isPassword && value != null && value.isNotEmpty) {
             if (value.length < 8) {
@@ -413,7 +413,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
           }
           if (isBiografija && value != null && value.isNotEmpty) {
             if (value.length > 255) {
-              return "Biografija može imati maksimalno 255 karaktera";
+              return "Biografija moze imati maksimalno 255 karaktera";
             }
           }
           return null;

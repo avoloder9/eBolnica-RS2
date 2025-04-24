@@ -238,7 +238,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       onPressed: _zakaziTermin,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
-                      child: const Text("Zakaži termin",
+                      child: const Text("Zakazi termin",
                           style: TextStyle(color: Colors.white)),
                     ),
                   ],

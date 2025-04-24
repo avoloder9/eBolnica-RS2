@@ -261,7 +261,7 @@ class _DoktorListScreenState extends State<DoktoriListScreen> {
                   minimumSize: const Size(double.infinity, 60),
                 ),
                 child: const Text(
-                  "Zakaži termin",
+                  "Zakazi termin",
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
               ),

@@ -105,10 +105,11 @@ namespace eBolnica.Services.Services
             {
                 EmailTo = pacijent.Email,
                 Subject = "Vaš termin je uspješno zakazan",
-                Message = $"Poštovani, Vaš termin sa doktorom {doktor.Ime} {doktor.Prezime} je uspješno zakazan. Detalji:\n" +
-                   $"Doktor: {doktor.Ime} {doktor.Prezime}\n" +
-                   $"Datum: {entity.DatumTermina:dd.MM.yyyy}\n" +
-                   $"Odjel: {odjel}",
+                Message = $"Poštovani, Vaš termin sa doktorom {doktor.Ime} {doktor.Prezime} je uspješno zakazan.<br/>" +
+                  $"Datum: {entity.DatumTermina:dd.MM.yyyy}<br/>" +
+                  $"Vrijeme: { entity.VrijemeTermina.ToString(@"hh\:mm\:ss")}<br/>"+
+                  $"Odjel: {odjel}",
+
                 ReceiverName = pacijent.Ime + " " + pacijent.Prezime,
             });
 
@@ -150,12 +151,12 @@ namespace eBolnica.Services.Services
             {
                 EmailTo = pacijent.Korisnik.Email,
                 Subject = "Vaš termin je otkazan",
-                Message = $"Poštovani, obavještavamo Vas da je Vaš termin sa doktorom {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime} otkazan.\n" +
-               $"Molimo Vas da, ukoliko je potrebno, zakažete novi termin u skladu s Vašim potrebama.\n\n" +
-               $"Detalji otkazanog termina:\n" +
-               $"Doktor: {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime}\n" +
-               $"Datum: {entity.DatumTermina}\n" +
-               $"Odjel: {odjel}\n\n" +
+                Message = $"Poštovani, obavještavamo Vas da je Vaš termin sa doktorom {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime} otkazan.<br>" +
+               $"Molimo Vas da, ukoliko je potrebno, zakažete novi termin u skladu s Vašim potrebama.<br>" +
+               $"Detalji otkazanog termina:<br>" +
+               $"Doktor: {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime}<br>" +
+               $"Datum: {entity.DatumTermina:dd.MM.yyyy}<br>" +
+               $"Odjel: {odjel}<br>" +
                $"Hvala Vam na razumijevanju.",
                 ReceiverName = pacijent.Korisnik.Ime + " " + pacijent.Korisnik.Prezime,
             });

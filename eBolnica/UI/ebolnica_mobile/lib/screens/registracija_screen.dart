@@ -340,7 +340,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               items: const [
                 DropdownMenuItem(value: 'Muški', child: Text('Muški')),
-                DropdownMenuItem(value: 'Ženski', child: Text('Ženski')),
+                DropdownMenuItem(value: 'zenski', child: Text('zenski')),
               ],
               onChanged: (value) {
                 setState(() {

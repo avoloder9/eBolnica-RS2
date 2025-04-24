@@ -229,7 +229,7 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                             return AlertDialog(
                               title: const Text("Potvrda"),
                               content: const Text(
-                                  "Da li ste sigurni da želite otkazati termin?"),
+                                  "Da li ste sigurni da zelite otkazati termin?"),
                               actions: [
                                 TextButton(
                                   onPressed: () {
