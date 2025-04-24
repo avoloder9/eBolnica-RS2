@@ -1,6 +1,7 @@
 ﻿using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
+using eBolnica.Services.Database;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.RabbitMQ;
 using MapsterMapper;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace eBolnica.Services.Services
 {
-    public class TerapijaService : BaseCRUDService<Terapija, TerapijaSearchObject, Database.Terapija, TerapijaInsertRequest, TerapijaUpdateRequest>, ITerapijaService
+    public class TerapijaService : BaseCRUDService<Model.Models.Terapija, TerapijaSearchObject, Database.Terapija, TerapijaInsertRequest, TerapijaUpdateRequest>, ITerapijaService
     {
         private readonly IRabbitMQService _rabbitMQService;
         public TerapijaService(Database.EBolnicaContext context, IMapper mapper, IRabbitMQService rabbitMQService) : base(context, mapper)
@@ -55,6 +56,22 @@ namespace eBolnica.Services.Services
             }
 
             base.BeforeInsert(request, entity);
+        }
+        public override IQueryable<Database.Terapija> AddFilter(TerapijaSearchObject searchObject, IQueryable<Database.Terapija> query)
+        {
+            query = base.AddFilter(searchObject, query);
+
+            if (searchObject.PacijentId != null || searchObject.PacijentId > 0)
+            {
+                query = query.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
+             .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+             .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == searchObject.PacijentId);
+            }
+            if (searchObject.PregledId != null || searchObject.PregledId > 0)
+            {
+                query = query.Where(x => x.PregledId == searchObject.PregledId);
+            }
+            return query;
         }
         public Database.Terapija? GetTerapijaByPregledId(int pregledId)
         {

@@ -48,6 +48,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Uputnica.Termin.Odjel.Naziv.Equals(searchObject.NazivOdjela));
             }
+            if (searchObject!.DoktorId != null || searchObject.DoktorId > 0)
+            {
+                query = query.Where(x => x.Uputnica.Termin.Doktor.DoktorId == searchObject.DoktorId);
+            }
             return query;
         }
         public override void BeforeInsert(PregledInsertRequest request, Database.Pregled entity)
@@ -80,7 +84,6 @@ namespace eBolnica.Services.Services
             var state = baseUputnicaState.CreateState(uputnica.StateMachine);
             state.Close(request.UputnicaId);
         }
-
         public List<Model.Response.BrojPregledaPoDanuResponse> GetBrojPregledaPoDanu(int brojDana)
         {
             DateTime endDate = DateTime.Now;
@@ -97,5 +100,6 @@ namespace eBolnica.Services.Services
                 .OrderBy(x => x.Datum)
                 .ToList();
         }
+
     }
 }

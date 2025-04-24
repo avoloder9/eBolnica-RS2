@@ -1,5 +1,6 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/providers/soba_provider.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 
 class NovaSobaScreen extends StatefulWidget {
@@ -70,15 +71,8 @@ class _NovaSobaScreenState extends State<NovaSobaScreen> {
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 14.0, horizontal: 16.0),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite naziv';
-                  }
-                  if (value[0] != value[0].toUpperCase()) {
-                    return 'Naziv mora početi sa velikim slovom';
-                  }
-                  return null;
-                },
+                validator: (value) => generalValidator(
+                    value, 'naziv', [notEmpty, startsWithCapital]),
               ),
             ),
           ],

@@ -10,6 +10,7 @@ import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/soba_provider.dart';
 import 'package:ebolnica_desktop/screens/hospitalizacija_screen.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 
 class NovaHospitalizacijaScreen extends StatefulWidget {
@@ -70,9 +71,10 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
     if (widget.doktorId == null) {
       return;
     }
-    var result = await odjelProvider.getOdjelByDoktorId(widget.doktorId!);
+    var result =
+        await odjelProvider.get(filter: {"DoktorId": widget.doktorId!});
     setState(() {
-      odjelId = result!.odjelId;
+      odjelId = result.result.first.odjelId!;
     });
     fetchSobe();
   }
@@ -137,12 +139,12 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
                       odabraniPacijent = value;
                     });
                   },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Molimo odaberite pacijenta';
-                    }
-                    return null;
-                  },
+                  validator: (value) => dropdownValidator(
+                    value?.korisnik != null
+                        ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                        : null,
+                    'pacijenta',
+                  ),
                 ),
               ),
               Padding(
@@ -172,12 +174,7 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
                       fetchKreveti();
                     }
                   },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Molimo odaberite sobu';
-                    }
-                    return null;
-                  },
+                  validator: (value) => dropdownValidator(value?.naziv, 'sobu'),
                 ),
               ),
               Padding(
@@ -202,12 +199,8 @@ class _NovaHospitalizacijaScreenState extends State<NovaHospitalizacijaScreen> {
                       odabraniKrevet = value;
                     });
                   },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Molimo odaberite krevet';
-                    }
-                    return null;
-                  },
+                  validator: (value) =>
+                      dropdownValidator(value?.krevetId, 'krevet'),
                 ),
               ),
               Padding(

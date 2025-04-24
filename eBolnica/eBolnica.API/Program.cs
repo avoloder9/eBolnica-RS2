@@ -7,6 +7,7 @@ using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.OperacijaStateMachine;
 using eBolnica.Services.RabbitMQ;
+using eBolnica.Services.Recommender;
 using eBolnica.Services.Services;
 using eBolnica.Services.UputnicaStateMachine;
 using Mapster;
@@ -65,6 +66,7 @@ builder.Services.AddTransient<CancelledOperacijaState>();
 
 builder.Services.AddTransient<SobaHelper>();
 builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
+builder.Services.AddScoped<IRecommenderService, RecommenderService>();
 builder.Services.AddControllers(x =>
 {
     x.Filters.Add<ExceptionFilter>();
@@ -72,9 +74,9 @@ builder.Services.AddControllers(x =>
 
 builder.Services.AddMapster();
 TypeAdapterConfig<eBolnica.Services.Database.Doktor, eBolnica.Model.Models.Doktor>
-    .NewConfig() 
-    .PreserveReference(true) 
-    .MaxDepth(3);  
+    .NewConfig()
+    .PreserveReference(true)
+    .MaxDepth(3);
 
 TypeAdapterConfig<eBolnica.Services.Database.Odjel, eBolnica.Model.Models.Odjel>
     .NewConfig()
@@ -138,6 +140,6 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dataContext = scope.ServiceProvider.GetRequiredService<EBolnicaContext>();
-  //   dataContext.Database.Migrate();   
+       dataContext.Database.Migrate();   
 }
 app.Run();

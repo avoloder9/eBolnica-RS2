@@ -11,7 +11,6 @@ import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
-import 'package:intl/intl.dart';
 
 class PacijentListScreen extends StatefulWidget {
   final int userId;
@@ -42,17 +41,32 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
     super.initState();
     provider = PacijentProvider();
     dokumentacijaProvider = MedicinskaDokumentacijaProvider();
-    _loadInitialData();
+    _loadData();
   }
 
-  Future<void> _loadInitialData() async {
-    result = await provider.get(filter: {}, page: page, pageSize: pageSize);
+  Future<void> _loadData({bool useFilters = false}) async {
+    var filter = <String, dynamic>{};
+
+    if (useFilters) {
+      if (_imeEditingController.text.isNotEmpty) {
+        filter['imeGTE'] = _imeEditingController.text;
+      }
+      if (_prezimeEditingController.text.isNotEmpty) {
+        filter['prezimeGTE'] = _prezimeEditingController.text;
+      }
+      if (_brojKarticeController.text.isNotEmpty) {
+        final broj = int.tryParse(_brojKarticeController.text);
+        if (broj != null) {
+          filter['brojZdravstveneKartice'] = broj;
+        }
+      }
+    }
+    result = await provider.get(
+      filter: filter,
+      page: page,
+      pageSize: pageSize,
+    );
     setState(() {});
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
   }
 
   @override
@@ -86,7 +100,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               controller: _imeEditingController,
               decoration: const InputDecoration(labelText: "Ime"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -96,7 +110,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               controller: _prezimeEditingController,
               decoration: const InputDecoration(labelText: "Prezime"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -107,7 +121,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
               decoration:
                   const InputDecoration(labelText: "Broj zdravstvene kartice"),
               onChanged: (value) async {
-                await _performSearch();
+                await _loadData(useFilters: true);
               },
             ),
           ),
@@ -121,8 +135,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                   barrierDismissible: false,
                   builder: (BuildContext context) {
                     return NoviPacijentScreen(
-                      userId: widget.userId,
-                    );
+                        userId: widget.userId, userType: widget.userType);
                   },
                 );
               },
@@ -131,27 +144,6 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _performSearch() async {
-    var filter = <String, dynamic>{
-      'imeGTE': _imeEditingController.text.isNotEmpty
-          ? _imeEditingController.text
-          : null,
-      'prezimeGTE': _prezimeEditingController.text.isNotEmpty
-          ? _prezimeEditingController.text
-          : null,
-      'brojZdravstveneKartice': _brojKarticeController.text.isNotEmpty
-          ? int.tryParse(_brojKarticeController.text)
-          : null,
-    };
-
-    result = await provider.get(
-      filter: filter,
-      page: page,
-      pageSize: pageSize,
-    );
-    setState(() {});
   }
 
   Widget _buildResultView() {
@@ -183,9 +175,12 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                 const DataColumn(label: Text("Status")),
                 if (widget.userType == "medicinsko osoblje")
                   const DataColumn(label: Text("Medicinska dokumentacija")),
-                const DataColumn(label: Text("")),
-                const DataColumn(label: Text("")),
-                const DataColumn(label: Text("")),
+                if (widget.userType == "administrator")
+                  const DataColumn(label: Text("")),
+                if (widget.userType == "administrator")
+                  const DataColumn(label: Text("")),
+                if (widget.userType == "administrator")
+                  const DataColumn(label: Text("")),
               ],
               rows: result?.result
                       .map<DataRow>(
@@ -253,99 +248,87 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                     },
                                   ),
                                 ),
-                              DataCell(
-                                widget.userType == "administrator"
-                                    ? ElevatedButton.icon(
-                                        icon: const Icon(Icons.edit),
-                                        label: const Text("Ažuriraj podatke"),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                EditPacijentScreen(
-                                              pacijentId: e.pacijentId!,
-                                              onSave: () {
-                                                _loadInitialData();
-                                              },
-                                            ),
-                                          );
+                              if (widget.userType == "administrator")
+                                DataCell(ElevatedButton.icon(
+                                  icon: const Icon(Icons.edit),
+                                  label: const Text("Ažuriraj podatke"),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => EditPacijentScreen(
+                                        pacijentId: e.pacijentId!,
+                                        onSave: () {
+                                          _loadData();
                                         },
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
-                              DataCell(
-                                widget.userType == "administrator"
-                                    ? ElevatedButton.icon(
-                                        icon: const Icon(Icons.edit),
-                                        label: Text(e.korisnik!.status == false
-                                            ? "Aktiviraj"
-                                            : "Deaktiviraj"),
-                                        onPressed: () async {
-                                          bool noviStatus =
-                                              e.korisnik!.status == false;
+                                      ),
+                                    );
+                                  },
+                                )),
+                              if (widget.userType == "administrator")
+                                DataCell(ElevatedButton.icon(
+                                  icon: const Icon(Icons.edit),
+                                  label: Text(e.korisnik!.status == false
+                                      ? "Aktiviraj"
+                                      : "Deaktiviraj"),
+                                  onPressed: () async {
+                                    bool noviStatus =
+                                        e.korisnik!.status == false;
 
-                                          var request = {
-                                            "ime": e.korisnik!.ime,
-                                            "prezime": e.korisnik!.prezime,
-                                            "telefon": e.korisnik!.telefon,
-                                            "adresa": e.adresa,
-                                            "status": noviStatus
-                                          };
+                                    var request = {
+                                      "ime": e.korisnik!.ime,
+                                      "prezime": e.korisnik!.prezime,
+                                      "telefon": e.korisnik!.telefon,
+                                      "adresa": e.adresa,
+                                      "status": noviStatus
+                                    };
 
-                                          provider.update(
-                                              e.pacijentId!, request);
-                                          await Flushbar(
-                                                  message:
-                                                      "Status su uspješno ažuriran",
-                                                  duration: const Duration(
-                                                      seconds: 3),
-                                                  backgroundColor: Colors.green)
-                                              .show(context);
-                                          _loadInitialData();
-                                          setState(() {});
-                                        },
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
-                              DataCell(
-                                widget.userType == "administrator"
-                                    ? ElevatedButton.icon(
-                                        icon: const Icon(Icons.delete),
-                                        label: const Text("Ukloni pacijenta"),
-                                        onPressed: () async {
-                                          showCustomDialog(
-                                            context: context,
-                                            title: "Obrisati pacijenta?",
+                                    provider.update(e.pacijentId!, request);
+                                    await Flushbar(
                                             message:
-                                                "Da li ste sigurni da zelite ukloniti pacijenta",
-                                            confirmText: "Da",
-                                            onConfirm: () async {
-                                              try {
-                                                await provider
-                                                    .delete(e.pacijentId!);
-                                                await Flushbar(
-                                                  message:
-                                                      "Pacijent je uspješno uklonjen!",
-                                                  duration: const Duration(
-                                                      seconds: 3),
-                                                  backgroundColor: Colors.green,
-                                                ).show(context);
-                                              } catch (error) {
-                                                await Flushbar(
-                                                  message:
-                                                      "Došlo je do greške prilikom uklanjanja pacijenta.",
-                                                  duration: const Duration(
-                                                      seconds: 3),
-                                                  backgroundColor: Colors.red,
-                                                ).show(context);
-                                              }
-                                              _loadInitialData();
-                                            },
-                                          );
-                                        },
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
+                                                "Status su uspješno ažuriran",
+                                            duration:
+                                                const Duration(seconds: 3),
+                                            backgroundColor: Colors.green)
+                                        .show(context);
+                                    _loadData();
+                                    setState(() {});
+                                  },
+                                )),
+                              if (widget.userType == "administrator")
+                                DataCell(ElevatedButton.icon(
+                                  icon: const Icon(Icons.delete),
+                                  label: const Text("Ukloni pacijenta"),
+                                  onPressed: () async {
+                                    showCustomDialog(
+                                      context: context,
+                                      title: "Obrisati pacijenta?",
+                                      message:
+                                          "Da li ste sigurni da želite ukloniti pacijenta?",
+                                      confirmText: "Da",
+                                      onConfirm: () async {
+                                        try {
+                                          await provider.delete(e.pacijentId!);
+                                          await Flushbar(
+                                            message:
+                                                "Pacijent je uspješno uklonjen!",
+                                            duration:
+                                                const Duration(seconds: 3),
+                                            backgroundColor: Colors.green,
+                                          ).show(context);
+                                        } catch (error) {
+                                          await Flushbar(
+                                            message:
+                                                "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                            duration:
+                                                const Duration(seconds: 3),
+                                            backgroundColor: Colors.red,
+                                          ).show(context);
+                                        }
+                                        _loadData();
+                                      },
+                                    );
+                                  },
+                                )),
                             ],
                             onSelectChanged:
                                 widget.userType == "administrator" ||
@@ -361,7 +344,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                                 .showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                    "Ovaj pacijent nema medicinsku dokumentaciju."),
+                                                    "Ovaj pacijent nema medicinsku dokumentaciju. Medicinsko osoblje je ovlašteno o kreiranju medicinske dokumentacije."),
                                               ),
                                             );
                                           } else {

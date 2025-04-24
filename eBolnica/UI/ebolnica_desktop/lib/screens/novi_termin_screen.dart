@@ -9,7 +9,8 @@ import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/providers/termin_provider.dart';
 import 'package:ebolnica_desktop/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_desktop/screens/pacijent_termin_list_screen.dart';
-
+import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -17,8 +18,14 @@ class NoviTerminScreen extends StatefulWidget {
   final int? pacijentId;
   final int? odjelId;
   final int userId;
+  final String? userType;
+
   const NoviTerminScreen(
-      {super.key, this.pacijentId, this.odjelId, required this.userId});
+      {super.key,
+      this.pacijentId,
+      this.odjelId,
+      required this.userId,
+      this.userType});
 
   @override
   _NoviTerminScreenState createState() => _NoviTerminScreenState();
@@ -98,36 +105,43 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         zauzetiTermini = result;
       });
     } catch (e) {
-      debugPrint('Greška pri učitavanju zauzetih termina: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju zauzetih termina')),
+      );
     }
   }
 
   Future<void> fetchOdjeli() async {
     try {
       SearchResult<Odjel> fetchedResult = await odjelProvider.get();
-      debugPrint('Fetched Odjeli: ${fetchedResult.result}');
       setState(() {
         resultOdjel = fetchedResult;
       });
     } catch (e) {
-      debugPrint('Error fetching odjeli: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju odjela')),
+      );
     }
   }
 
   Future<void> fetchDoktor() async {
     try {
       if (odabraniOdjel != null && odabraniOdjel!.odjelId != null) {
-        List<Doktor> fetchedResult =
-            await odjelProvider.getDoktorByOdjelId(odabraniOdjel!.odjelId!);
-        debugPrint('Fetched Doktor: $fetchedResult');
+        SearchResult<Doktor> fetchedResult = await doktorProvider
+            .get(filter: {"OdjelId": odabraniOdjel!.odjelId!});
         setState(() {
-          resultDoktor = fetchedResult;
+          resultDoktor = fetchedResult.result;
         });
       } else {
-        debugPrint("Odabrani odjel je null");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Greška prilikom učitavanja odabranog odjela')),
+        );
       }
     } catch (e) {
-      debugPrint('Error fetching doktori: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška prilikom učitavanja doktora')),
+      );
     }
   }
 
@@ -174,12 +188,12 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               odabraniPacijent = value;
                             });
                           },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Molimo odaberite pacijenta';
-                            }
-                            return null;
-                          },
+                          validator: (value) => dropdownValidator(
+                            value?.korisnik != null
+                                ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                                : null,
+                            'pacijenta',
+                          ),
                         ),
                       ),
                 Padding(
@@ -209,12 +223,8 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                             });
                             fetchDoktor();
                           },
-                    validator: (value) {
-                      if (value == null || value.naziv == "") {
-                        return 'Molimo odaberite odjel';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        dropdownValidator(value?.naziv, 'odjel'),
                   ),
                 ),
                 const SizedBox(
@@ -247,12 +257,12 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       });
                       loadZauzetiTermini();
                     },
-                    validator: (value) {
-                      if (value == null || value.korisnik!.ime == "") {
-                        return 'Molimo odaberite odjel';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(
+                      value?.korisnik != null
+                          ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                          : null,
+                      'doktora',
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -286,34 +296,65 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: Wrap(
-                    spacing: 11,
-                    direction: Axis.horizontal,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.spaceBetween,
-                    children: List.generate(12, (index) {
-                      int hour = 9 + index ~/ 3;
-                      int minute = (index % 3) * 20;
+                  child: FormField<String>(
+                    validator: (value) {
+                      if ((time?.isEmpty ?? true)) {
+                        return 'Molimo odaberite termin';
+                      }
+                      return null;
+                    },
+                    builder: (FormFieldState<String> field) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 11,
+                            direction: Axis.horizontal,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.spaceBetween,
+                            children: List.generate(12, (index) {
+                              int hour = 9 + index ~/ 3;
+                              int minute = (index % 3) * 20;
 
-                      String selectedTime =
-                          "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
-                      bool isZauzet = zauzetiTermini.contains(selectedTime);
-                      return ElevatedButton(
-                        onPressed: isZauzet
-                            ? null
-                            : () {
-                                setState(() {
-                                  time = selectedTime;
-                                });
-                                debugPrint('Odabran termin: $time');
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isZauzet ? Colors.grey : Colors.blue,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(selectedTime),
+                              String selectedTime =
+                                  "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+                              bool isZauzet =
+                                  zauzetiTermini.contains(selectedTime);
+                              bool isSelektovan = selectedTime == time;
+
+                              return ElevatedButton(
+                                onPressed: isZauzet
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          time = selectedTime;
+                                          field.didChange(selectedTime);
+                                        });
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isZauzet
+                                      ? Colors.grey
+                                      : isSelektovan
+                                          ? Colors.green
+                                          : Colors.blue,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: Text(selectedTime),
+                              );
+                            }),
+                          ),
+                          if (field.hasError)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                field.errorText!,
+                                style: TextStyle(
+                                    color: Colors.red[700], fontSize: 13),
+                              ),
+                            ),
+                        ],
                       );
-                    }),
+                    },
                   ),
                 ),
                 const SizedBox(
@@ -342,9 +383,10 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                               "vrijemeTermina": "$time:00",
                               "otkazano": false,
                             };
-                            print(noviTermin);
                             try {
+                              showFullScreenLoading(context);
                               await terminProvider.insert(noviTermin);
+                              Navigator.pop(context);
                               await Flushbar(
                                       message: "Termin je uspješno dodan",
                                       backgroundColor: Colors.green,
@@ -365,10 +407,13 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                     builder: (context) {
                                       if (widget.odjelId != null) {
                                         return OdjelTerminiScreen(
-                                            userId: widget.userId);
+                                          userId: widget.userId,
+                                          userType: widget.userType,
+                                        );
                                       } else {
                                         return TerminiScreen(
                                           userId: widget.userId,
+                                          userType: widget.userType,
                                         );
                                       }
                                     },
@@ -377,6 +422,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                 return;
                               }
                             } catch (e) {
+                              Navigator.pop(context);
                               await Flushbar(
                                       message:
                                           "Došlo je do greške. Pokušajte ponovo.",

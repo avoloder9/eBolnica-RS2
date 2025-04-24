@@ -34,15 +34,29 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
     operacije = [];
     doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
     if (doktorId != null) {
-      var result = await doktorProvider.getOperacijeByDoktorId(doktorId!);
+      var result = await operacijaProvider.get(filter: {"DoktorId": doktorId});
+
+      List<Operacija> filtrirane = [];
+
+      for (var op in result.result) {
+        var akcije =
+            await operacijaProvider.fetchAllowedActions(op.operacijaId!);
+        if (akcije.isNotEmpty) {
+          filtrirane.add(op);
+        }
+      }
       setState(() {
-        operacije = result;
+        operacije = filtrirane;
       });
-      if (operacije == null) {
-        print("Nema operacija za ovog doktora");
+      if (operacije!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nema operacija za ovog doktora')),
+        );
       }
     } else {
-      print("Nije pronadjen doktor");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nije pronadjen doktor')),
+      );
     }
   }
 
@@ -80,7 +94,12 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
             ? buildEmptyView(
                 context: context,
                 screen: NovaOperacijaScreen(userId: widget.userId),
-                message: "Nema zakazanih operacija")
+                message: "Nema zakazanih operacija",
+                onDialogClosed: () {
+                  setState(() {});
+                  fetchOperacije();
+                },
+              )
             : _buildResultView());
   }
 

@@ -40,16 +40,16 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
     pacijentId =
         await pacijentProvider.getPacijentIdByKorisnikId(widget.userId);
     if (pacijentId != null) {
-      var result = await pacijentProvider.getTerapijaByPacijentId(pacijentId!);
+      var result =
+          await terapijaProvider.get(filter: {"PacijentId": pacijentId});
       setState(() {
-        terapije = result;
+        terapije = result.result;
         _isLoading = false;
       });
     } else {
       setState(() {
         _isLoading = false;
       });
-      print("error");
     }
   }
 
@@ -78,46 +78,75 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
         ),
       );
     }
+
     if (terapije == null || terapije!.isEmpty) {
       return const Expanded(
         child: Center(
-            child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text(
-            "Nema dostupnih terapija",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Text(
+              "Nema dostupnih terapija",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            ),
           ),
-        )),
+        ),
       );
     }
+
     return Expanded(
-        child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: DataTable(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: DataTable(
+            headingRowColor: MaterialStateProperty.all(
+              Colors.blueGrey.shade50,
+            ),
+            headingTextStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            dataRowHeight: 64,
+            columnSpacing: 24,
             columns: const [
               DataColumn(label: Text("Nadležni doktor")),
               DataColumn(label: Text("Naziv")),
               DataColumn(label: Text("Opis")),
-              DataColumn(label: Text("Datum pocetka terapije")),
-              DataColumn(label: Text("Datum zavrsetka terapije")),
+              DataColumn(label: Text("Početak")),
+              DataColumn(label: Text("Završetak")),
             ],
-            rows: terapije!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.pregled!.uputnica!.termin!.doktor!.korisnik!.ime} ${e.pregled!.uputnica!.termin!.doktor!.korisnik!.prezime}")),
-                      DataCell(Text(e.naziv.toString())),
-                      DataCell(Text(e.opis.toString())),
-                      DataCell(Text(formattedDate(e.datumPocetka))),
-                      DataCell(Text(formattedDate(e.datumZavrsetka))),
-                    ],
-                  ),
-                )
-                .toList()),
+            rows: List.generate(terapije!.length, (index) {
+              final e = terapije![index];
+              final isEven = index % 2 == 0;
+
+              return DataRow(
+                color: MaterialStateProperty.resolveWith<Color?>(
+                  (Set<MaterialState> states) {
+                    return isEven ? Colors.grey[50] : null;
+                  },
+                ),
+                cells: [
+                  DataCell(Text(
+                      "${e.pregled!.uputnica!.termin!.doktor!.korisnik!.ime} ${e.pregled!.uputnica!.termin!.doktor!.korisnik!.prezime}")),
+                  DataCell(Text(e.naziv ?? "-")),
+                  DataCell(SizedBox(
+                    width: 200,
+                    child: Text(
+                      e.opis ?? "-",
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  )),
+                  DataCell(Text(formattedDate(e.datumPocetka))),
+                  DataCell(Text(formattedDate(e.datumZavrsetka))),
+                ],
+              );
+            }),
+          ),
+        ),
       ),
-    ));
+    );
   }
 }

@@ -19,7 +19,7 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.LaboratorijskiNalaz> AddFilter(LaboratorijskiNalazSearchObject searchObject, IQueryable<Database.LaboratorijskiNalaz> query)
         {
-            query = base.AddFilter(searchObject, query).Include(p => p.Pacijent).ThenInclude(k => k.Korisnik).Include(x=>x.Doktor).ThenInclude(x=>x.Korisnik);
+            query = base.AddFilter(searchObject, query).Include(p => p.Pacijent).ThenInclude(k => k.Korisnik).Include(x => x.Doktor).ThenInclude(x => x.Korisnik);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImePacijentaGTE))
             {
@@ -29,6 +29,10 @@ namespace eBolnica.Services.Services
             if (!string.IsNullOrWhiteSpace(searchObject?.PrezimePacijentaGTE))
             {
                 query = query.Where(x => x.Pacijent.Korisnik.Prezime.StartsWith(searchObject.PrezimePacijentaGTE));
+            }
+            if (searchObject!.PacijentId != null || searchObject.PacijentId > 0)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId);
             }
             return query;
         }

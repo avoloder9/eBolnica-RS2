@@ -1,9 +1,10 @@
 import 'package:ebolnica_mobile/screens/dnevni_raspored_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_mobile/screens/hospitalizacije_list_screen.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
 import 'package:ebolnica_mobile/screens/pacijent_nalazi_screen.dart';
-import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
 import 'package:ebolnica_mobile/screens/radni_zadatak_screen.dart';
 import 'package:ebolnica_mobile/screens/raspored_smjena_screen.dart';
 import 'package:ebolnica_mobile/screens/terapije_list_screen.dart';
@@ -27,59 +28,6 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
-
-  List<Widget> _getScreensForUser() {
-    switch (widget.userType) {
-      case 'doktor':
-        return [
-          HospitalizacijaListScreen(
-              userId: widget.userId,
-              userType: widget.userType,
-              nazivOdjela: widget.nazivOdjela),
-          DnevniRasporedScreen(
-            userId: widget.userId,
-            userType: widget.userType,
-            nazivOdjela: widget.nazivOdjela,
-          ),
-          RadniZadatakScreen(
-              userId: widget.userId,
-              userType: widget.userType,
-              nazivOdjela: widget.nazivOdjela),
-          PostavkeScreen(
-            userId: widget.userId,
-            userType: widget.userType,
-            nazivOdjela: widget.nazivOdjela,
-          ),
-        ];
-      case 'pacijent':
-        return [
-          const Placeholder(),
-          PacijentScreen(userId: widget.userId, userType: widget.userType),
-          PacijentNalaziScreen(
-              userId: widget.userId, userType: widget.userType),
-          PacijentTerapijaScreen(
-              userId: widget.userId, userType: widget.userType),
-          PostavkeScreen(userId: widget.userId, userType: widget.userType),
-        ];
-      case 'medicinsko osoblje':
-        return [
-          OdjelTerminiScreen(userId: widget.userId, userType: widget.userType),
-          RasporedSmjenaScreen(
-              userId: widget.userId, userType: widget.userType),
-          HospitalizacijaListScreen(
-              userId: widget.userId,
-              userType: widget.userType,
-              nazivOdjela: widget.nazivOdjela),
-          RadniZadatakScreen(
-              userId: widget.userId,
-              userType: widget.userType,
-              nazivOdjela: widget.nazivOdjela),
-          PostavkeScreen(userId: widget.userId, userType: widget.userType),
-        ];
-      default:
-        return [const Placeholder()];
-    }
-  }
 
   List<BottomNavigationBarItem> _getNavBarItemsForUser() {
     switch (widget.userType) {
@@ -105,8 +53,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.local_hospital), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.checklist), label: ''),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Postavke'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
         ];
       default:
         return const [
@@ -116,19 +63,83 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
   }
 
+  Widget _getScreenForIndex(int index) {
+    switch (widget.userType) {
+      case 'doktor':
+        switch (index) {
+          case 0:
+            return HospitalizacijaListScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+          case 1:
+            return DnevniRasporedScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+          case 2:
+            return RadniZadatakScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+          case 3:
+            return PostavkeScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+        }
+        break;
+      case 'pacijent':
+        switch (index) {
+          case 0:
+            return PacijentScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 1:
+            return PacijentDetaljiScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 2:
+            return PacijentNalaziScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 3:
+            return PacijentTerapijaScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 4:
+            return PostavkeScreen(
+                userId: widget.userId, userType: widget.userType);
+        }
+        break;
+      case 'medicinsko osoblje':
+        switch (index) {
+          case 0:
+            return OdjelTerminiScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 1:
+            return RasporedSmjenaScreen(
+                userId: widget.userId, userType: widget.userType);
+          case 2:
+            return HospitalizacijaListScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+          case 3:
+            return RadniZadatakScreen(
+                userId: widget.userId,
+                userType: widget.userType,
+                nazivOdjela: widget.nazivOdjela);
+          case 4:
+            return PostavkeScreen(
+                userId: widget.userId, userType: widget.userType);
+        }
+        break;
+    }
+
+    return const Placeholder();
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> screens = _getScreensForUser();
-
     return Scaffold(
-      body: Stack(
-        children: List.generate(screens.length, (index) {
-          return Offstage(
-            offstage: _selectedIndex != index,
-            child: screens[index],
-          );
-        }),
-      ),
+      body: _getScreenForIndex(_selectedIndex),
       bottomNavigationBar: _buildBottomNavBar(),
     );
   }

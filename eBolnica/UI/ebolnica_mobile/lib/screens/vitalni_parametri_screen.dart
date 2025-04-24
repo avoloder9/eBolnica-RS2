@@ -59,26 +59,59 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
             ? const Center(child: CircularProgressIndicator())
             : vitalniParametri.isEmpty
                 ? const Center(
-                    child: Text("Nema dostupnih vitalnih parametara."))
+                    child: Text(
+                      "Nema dostupnih vitalnih parametara.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: vitalniParametri.length,
                     itemBuilder: (context, index) {
                       var parametar = vitalniParametri[index];
                       return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(
-                            "Datum: ${parametar.datumMjerenja.toString().split(' ')[0]}",
-                          ),
-                          subtitle: Column(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 16),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                  "Otkucaji srca: ${parametar.otkucajSrca}/min"),
-                              Text("Saturacija: ${parametar.saturacija}%"),
-                              Text("Šećer: ${parametar.secer} mmol/L"),
-                              Text(
-                                "Vrijeme: ${formattedTime(parametar.vrijemeMjerenja)}",
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Datum: ${parametar.datumMjerenja.toString().split(' ')[0]}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    formattedTime(parametar.vrijemeMjerenja),
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _parametarItem(Icons.favorite, "Otkucaji",
+                                      "${parametar.otkucajSrca}/min"),
+                                  _parametarItem(Icons.air, "Saturacija",
+                                      "${parametar.saturacija}%"),
+                                  _parametarItem(Icons.bloodtype, "Šećer",
+                                      "${parametar.secer} mmol/L"),
+                                ],
                               ),
                             ],
                           ),
@@ -88,8 +121,8 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
                   ),
       );
     }
-
-    return Dialog(
+    return Card(
+      margin: const EdgeInsets.all(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -208,6 +241,30 @@ class _VitalniParametriScreenState extends State<VitalniParametriScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _parametarItem(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.blueGrey),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                )),
+            Text(value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                )),
+          ],
+        ),
+      ],
     );
   }
 }

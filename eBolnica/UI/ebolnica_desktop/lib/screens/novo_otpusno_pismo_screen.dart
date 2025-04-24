@@ -51,146 +51,119 @@ class _NovoOtpusnoPismoScreenState extends State<NovoOtpusnoPismoScreen> {
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
-      content: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: dijagnozaController,
-                  decoration: const InputDecoration(labelText: "Dijagnoza"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Ovo polje je obavezno';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: anamnezaController,
-                  decoration: const InputDecoration(labelText: "Anamneza"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Ovo polje je obavezno';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: zakljucakController,
-                  decoration: const InputDecoration(labelText: "Zakljucak"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Ovo polje je obavezno';
-                    }
-                    return null;
-                  },
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      prikaziTerapiju = !prikaziTerapiju;
-                    });
-                  },
-                  child: Text(
-                      prikaziTerapiju ? "Sakrij terapiju" : "Dodaj terapiju"),
-                ),
-                if (prikaziTerapiju) ...[
-                  TextFormField(
-                    controller: nazivTerapijeController,
-                    decoration:
-                        const InputDecoration(labelText: "Naziv terapije"),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ovo polje je obavezno';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: opisTerapijeController,
-                    decoration:
-                        const InputDecoration(labelText: "Opis terapije"),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ovo polje je obavezno';
-                      }
-                      return null;
-                    },
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ListTile(
-                          title: Text(
-                            datumPocetka == null
-                                ? "Odaberite datum početka"
-                                : DateFormat('dd.MM.yyyy')
-                                    .format(datumPocetka!),
-                          ),
-                          trailing: const Icon(Icons.calendar_today),
-                          onTap: () async {
-                            DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2026),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                datumPocetka = picked;
-                                if (datumZavrsetka != null &&
-                                    !datumZavrsetka!.isAfter(datumPocetka!)) {
-                                  datumZavrsetka = null;
-                                }
-                              });
-                            }
-                          },
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: Card(
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildTextField(dijagnozaController, "Dijagnoza"),
+                    const SizedBox(height: 16),
+                    _buildTextField(anamnezaController, "Anamneza"),
+                    const SizedBox(height: 16),
+                    _buildTextField(zakljucakController, "Zaključak"),
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            prikaziTerapiju = !prikaziTerapiju;
+                          });
+                        },
+                        icon: Icon(
+                          prikaziTerapiju
+                              ? Icons.remove_circle
+                              : Icons.add_circle,
+                          color: Colors.blueAccent,
+                        ),
+                        label: Text(
+                          prikaziTerapiju
+                              ? "Sakrij terapiju"
+                              : "Dodaj terapiju",
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ListTile(
-                          title: Text(
-                            datumZavrsetka == null
-                                ? "Odaberite datum završetka"
-                                : DateFormat('dd.MM.yyyy')
-                                    .format(datumZavrsetka!),
+                    ),
+                    if (prikaziTerapiju) ...[
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                          nazivTerapijeController, "Naziv terapije"),
+                      const SizedBox(height: 16),
+                      _buildTextField(opisTerapijeController, "Opis terapije"),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDateSelector(
+                              label: "Datum početka",
+                              selectedDate: datumPocetka,
+                              onTap: () async {
+                                DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime(2026),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    datumPocetka = picked;
+                                    if (datumZavrsetka != null &&
+                                        !datumZavrsetka!.isAfter(picked)) {
+                                      datumZavrsetka = null;
+                                    }
+                                  });
+                                }
+                              },
+                            ),
                           ),
-                          trailing: const Icon(Icons.calendar_today),
-                          onTap: () async {
-                            if (datumPocetka == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text("Prvo odaberite datum početka."),
-                                ),
-                              );
-                              return;
-                            }
-                            DateTime initialDate =
-                                datumPocetka!.add(const Duration(days: 1));
-                            DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: initialDate,
-                              firstDate: initialDate,
-                              lastDate: DateTime(2026),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                datumZavrsetka = picked;
-                              });
-                            }
-                          },
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildDateSelector(
+                              label: "Datum završetka",
+                              selectedDate: datumZavrsetka,
+                              onTap: () async {
+                                if (datumPocetka == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text("Prvo odaberite datum početka."),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                DateTime initialDate =
+                                    datumPocetka!.add(const Duration(days: 1));
+                                DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: initialDate,
+                                  firstDate: initialDate,
+                                  lastDate: DateTime(2026),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    datumZavrsetka = picked;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ]
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -241,11 +214,63 @@ class _NovoOtpusnoPismoScreenState extends State<NovoOtpusnoPismoScreen> {
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
           child: const Text(
-            "Sacuvaj",
+            "Sačuvaj",
             style: TextStyle(color: Colors.white),
           ),
         )
       ],
     );
   }
+}
+
+Widget _buildTextField(TextEditingController controller, String label) {
+  return TextFormField(
+    controller: controller,
+    decoration: InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    ),
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Ovo polje je obavezno';
+      }
+      return null;
+    },
+  );
+}
+
+Widget _buildDateSelector({
+  required String label,
+  required DateTime? selectedDate,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(10),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            selectedDate == null
+                ? label
+                : DateFormat('dd.MM.yyyy').format(selectedDate),
+            style: TextStyle(
+              fontSize: 16,
+              color: selectedDate == null ? Colors.grey : Colors.black,
+            ),
+          ),
+          const Icon(Icons.calendar_today, size: 20, color: Colors.blueGrey),
+        ],
+      ),
+    ),
+  );
 }

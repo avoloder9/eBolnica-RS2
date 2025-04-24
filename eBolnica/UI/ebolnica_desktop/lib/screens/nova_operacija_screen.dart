@@ -4,6 +4,7 @@ import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/operacija_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/operacije_screen.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -75,7 +76,9 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
         zauzetiTermini = result;
       });
     } catch (e) {
-      debugPrint('Greška pri učitavanju zauzetih termina: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Greška pri učitavanju zauzetih termina $e')),
+      );
     }
   }
 
@@ -86,7 +89,9 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
         pacijenti = result;
       });
     } catch (e) {
-      debugPrint('Error fetching pacijenti: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri dohvaćanju pacijenata')),
+      );
     }
   }
 
@@ -133,12 +138,12 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                               odabraniPacijent = value;
                             });
                           },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Molimo odaberite pacijenta';
-                            }
-                            return null;
-                          },
+                          validator: (value) => dropdownValidator(
+                            value?.korisnik != null
+                                ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                                : null,
+                            'pacijenta',
+                          ),
                         ),
                       ),
                 GestureDetector(
@@ -172,15 +177,8 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       ),
                       prefixIcon: const Icon(Icons.medical_services),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite tip operacije';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Tip operacije mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
+                    validator: (value) => generalValidator(
+                        value, 'tip operacije', [notEmpty, startsWithCapital]),
                   ),
                 ),
                 Padding(

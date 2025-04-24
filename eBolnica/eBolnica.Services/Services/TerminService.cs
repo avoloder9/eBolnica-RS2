@@ -8,6 +8,7 @@ using eBolnica.Services.Interfaces;
 using eBolnica.Services.RabbitMQ;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,15 +27,28 @@ namespace eBolnica.Services.Services
         {
             _rabbitMQService = rabbitMQService;
         }
-
         public override IQueryable<Database.Termin> AddFilter(TerminSearchObject searchObject, IQueryable<Database.Termin> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik)
-                .Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik).Where(x => x.DatumTermina >= DateTime.Now).OrderBy(x=>x.DatumTermina);
+            var usedTerminIds = Context.Pregleds.Include(x => x.Uputnica).Where(p => p.Uputnica != null && p.Uputnica!.TerminId != null)
+                .Select(p => p.Uputnica.TerminId);
 
+            query = base.AddFilter(searchObject, query).Include(x => x.Doktor).ThenInclude(a => a.Korisnik).
+                Include(y => y.Odjel).Include(z => z.Pacijent).ThenInclude(k => k.Korisnik)
+                .Where(x => x.DatumTermina.Date >= DateTime.Today && x.Otkazano == false && !usedTerminIds.Contains(x.TerminId)).OrderBy(x => x.DatumTermina);
+            if (searchObject!.DoktorId != null)
+            {
+                query = query.Where(x => x.Doktor.DoktorId == searchObject.DoktorId);
+            }
+            if (searchObject!.OdjelId != null)
+            {
+                query = query.Where(x => x.OdjelId == searchObject.OdjelId);
+            }
+            if (searchObject!.PacijentId != null)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId);
+            }
             return base.AddFilter(searchObject, query);
         }
-
         public override void BeforeInsert(TerminInsertRequest request, Database.Termin entity)
         {
             var pacijentExists = Context.Pacijents.Any(p => p.PacijentId == request.PacijentId);
@@ -91,10 +105,11 @@ namespace eBolnica.Services.Services
             {
                 EmailTo = pacijent.Email,
                 Subject = "Vaš termin je uspješno zakazan",
-                Message = $"Poštovani, Vaš termin sa doktorom {doktor.Ime} {doktor.Prezime} je uspješno zakazan. Detalji:\n" +
-                   $"Doktor: {doktor.Ime} {doktor.Prezime}\n" +
-                   $"Datum: {entity.DatumTermina:dd.MM.yyyy}\n" +
-                   $"Odjel: {odjel}",
+                Message = $"Poštovani, Vaš termin sa doktorom {doktor.Ime} {doktor.Prezime} je uspješno zakazan.<br/>" +
+                  $"Datum: {entity.DatumTermina:dd.MM.yyyy}<br/>" +
+                  $"Vrijeme: { entity.VrijemeTermina.ToString(@"hh\:mm\:ss")}<br/>"+
+                  $"Odjel: {odjel}",
+
                 ReceiverName = pacijent.Ime + " " + pacijent.Prezime,
             });
 
@@ -136,26 +151,21 @@ namespace eBolnica.Services.Services
             {
                 EmailTo = pacijent.Korisnik.Email,
                 Subject = "Vaš termin je otkazan",
-                Message = $"Poštovani, obavještavamo Vas da je Vaš termin sa doktorom {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime} otkazan.\n" +
-               $"Molimo Vas da, ukoliko je potrebno, zakažete novi termin u skladu s Vašim potrebama.\n\n" +
-               $"Detalji otkazanog termina:\n" +
-               $"Doktor: {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime}\n" +
-               $"Datum: {entity.DatumTermina}\n" +
-               $"Odjel: {odjel}\n\n" +
+                Message = $"Poštovani, obavještavamo Vas da je Vaš termin sa doktorom {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime} otkazan.<br>" +
+               $"Molimo Vas da, ukoliko je potrebno, zakažete novi termin u skladu s Vašim potrebama.<br>" +
+               $"Detalji otkazanog termina:<br>" +
+               $"Doktor: {doktor.Korisnik.Ime} {doktor.Korisnik.Prezime}<br>" +
+               $"Datum: {entity.DatumTermina:dd.MM.yyyy}<br>" +
+               $"Odjel: {odjel}<br>" +
                $"Hvala Vam na razumijevanju.",
                 ReceiverName = pacijent.Korisnik.Ime + " " + pacijent.Korisnik.Prezime,
             });
 
             base.BeforeUpdate(request, entity);
         }
-
         public List<string> GetZauzetiTerminiZaDatum(DateTime datum, int doktorId)
         {
             return Context.Termins.Where(x => x.DatumTermina.Date == datum.Date && (x.Otkazano == null || x.Otkazano == false) && x.DoktorId == doktorId).Select(x => x.VrijemeTermina.ToString(@"hh\:mm")).ToList();
-        }
-        public Task<Database.Uputnica?> GetUputnicaByTerminId(int terminId)
-        {
-            return Context.Uputnicas.FirstOrDefaultAsync(x => x.TerminId == terminId);
         }
     }
 }

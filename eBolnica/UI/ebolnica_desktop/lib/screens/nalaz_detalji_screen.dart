@@ -3,8 +3,8 @@ import 'package:ebolnica_desktop/models/laboratorijski_nalaz_model.dart';
 import 'package:ebolnica_desktop/models/nalaz_parametar_model.dart';
 import 'package:ebolnica_desktop/providers/bolnica_provider.dart';
 import 'package:ebolnica_desktop/providers/nalaz_parametar_provider.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -17,11 +17,6 @@ class NalazDetaljiScreen extends StatefulWidget {
 }
 
 class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
-  String formattedDate(date) {
-    final formatter = DateFormat('dd.MM.yyyy');
-    return formatter.format(date);
-  }
-
   List<NalazParametar>? parametri;
   late BolnicaProvider bolnicaProvider;
   late NalazParametarProvider nalazParametarProvider;
@@ -72,7 +67,7 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Pacijent: ${widget.laboratorijskiNalaz.pacijent?.korisnik?.ime} "
+                        "${widget.laboratorijskiNalaz.pacijent?.korisnik?.ime} "
                         "${widget.laboratorijskiNalaz.pacijent?.korisnik?.prezime} "
                         "(${formattedDate(widget.laboratorijskiNalaz.pacijent?.korisnik?.datumRodjenja)}, "
                         "${widget.laboratorijskiNalaz.pacijent?.korisnik?.spol})",
@@ -206,7 +201,8 @@ class _NalazDetaljiScreenState extends State<NalazDetaljiScreen> {
     pdf.addPage(
       pw.MultiPage(
         build: (pw.Context context) => [
-          pw.Text('Laboratorijski nalaz', style: pw.TextStyle(fontSize: 24)),
+          pw.Text('Laboratorijski nalaz',
+              style: const pw.TextStyle(fontSize: 24)),
           pw.SizedBox(height: 16),
           pw.Text(
             'Pacijent: ${pacijent?.ime ?? ""} ${pacijent?.prezime ?? ""} '

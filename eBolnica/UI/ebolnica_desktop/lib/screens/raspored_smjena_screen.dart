@@ -11,6 +11,7 @@ import 'package:ebolnica_desktop/providers/raspored_smjena_provider.dart';
 import 'package:ebolnica_desktop/providers/slobodan_dan_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -138,24 +139,37 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        bool showStartDateError = false;
+        bool showEndDateError = false;
+        bool showRangeError = false;
+
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Odaberite vremenski period"),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text("Odaberite vremenski period",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: GestureDetector(
                       onTap: () async {
                         await pickStartDate(setDialogState);
+                        setDialogState(() {
+                          showStartDateError = false;
+                          showRangeError = false;
+                        });
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,25 +178,41 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                               startDate != null
                                   ? DateFormat('yyyy-MM-dd').format(startDate!)
                                   : "Odaberite početni datum",
-                              style: const TextStyle(fontSize: 18),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: startDate == null
+                                    ? Colors.grey
+                                    : Colors.black,
+                              ),
                             ),
-                            const Icon(Icons.calendar_today),
+                            const Icon(Icons.calendar_today,
+                                color: Colors.blue),
                           ],
                         ),
                       ),
                     ),
                   ),
+                  if (showStartDateError)
+                    const Text(
+                      "Molimo odaberite početni datum.",
+                      style: TextStyle(color: Colors.red),
+                    ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: GestureDetector(
                       onTap: () async {
                         await pickEndDate(setDialogState);
+                        setDialogState(() {
+                          showEndDateError = false;
+                          showRangeError = false;
+                        });
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,14 +221,33 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                               endDate != null
                                   ? DateFormat('yyyy-MM-dd').format(endDate!)
                                   : "Odaberite krajnji datum",
-                              style: const TextStyle(fontSize: 18),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: endDate == null
+                                    ? Colors.grey
+                                    : Colors.black,
+                              ),
                             ),
-                            const Icon(Icons.calendar_today),
+                            const Icon(Icons.calendar_today,
+                                color: Colors.blue),
                           ],
                         ),
                       ),
                     ),
                   ),
+                  if (showEndDateError)
+                    const Text(
+                      "Molimo odaberite krajnji datum.",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  if (showRangeError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        "Krajnji datum ne može biti prije početnog.",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                 ],
               ),
               actions: [
@@ -206,30 +255,43 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                   onPressed: () {
                     if (context.mounted) {
                       Navigator.of(context).pop();
+                      startDate = null;
+                      endDate = null;
                     }
                   },
-                  child: const Text("Odustani"),
+                  child: const Text("Odustani", style: TextStyle(fontSize: 16)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    if (startDate != null && endDate != null) {
-                      _showFullScreenLoading();
+                    setDialogState(() {
+                      showStartDateError = startDate == null;
+                      showEndDateError = endDate == null;
+                      showRangeError = startDate != null &&
+                          endDate != null &&
+                          endDate!.isBefore(startDate!);
+                    });
 
+                    if (!showStartDateError &&
+                        !showEndDateError &&
+                        !showRangeError) {
+                      _showFullScreenLoading();
                       await _submitRaspored();
 
                       if (context.mounted) {
                         Navigator.of(context).pop();
                       }
-                    } else {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Molimo odaberite datume!")),
-                        );
-                      }
                     }
                   },
-                  child: const Text("Sačuvaj"),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text("Sačuvaj", style: TextStyle(fontSize: 16)),
                 ),
               ],
             );
@@ -285,6 +347,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                 duration: const Duration(seconds: 3))
             .show(context);
         Navigator.pop(context);
+        startDate = null;
+        endDate = null;
         fetchRaspored();
       } catch (e) {
         await Flushbar(
@@ -898,12 +962,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Unesite razlog zahtjeva";
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          generalValidator(value, 'razlog', [notEmpty]),
                     ),
                   ],
                 ),

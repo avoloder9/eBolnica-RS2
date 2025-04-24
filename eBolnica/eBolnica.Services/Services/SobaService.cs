@@ -21,11 +21,15 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Soba> AddFilter(SobaSearchObject searchObject, IQueryable<Database.Soba> query)
         {
-            query = base.AddFilter(searchObject, query);
+            query = base.AddFilter(searchObject, query).Where(x => x.Obrisano == false);
 
-            if (searchObject?.SobaId != null && searchObject.SobaId > 0)
+            if (searchObject?.SobaId != null || searchObject!.SobaId > 0)
             {
                 query = query.Where(x => x.SobaId == searchObject.SobaId);
+            }
+            if (searchObject?.OdjelId != null || searchObject!.OdjelId > 0)
+            {
+                query = query.Include(x => x.Odjel).Where(x => x.OdjelId == searchObject.OdjelId);
             }
             return query;
         }
@@ -67,31 +71,6 @@ namespace eBolnica.Services.Services
             soba.Zauzeta = sviKrevetiZauzeti;
             Context.SaveChanges();
         }
-        public List<Model.Models.Soba> GetSobaByOdjelId(int odjelId)
-        {
-            var sobaDatabase = Context.Set<Database.Soba>().Include(s => s.Odjel).Where(x => x.OdjelId == odjelId).ToList();
-            if (!sobaDatabase.Any())
-            {
-                return new List<Model.Models.Soba>();
-            }
-            var sobaModel = sobaDatabase.Select(s => new Model.Models.Soba
-            {
-                OdjelId = s.OdjelId,
-                Naziv = s.Naziv,
-                SobaId = s.SobaId,
-                BrojKreveta = s.BrojKreveta,
-                Zauzeta = s.Zauzeta,
-                Odjel = new Model.Models.Odjel
-                {
-                    Naziv = s.Odjel.Naziv,
-                    OdjelId = s.Odjel.OdjelId,
-                    BrojKreveta = s.Odjel.BrojKreveta,
-                    BrojSlobodnihKreveta = s.Odjel.BrojSlobodnihKreveta,
-                    BrojSoba = s.Odjel.BrojSoba
-                }
-            }).ToList();
-            return sobaModel;
-        }
         public List<Model.Models.Soba> GetSlobodneSobaByOdjelId(int odjelId)
         {
             var sobaDatabase = Context.Set<Database.Soba>().Include(s => s.Odjel).Where(x => x.OdjelId == odjelId && x.Zauzeta == false).ToList();
@@ -118,6 +97,46 @@ namespace eBolnica.Services.Services
             }).ToList();
             return sobaModel;
         }
-    }
+        public override void Delete(int id)
+        {
+            var soba = Context.Sobas.Include(x => x.Odjel).ThenInclude(x => x.Bolnica).FirstOrDefault(s => s.SobaId == id);
 
+            if (soba == null)
+            {
+                throw new Exception("Sobu nije moguće pronaći.");
+            }
+
+            if (soba is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.Obrisano = true;
+                softDeleteEntity.VrijemeBrisanja = DateTime.Now;
+                Context.Update(soba);
+
+                if (soba.BrojKreveta.HasValue && soba.BrojKreveta > 0)
+                {
+                    soba.BrojKreveta--;
+                    Context.Update(soba);
+                }
+
+                if (soba.Odjel.BrojSoba > 0)
+                {
+                    soba.Odjel.BrojSoba--;
+                    Context.Update(soba.Odjel);
+                }
+
+                if (soba.Odjel.Bolnica.UkupanBrojSoba > 0)
+                {
+                    soba.Odjel.Bolnica.UkupanBrojSoba--;
+                    Context.Update(soba.Odjel.Bolnica);
+                }
+            }
+            else
+            {
+                Context.Remove(soba);
+            }
+
+            Context.SaveChanges();
+        }
+
+    }
 }

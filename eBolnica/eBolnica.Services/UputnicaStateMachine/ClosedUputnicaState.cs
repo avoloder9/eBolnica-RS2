@@ -13,9 +13,21 @@ namespace eBolnica.Services.UputnicaStateMachine
         public ClosedUputnicaState(EBolnicaContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
+        public override Model.Models.Uputnica Edit(int id)
+        {
+            var set = Context.Set<Database.Uputnica>();
+
+            var entity = set.Find(id);
+
+            entity!.StateMachine = "draft";
+
+            Context.SaveChanges();
+
+            return Mapper.Map<Model.Models.Uputnica>(entity);
+        }
         public override List<string> AllowedActions(Uputnica entity)
         {
-            return new List<string>() { };
+            return new List<string>() { nameof(Edit) };
         }
     }
 }

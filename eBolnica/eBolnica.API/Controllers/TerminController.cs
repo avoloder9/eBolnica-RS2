@@ -4,6 +4,8 @@ using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using eBolnica.Model;
 
 namespace eBolnica.API.Controllers
 {
@@ -16,6 +18,8 @@ namespace eBolnica.API.Controllers
         {
             _terminService = service;
         }
+
+        [Authorize(Roles = "Pacijent,MedicinskoOsoblje")]
         [HttpGet("zauzeti-termini")]
         public ActionResult<List<string>> GetZauzetiTermini(DateTime datum, int doktorId)
         {
@@ -23,15 +27,36 @@ namespace eBolnica.API.Controllers
             return Ok(zauzetiTermini);
         }
 
-        [HttpGet("termin/{terminId}")]
-        public async Task<IActionResult> GetUputnicaByTerminId(int terminId)
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
+        public override PagedResult<Termin> GetList([FromQuery] TerminSearchObject searchObject)
         {
-            var uputnica =await _terminService.GetUputnicaByTerminId(terminId);
-            if (uputnica == null)
-            {
-                return NotFound();
-            }
-            return Ok(uputnica);
+            return base.GetList(searchObject);
         }
+
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
+        public override Termin GetById(int id)
+        {
+            return base.GetById(id);
+        }
+       
+        [Authorize(Roles = "Pacijent,MedicinskoOsoblje")]
+        public override Termin Insert(TerminInsertRequest request)
+        {
+            return base.Insert(request);
+        }
+
+        [Authorize(Roles = "Administrator,MedicinskoOsoblje")]
+        public override Termin Update(int id, TerminUpdateRequest request)
+        {
+            return base.Update(id, request);
+        }
+
+        [Authorize(Roles = "Administrator,MedicinskoOsoblje")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
+        }
+
+
     }
 }

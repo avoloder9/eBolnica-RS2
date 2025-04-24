@@ -6,10 +6,10 @@ namespace eBolnica.Model.Response
 {
     public class NalazParametarResponse
     {
-        public string ImePacijenta { get; set; }
-        public string PrezimePacijenta { get; set; }
+        public string ImePacijenta { get; set; } = null!;
+        public string PrezimePacijenta { get; set; } = null!;
 
-        public string NazivParametra { get; set; }
+        public string NazivParametra { get; set; } = null!;
         public decimal MinVrijednost { get; set; }
         public decimal MaxVrijednost { get; set; }
         public decimal Vrijednost { get; set; }

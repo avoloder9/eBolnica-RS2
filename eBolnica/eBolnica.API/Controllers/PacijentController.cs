@@ -1,5 +1,7 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
+using eBolnica.Model.Response;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.Services;
@@ -19,7 +21,7 @@ namespace eBolnica.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]      
+        [HttpPost("register")]
         public IActionResult Register([FromBody] PacijentInsertRequest request)
         {
             try
@@ -38,21 +40,31 @@ namespace eBolnica.API.Controllers
         {
             return base.Insert(request);
         }
-
-        [HttpGet("GetTerminByPacijent")]
-        public IActionResult GetTerminByPacijent(int pacijentId)
+        [Authorize(Roles = "Administrator,Pacijent,Doktor,MedicinskoOsoblje")]
+        public override PagedResult<Pacijent> GetList([FromQuery] PacijentSearchObject searchObject)
         {
-            try
-            {
-                var termini = _pacijentService.GetTerminByPacijentId(pacijentId);
-                return Ok(termini);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return base.GetList(searchObject);
+        }
+      
+        [Authorize(Roles = "Administrator,Pacijent,Doktor,MedicinskoOsoblje")]
+        public override Pacijent GetById(int id)
+        {
+            return base.GetById(id);
+        }
+     
+        [Authorize(Roles = "Administrator,Pacijent")]
+        public override Pacijent Update(int id, PacijentUpdateRequest request)
+        {
+            return base.Update(id, request);
         }
 
+        [Authorize(Roles = "Administrator")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
+        }
+
+        [Authorize(Roles = "Administrator,Pacijent")]
         [HttpGet("GetPacijentIdByKorisnikId/{korisnikId}")]
         public IActionResult GetPacijentIdByKorisnikId(int korisnikId)
         {
@@ -68,18 +80,21 @@ namespace eBolnica.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Administrator,Doktor,MedicinskoOsoblje")]
         [HttpGet("GetPacijentSaDokumenticijom")]
         public ActionResult<List<Pacijent>> GetPacijentiSaMedicinskomDokumentacijom()
         {
-            return Ok(_pacijentService.GetPacijentWithDokumentacija());
+            return Ok(_pacijentService.GetPacijentSaDokumentacija());
         }
 
+        [Authorize(Roles = "Doktor")]
         [HttpGet("GetPacijentiZaHospitalizaciju")]
         public ActionResult<List<Pacijent>> GetPacijentiZaHospitalizaciju()
         {
             return Ok(_pacijentService.GetPacijentiZaHospitalizaciju());
         }
 
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
         [HttpGet("getPregledByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetPregledByPacijentId(int pacijentId)
         {
@@ -91,39 +106,7 @@ namespace eBolnica.API.Controllers
             return Ok(pacijent);
         }
 
-        [HttpGet("getHospitalizacijeByPacijentId/{pacijentId}")]
-        public async Task<IActionResult> GetHospitalizacijeByPacijentId(int pacijentId)
-        {
-            var pacijent = await _pacijentService.GetHospitalizacijeByPacijentIdAsync(pacijentId);
-            if (pacijent == null)
-            {
-                return NotFound(new { message = "Hospitlaizacije nisu pronadjene" });
-            }
-            return Ok(pacijent);
-        }
-
-        [HttpGet("getOtpusnaPismaByPacijentId/{pacijentId}")]
-        public async Task<IActionResult> GetOtpusnaPismaByPacijentId(int pacijentId)
-        {
-            var pacijent = await _pacijentService.GetOtpusnaPismaByPacijentIdAsync(pacijentId);
-            if (pacijent == null)
-            {
-                return NotFound(new { message = "Otpusna pisma nisu pronadjena" });
-            }
-            return Ok(pacijent);
-        }
-
-        [HttpGet("getTerapijaByPacijentId/{pacijentId}")]
-        public async Task<IActionResult> GetTerapijaByPacijentId(int pacijentId)
-        {
-            var pacijent = await _pacijentService.GetTerapijaByPacijentIdAsync(pacijentId);
-            if (pacijent == null)
-            {
-                return NotFound(new { message = "Terapije nisu pronadjene" });
-            }
-            return Ok(pacijent);
-        }
-
+        [Authorize(Roles = "Pacijent")]
         [HttpGet("getAktivneTerapijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetAktivneTerapijeByPacijentId(int pacijentId)
         {
@@ -135,6 +118,7 @@ namespace eBolnica.API.Controllers
             return Ok(pacijent);
         }
 
+        [Authorize(Roles = "Pacijent")]
         [HttpGet("getGotoveTerapijeByPacijentId/{pacijentId}")]
         public async Task<IActionResult> GetGotoveTerapijeByPacijentId(int pacijentId)
         {
@@ -146,32 +130,28 @@ namespace eBolnica.API.Controllers
             return Ok(pacijent);
         }
 
-        [HttpGet("getNalaziByPacijentId/{pacijentId}")]
-        public async Task<IActionResult> GetNalaziByPacijentId(int pacijentId)
-        {
-            var pacijent = await _pacijentService.GetNalaziByPacijentIdAsync(pacijentId);
-            if (pacijent == null)
-            {
-                return NotFound(new { message = "Nalazi nisu pronadjeni" });
-            }
-            return Ok(pacijent);
-        }
-
-        [HttpGet("getOperacijeByPacijentId/{pacijentId}")]
-        public async Task<IActionResult> GetOperacijeByPacijentId(int pacijentId)
-        {
-            var pacijent = await _pacijentService.GetOperacijeByPacijentIdAsync(pacijentId);
-            if (pacijent == null)
-            {
-                return NotFound(new { message = "Operacije nisu pronadjene" });
-            }
-            return Ok(pacijent);
-        }
+        [Authorize(Roles = "Administrator")]
         [HttpGet("broj-pacijenata")]
         public IActionResult GetBrojPacijenata()
         {
             var result = _pacijentService.GetBrojPacijenata();
             return Ok(result);
         }
+
+        [AllowAnonymous]
+        [HttpGet("{pacijentId}/recommended-doktori")]
+        public ActionResult<List<Model.Models.Doktor>> GetRecommendedDoktori(int pacijentId)
+        {
+            var recommended = _pacijentService.GetPreporuceneDoktore(pacijentId);
+            return Ok(recommended);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("train-model")]
+        public void TrainModel()
+        {
+            _pacijentService.TrainModel();
+        }
+
     }
 }

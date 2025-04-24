@@ -136,7 +136,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
           throw UserFriendlyException(
               "Potrebno je dodati doktore na ovaj odjel.");
         }
-        throw UserFriendlyException("Traženi resurs nije pronađen.");
+        throw UserFriendlyException("Trazeni resurs nije pronađen.");
       } else if (response.statusCode >= 500) {
         throw UserFriendlyException("Greška na serveru. Pokušajte kasnije.");
       }

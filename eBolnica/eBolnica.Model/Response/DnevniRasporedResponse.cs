@@ -8,8 +8,8 @@ namespace eBolnica.Model.Response
     {
         public int DoktorId { get; set; }
         public DateTime Datum { get; set; }
-        public List<Model.Models.Termin> Termini { get; set; }
-        public List<Model.Models.Operacija> Operacije { get; set; }
+        public List<Model.Models.Termin> Termini { get; set; } = null!;
+        public List<Model.Models.Operacija> Operacije { get; set; } = null!;
 
 
     }

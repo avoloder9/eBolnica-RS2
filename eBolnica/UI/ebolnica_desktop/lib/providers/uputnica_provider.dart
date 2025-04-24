@@ -99,7 +99,7 @@ class UputnicaProvider extends BaseProvider<Uputnica> {
                     onPressed: () => executeAction("Activate"),
                     child: const Text("Aktiviraj"),
                   ),
-                if (allowedActions.contains("Update"))
+                if (allowedActions.contains("Edit"))
                   ElevatedButton(
                     onPressed: () => executeAction("Edit"),
                     child: const Text("Ažuriraj"),

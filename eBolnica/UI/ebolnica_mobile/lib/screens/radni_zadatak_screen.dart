@@ -51,6 +51,7 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
       }
       gotoviZadaci = null;
     }
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -245,7 +246,7 @@ class _RadniZadatakScreenState extends State<RadniZadatakScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Da li ste sigurni da želite označiti zadatak kao završen?",
+                  "Da li ste sigurni da zelite označiti zadatak kao završen?",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),

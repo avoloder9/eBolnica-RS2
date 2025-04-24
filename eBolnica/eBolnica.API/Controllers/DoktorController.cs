@@ -4,6 +4,8 @@ using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
 using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using eBolnica.Model;
 
 namespace eBolnica.API.Controllers
 {
@@ -16,6 +18,38 @@ namespace eBolnica.API.Controllers
         {
             _doktorService = service;
         }
+
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
+        public override PagedResult<Doktor> GetList([FromQuery] DoktorSearchObject searchObject)
+        {
+            return base.GetList(searchObject);
+        }
+
+        [Authorize(Roles = "Administrator,Doktor,Pacijent,MedicinskoOsoblje")]
+        public override Doktor GetById(int id)
+        {
+            return base.GetById(id);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override Doktor Insert(DoktorInsertRequest request)
+        {
+            return base.Insert(request);
+        }
+
+        [Authorize(Roles = "Administrator,Doktor")]
+        public override Doktor Update(int id, DoktorUpdateRequest request)
+        {
+            return base.Update(id, request);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
+        }
+
+        [Authorize(Roles = "Doktor")]
         [HttpGet("GetDoktorIdByKorisnikId/{korisnikId}")]
         public IActionResult GetDoktorIdByKorisnikId(int korisnikId)
         {
@@ -31,47 +65,7 @@ namespace eBolnica.API.Controllers
             }
         }
 
-        [HttpGet("GetTerminByDoktorId/{doktorId}")]
-        public IActionResult GetTerminByDoktorId(int doktorId)
-        {
-            try
-            {
-                var termini = _doktorService.GetTerminByDoktorId(doktorId);
-                return Ok(termini);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("GetPregledByDoktorId/{doktorId}")]
-        public IActionResult GetPregledByDoktorId(int doktorId)
-        {
-            try
-            {
-                var pregledi = _doktorService.GetPreglediByDoktorId(doktorId);
-                return Ok(pregledi);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("GetOperacijeByDoktorId/{doktorId}")]
-        public IActionResult GetOperacijeByDoktorId(int doktorId)
-        {
-            try
-            {
-                var operacije = _doktorService.GetOperacijaByDoktorId(doktorId);
-                return Ok(operacije);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        [Authorize(Roles = "Administrator,Doktor")]
         [HttpGet("GetDnevniRaspored/{doktorId}")]
         public async Task<IActionResult> GetDnevniRaspored(int doktorId)
         {

@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -47,24 +45,8 @@ class PhoneNumberFormatter extends TextInputFormatter {
   }
 }
 
-int? getPacijentIdByUserId(int? userId, List<Pacijent> pacijenti) {
-  if (userId == null) return null;
-
-  final pacijent = pacijenti.firstWhere(
-    (pacijent) => pacijent.korisnikId == userId,
-    orElse: () => Pacijent(),
-  );
-
-  return pacijent.pacijentId;
-}
-
-Future<List<Pacijent>> fetchPacijenti() async {
-  final response = await pacijentProvider.get();
-  return response.result;
-}
-
 String formattedDate(date) {
-  final formatter = DateFormat('dd/MM/yyyy');
+  final formatter = DateFormat('dd.MM.yyyy');
   return formatter.format(date);
 }
 
@@ -74,10 +56,12 @@ String formattedTime(Duration time) {
   return '$hours:$minutes';
 }
 
-Widget buildEmptyView(
-    {required BuildContext context,
-    required Widget screen,
-    required String message}) {
+Widget buildEmptyView({
+  required BuildContext context,
+  required Widget screen,
+  required String message,
+  required VoidCallback onDialogClosed,
+}) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -91,7 +75,9 @@ Widget buildEmptyView(
                 return screen;
               },
               barrierDismissible: false,
-            );
+            ).then((value) {
+              onDialogClosed();
+            });
           },
         ),
         const SizedBox(height: 10),
@@ -111,7 +97,7 @@ class DurationConverter implements JsonConverter<Duration?, String?> {
   Duration? fromJson(String? json) {
     if (json == null) return null;
     List<String> parts = json.split(':');
-    if (parts.length != 3) return null; // Ako format nije HH:mm:ss
+    if (parts.length != 3) return null;
 
     int hours = int.tryParse(parts[0]) ?? 0;
     int minutes = int.tryParse(parts[1]) ?? 0;
@@ -398,4 +384,56 @@ class TerminiPoMjesecima {
       brojTermina: json['brojTermina'],
     );
   }
+}
+
+Widget buildDetailRowWithIcon({
+  required IconData icon,
+  required String label,
+  required String value,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.blueGrey),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 16, color: Colors.black),
+              children: [
+                TextSpan(
+                  text: "$label ",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                TextSpan(text: value),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void showFullScreenLoading(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Container(
+        color: Colors.white,
+        child: const Center(
+          child: SizedBox(
+            width: 70,
+            height: 70,
+            child: CircularProgressIndicator(
+              strokeWidth: 8,
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

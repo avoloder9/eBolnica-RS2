@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/krevet_model.dart';
 import 'package:ebolnica_desktop/providers/krevet_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_krevet_screen.dart';
@@ -21,20 +22,20 @@ class KrevetListScreen extends StatefulWidget {
 }
 
 class _KrevetListScreenState extends State<KrevetListScreen> {
-  late KrevetProvider provider;
+  late KrevetProvider krevetProvider;
   List<Krevet>? kreveti = [];
 
   @override
   void initState() {
     super.initState();
-    provider = KrevetProvider();
+    krevetProvider = KrevetProvider();
     _fetchKreveti();
   }
 
   Future<void> _fetchKreveti() async {
-    var result = await provider.getKrevetBySobaId(widget.sobaId);
+    var result = await krevetProvider.get(filter: {"SobaId": widget.sobaId});
     setState(() {
-      kreveti = result;
+      kreveti = result.result;
     });
   }
 
@@ -67,6 +68,12 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
               label: const Text("Dodaj novi krevet"),
             ),
         ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
       ),
       body: kreveti == null || kreveti!.isEmpty
           ? buildEmptyView(
@@ -77,7 +84,12 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                 userId: widget.userId,
                 userType: widget.userType,
               ),
-              message: "Nema kreveta na ovom odjelu")
+              message: "Nema kreveta na ovom odjelu",
+              onDialogClosed: () {
+                setState(() {});
+                _fetchKreveti();
+              },
+            )
           : _buildResultView(),
     );
   }
@@ -88,30 +100,110 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: DataTable(
+          columnSpacing: 20,
+          headingRowHeight: 56,
           columns: const [
-            DataColumn(label: Center(child: Text("Broj kreveta"))),
-            DataColumn(label: Center(child: Text("Soba"))),
-            DataColumn(label: Center(child: Text("Status"))),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Broj kreveta",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Soba",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: Center(
+                child: Text(
+                  "Status",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            DataColumn(label: Text("")),
           ],
-          rows: kreveti
-                  ?.map<DataRow>((e) => DataRow(
-                        cells: [
-                          DataCell(SizedBox(
-                              width: 100,
-                              child:
-                                  Center(child: Text(e.krevetId.toString())))),
-                          DataCell(SizedBox(
-                              width: 50,
-                              child: Center(child: Text(e.soba!.naziv!)))),
-                          DataCell(SizedBox(
-                              width: 70,
-                              child: Center(
-                                  child: Text(e.zauzet == true
-                                      ? "Zauzet"
-                                      : "Slobodan")))),
-                        ],
-                      ))
-                  .toList() ??
+          rows: kreveti?.map<DataRow>((e) {
+                return DataRow(
+                  cells: [
+                    DataCell(
+                      SizedBox(
+                        width: 100,
+                        child: Center(
+                          child: Text(
+                            e.krevetId.toString(),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      SizedBox(
+                        width: 50,
+                        child: Center(
+                          child: Text(
+                            e.soba!.naziv!,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      SizedBox(
+                        width: 70,
+                        child: Center(
+                          child: Text(
+                            e.zauzet == true ? "Zauzet" : "Slobodan",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color:
+                                  e.zauzet == true ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataCell(ElevatedButton.icon(
+                      icon: const Icon(Icons.delete),
+                      label: const Text("Ukloni krevet"),
+                      onPressed: () async {
+                        showCustomDialog(
+                          context: context,
+                          title: "Obrisati krevet?",
+                          message:
+                              "Da li ste sigurni da želite ukloniti krevet?",
+                          confirmText: "Da",
+                          onConfirm: () async {
+                            try {
+                              await krevetProvider.delete(e.krevetId!);
+                              await Flushbar(
+                                message: "Krevet je uspješno uklonjen!",
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.green,
+                              ).show(context);
+                            } catch (error) {
+                              await Flushbar(
+                                message:
+                                    "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.red,
+                              ).show(context);
+                            }
+                            _fetchKreveti();
+                          },
+                        );
+                      },
+                    )),
+                  ],
+                );
+              }).toList() ??
               [],
         ),
       ),

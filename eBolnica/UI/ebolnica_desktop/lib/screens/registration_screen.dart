@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/utils/password_validator.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -120,203 +121,199 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registracija Pacijenta'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              Column(
-                children: [
-                  const SizedBox(height: 10),
-                  Image.asset(
-                    'assets/images/logo.jpg',
-                    height: 100,
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-              TextFormField(
-                controller: imeController,
-                decoration: const InputDecoration(labelText: 'Ime'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite ime';
-                  }
-                  if (value[0] != value[0].toUpperCase()) {
-                    return 'Ime mora početi sa velikim slovom';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: prezimeController,
-                decoration: const InputDecoration(labelText: 'Prezime'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite prezime';
-                  }
-                  if (value[0] != value[0].toUpperCase()) {
-                    return 'Prezime mora početi sa velikim slovom';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null ||
-                      value.isEmpty ||
-                      !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Molimo unesite validan email';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: korisnickoImeController,
-                decoration: const InputDecoration(labelText: 'Korisničko Ime'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite korisničko ime';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: lozinkaController,
-                decoration: const InputDecoration(labelText: 'Lozinka'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite lozinku';
-                  }
-                  String passwordValidation =
-                      PasswordValidator.checkPasswordStrength(value);
-                  if (passwordValidation.isNotEmpty) {
-                    return passwordValidation;
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: lozinkaPotvrdaController,
-                decoration: const InputDecoration(labelText: 'Potvrdi Lozinku'),
-                obscureText: true,
-                validator: (value) {
-                  if (value != lozinkaController.text) {
-                    return 'Lozinke se moraju poklapati';
-                  }
-                  return null;
-                },
-              ),
-              GestureDetector(
-                onTap: () async {
-                  final DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: datumRodjenja ?? DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null && pickedDate != datumRodjenja) {
-                    setState(() {
-                      datumRodjenja = pickedDate;
-                    });
-                  }
-                },
-                child: AbsorbPointer(
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Datum Rođenja',
-                      suffixIcon: Icon(Icons.calendar_today),
-                    ),
-                    controller: TextEditingController(
-                      text: datumRodjenja != null
-                          ? '${datumRodjenja!.day}/${datumRodjenja!.month}/${datumRodjenja!.year}'
-                          : '',
-                    ),
-                    validator: (value) {
-                      if (datumRodjenja == null) {
-                        return 'Molimo unesite datum rođenja';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-              TextFormField(
-                controller: telefonController,
-                decoration: const InputDecoration(labelText: 'Telefon'),
-                keyboardType: TextInputType.phone,
-                maxLength: 10,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite broj telefona';
-                  }
-                  return null;
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: spol.isEmpty ? null : spol,
-                decoration: const InputDecoration(labelText: 'Spol'),
-                items: const [
-                  DropdownMenuItem(value: 'Muški', child: Text('Muški')),
-                  DropdownMenuItem(value: 'Ženski', child: Text('Ženski')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    spol = value ?? '';
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo odaberite spol';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: adresaController,
-                decoration: const InputDecoration(labelText: 'Adresa'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Molimo unesite adresu';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _sendRegistrationRequest,
-                style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50)),
-                child: const Text('Registruj se'),
-              ),
-              const SizedBox(
-                height: 30,
-                width: 60,
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 350),
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ));
-                    },
-                    child: const Text('Već imate nalog? Prijavite se'),
-                  ),
-                ),
-              ),
-            ],
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Image.asset(
+              'assets/images/pozadina2.jpg',
+              fit: BoxFit.cover,
+              height: double.infinity,
+            ),
           ),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48.0),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      const Text(
+                        'Registracija pacijenta',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Unesite svoje podatke',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 40),
+                      _buildTextField(
+                        imeController,
+                        'Ime',
+                        validator: (value) => generalValidator(
+                            value, 'ime', [notEmpty, startsWithCapital]),
+                      ),
+                      _buildTextField(
+                        prezimeController,
+                        'Prezime',
+                        validator: (value) => generalValidator(
+                            value, 'prezime', [notEmpty, startsWithCapital]),
+                      ),
+                      _buildTextField(
+                        emailController,
+                        'Email',
+                        validator: (value) => generalValidator(
+                            value, 'email', [notEmpty, validEmail]),
+                      ),
+                      _buildTextField(
+                        korisnickoImeController,
+                        'Korisničko ime',
+                        validator: (value) => generalValidator(
+                            value, 'korisničko ime', [notEmpty]),
+                      ),
+                      _buildTextField(lozinkaController, 'Lozinka',
+                          obscureText: true, validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Molimo unesite lozinku';
+                        }
+                        String passwordValidation =
+                            PasswordValidator.checkPasswordStrength(value);
+                        if (passwordValidation.isNotEmpty) {
+                          return passwordValidation;
+                        }
+                        return null;
+                      }),
+                      _buildTextField(
+                          lozinkaPotvrdaController, 'Potvrdi lozinku',
+                          obscureText: true, validator: (value) {
+                        if (value != lozinkaController.text) {
+                          return 'Lozinke se moraju poklapati';
+                        }
+                        return null;
+                      }),
+                      GestureDetector(
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: datumRodjenja ?? DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null &&
+                              pickedDate != datumRodjenja) {
+                            setState(() {
+                              datumRodjenja = pickedDate;
+                            });
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: TextEditingController(
+                              text: datumRodjenja != null
+                                  ? '${datumRodjenja!.day}.${datumRodjenja!.month}.${datumRodjenja!.year}'
+                                  : '',
+                            ),
+                            decoration: const InputDecoration(
+                              labelText: 'Datum rođenja',
+                              suffixIcon: Icon(Icons.calendar_today),
+                            ),
+                            validator: (value) =>
+                                dateValidator(datumRodjenja, 'datum rođenja'),
+                          ),
+                        ),
+                      ),
+                      _buildTextField(
+                        telefonController,
+                        'Telefon',
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        validator: (value) =>
+                            generalValidator(value, 'telefon', [notEmpty]),
+                      ),
+                      DropdownButtonFormField<String>(
+                        value: spol.isEmpty ? null : spol,
+                        decoration: const InputDecoration(labelText: 'Spol'),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'Muški', child: Text('Muški')),
+                          DropdownMenuItem(
+                              value: 'Ženski', child: Text('Ženski')),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            spol = value ?? '';
+                          });
+                        },
+                        validator: (value) => dropdownValidator(value, 'spol'),
+                      ),
+                      _buildTextField(
+                        adresaController,
+                        'Adresa',
+                        validator: (value) =>
+                            generalValidator(value, 'adresu', [notEmpty]),
+                      ),
+                      const SizedBox(height: 40),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _sendRegistrationRequest,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.blueAccent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Registruj se',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Već imate nalog? Prijavite se'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool obscureText = false,
+      int? maxLength,
+      TextInputType? keyboardType,
+      String? Function(String?)? validator}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        maxLength: maxLength,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          counterText: '',
         ),
+        validator: validator,
       ),
     );
   }

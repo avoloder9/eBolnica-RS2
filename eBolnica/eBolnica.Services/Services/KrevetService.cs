@@ -24,11 +24,15 @@ namespace eBolnica.Services.Services
 
         public override IQueryable<Database.Krevet> AddFilter(KrevetSearchObject searchObject, IQueryable<Database.Krevet> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Soba);
+            query = base.AddFilter(searchObject, query).Include(x => x.Soba).Where(x => x.Obrisano == false);
 
-            if (searchObject?.KrevetId != null && searchObject.KrevetId > 0)
+            if (searchObject?.KrevetId != null || searchObject!.KrevetId > 0)
             {
                 query = query.Where(x => x.SobaId == searchObject.KrevetId);
+            }
+            if (searchObject?.SobaId != null || searchObject!.SobaId > 0)
+            {
+                query = query.Where(x => x.SobaId == searchObject.SobaId);
             }
             return query;
         }
@@ -79,7 +83,6 @@ namespace eBolnica.Services.Services
 
             return Mapper.Map<Krevet>(entity);
         }
-
         public override void BeforeUpdate(KrevetUpdateRequest request, Database.Krevet entity)
         {
             var novaSobaExists = Context.Sobas.Any(o => o.SobaId == request.SobaId);
@@ -103,27 +106,6 @@ namespace eBolnica.Services.Services
 
             base.BeforeUpdate(request, entity);
         }
-        public List<Model.Models.Krevet> GetKrevetBySobaId(int sobaId)
-        {
-            var krevetDatabase = Context.Set<Database.Krevet>().Include(s => s.Soba).Where(x => x.SobaId == sobaId).ToList();
-            if (!krevetDatabase.Any())
-            {
-                return new List<Model.Models.Krevet>();
-            }
-            var krevetModel = krevetDatabase.Select(s => new Model.Models.Krevet
-            {
-                SobaId = s.SobaId,
-                KrevetId = s.KrevetId,
-                Zauzet = s.Zauzet,
-                Soba = new Model.Models.Soba
-                {
-                    Naziv = s.Soba.Naziv,
-                    BrojKreveta = s.Soba.BrojKreveta,
-                    Zauzeta = s.Soba.Zauzeta,
-                }
-            }).ToList();
-            return krevetModel;
-        }
         public List<Model.Models.Krevet> GetSlobodanKrevetBySobaId(int sobaId)
         {
             var krevetDatabase = Context.Set<Database.Krevet>().Include(s => s.Soba).Where(x => x.SobaId == sobaId && x.Zauzet == false).ToList();
@@ -145,7 +127,6 @@ namespace eBolnica.Services.Services
             }).ToList();
             return krevetModel;
         }
-
         public PopunjenostBolniceResponse GetPopunjenostBolnice()
         {
             var ukupnoKreveta = Context.Krevets.Count(k => !k.Obrisano);
@@ -157,6 +138,49 @@ namespace eBolnica.Services.Services
                 ZauzetiKreveta = zauzetiKreveta,
                 SlobodniKreveta = slobodniKreveti
             };
+        }
+
+        public override void Delete(int id)
+        {
+
+            var krevet = Context.Krevets.Include(k => k.Soba).ThenInclude(s => s.Odjel).ThenInclude(o => o.Bolnica).FirstOrDefault(k => k.KrevetId == id);
+
+            if (krevet == null)
+            {
+                throw new Exception("Krevet nije moguće pronaći.");
+            }
+
+            if (krevet is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.Obrisano = true;
+                softDeleteEntity.VrijemeBrisanja = DateTime.Now;
+                Context.Update(krevet);
+
+                if (krevet.Soba.BrojKreveta.HasValue && krevet.Soba.BrojKreveta > 0)
+                {
+                    krevet.Soba.BrojKreveta--;
+                    Context.Update(krevet.Soba);
+                }
+
+                if (krevet.Soba.Odjel.BrojKreveta > 0)
+                {
+                    krevet.Soba.Odjel.BrojKreveta--;
+                    krevet.Soba.Odjel.BrojSlobodnihKreveta--;
+                    Context.Update(krevet.Soba.Odjel);
+                }
+
+                if (krevet.Soba.Odjel.Bolnica.UkupanBrojKreveta > 0)
+                {
+                    krevet.Soba.Odjel.Bolnica.UkupanBrojKreveta--;
+                    Context.Update(krevet.Soba.Odjel.Bolnica);
+                }
+            }
+            else
+            {
+                Context.Remove(krevet);
+            }
+
+            Context.SaveChanges();
         }
     }
 }

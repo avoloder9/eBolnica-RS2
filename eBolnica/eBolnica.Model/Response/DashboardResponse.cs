@@ -17,7 +17,7 @@ namespace eBolnica.Model.Response
         public int BrojKorisnika { get; set; }
         public int BrojDoktora { get; set; }
         public int BrojOsoblja { get; set; }
-        public List<TerminiPoMjesecima> TerminiPoMjesecima { get; set; }
+        public List<TerminiPoMjesecima> TerminiPoMjesecima { get; set; } = null!;
     }
 
     public class TerminiPoMjesecima

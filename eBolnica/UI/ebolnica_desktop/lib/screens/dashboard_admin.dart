@@ -30,6 +30,7 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   late TerminProvider terminProvider;
   List<Termin>? termini;
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Administrator')),
@@ -57,7 +58,10 @@ class _DashboardAdminState extends State<DashboardAdmin> {
                         _generateAndPrintReport(popunjenost, zaposleni,
                             pacijenti, dashboardData[0]);
                       } catch (e) {
-                        print("Greška prilikom generisanja izvještaja: $e");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Greška prilikom generisanja izvještaja')));
                       }
                     },
                     child: const Text(

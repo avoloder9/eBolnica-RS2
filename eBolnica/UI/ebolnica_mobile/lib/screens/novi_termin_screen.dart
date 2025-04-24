@@ -8,9 +8,8 @@ import 'package:ebolnica_mobile/providers/odjel_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/providers/termin_provider.dart';
 import 'package:ebolnica_mobile/screens/odjel_termini_screen.dart';
-import 'package:ebolnica_mobile/screens/pacijent_screen.dart';
+import 'package:ebolnica_mobile/screens/pacijent_detalji_screen.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -19,12 +18,16 @@ class NoviTerminScreen extends StatefulWidget {
   final int? odjelId;
   final int userId;
   final String? userType;
+  final Doktor? doktor;
+  final Odjel? odjel;
   const NoviTerminScreen(
       {super.key,
       this.pacijentId,
       this.odjelId,
       required this.userId,
-      this.userType});
+      this.userType,
+      this.doktor,
+      this.odjel});
 
   @override
   _NoviTerminScreenState createState() => _NoviTerminScreenState();
@@ -46,7 +49,8 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   List<String> zauzetiTermini = [];
   DateTime selectedDate = DateTime.now();
   String? time;
-
+  bool _isDateValid = true;
+  bool _isTimeValid = true;
   @override
   void initState() {
     super.initState();
@@ -54,6 +58,11 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
     doktorProvider = DoktorProvider();
     terminProvider = TerminProvider();
     pacijentProvider = PacijentProvider();
+    if (widget.doktor != null && widget.odjel != null) {
+      odabraniDoktor = widget.doktor!;
+      odabraniOdjel = widget.odjel!;
+    }
+
     fetchOdjeli().then((_) {
       if (widget.odjelId != null && resultOdjel != null) {
         var matchingOdjel = resultOdjel!.result.firstWhere(
@@ -111,7 +120,6 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   Future<void> fetchOdjeli() async {
     try {
       SearchResult<Odjel> fetchedResult = await odjelProvider.get();
-      debugPrint('Fetched Odjeli: ${fetchedResult.result}');
       setState(() {
         resultOdjel = fetchedResult;
       });
@@ -123,11 +131,11 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
   Future<void> fetchDoktor() async {
     try {
       if (odabraniOdjel != null && odabraniOdjel!.odjelId != null) {
-        List<Doktor> fetchedResult =
-            await odjelProvider.getDoktorByOdjelId(odabraniOdjel!.odjelId!);
+        SearchResult<Doktor> fetchedResult = await doktorProvider
+            .get(filter: {"OdjelId": odabraniOdjel!.odjelId!});
         debugPrint('Fetched Doktor: $fetchedResult');
         setState(() {
-          resultDoktor = fetchedResult;
+          resultDoktor = fetchedResult.result;
         });
       } else {
         debugPrint("Odabrani odjel je null");
@@ -169,7 +177,10 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                     onChanged: (value) =>
                         setState(() => odabraniPacijent = value),
                   ),
-                if (widget.userType != "medicinsko osoblje")
+                if ((widget.userType != "medicinsko osoblje" &&
+                        widget.odjel == null &&
+                        widget.pacijentId == null) ||
+                    (widget.doktor == null && widget.odjel == null))
                   _buildDropdown<Odjel>(
                     label: "Odjel",
                     icon: Icons.business,
@@ -193,25 +204,26 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   )
                 else
                   const SizedBox.shrink(),
-                _buildDropdown<Doktor>(
-                  label: "Doktor",
-                  icon: Icons.medical_services,
-                  value: odabraniDoktor,
-                  items: (resultDoktor ?? [])
-                      .map((doktor) => DropdownMenuItem(
-                            value: doktor,
-                            child: Text(
-                                "${doktor.korisnik?.ime ?? "Nepoznato"} ${doktor.korisnik?.prezime ?? "Nepoznato"}"),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      odabraniDoktor = value;
-                      zauzetiTermini = [];
-                    });
-                    loadZauzetiTermini();
-                  },
-                ),
+                if (widget.doktor == null)
+                  _buildDropdown<Doktor>(
+                    label: "Doktor",
+                    icon: Icons.medical_services,
+                    value: odabraniDoktor,
+                    items: (resultDoktor ?? [])
+                        .map((doktor) => DropdownMenuItem(
+                              value: doktor,
+                              child: Text(
+                                  "${doktor.korisnik?.ime ?? "Nepoznato"} ${doktor.korisnik?.prezime ?? "Nepoznato"}"),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        odabraniDoktor = value;
+                        zauzetiTermini = [];
+                      });
+                      loadZauzetiTermini();
+                    },
+                  ),
                 _buildDatePicker(),
                 _buildTimeSelector(),
                 const SizedBox(height: 20),
@@ -219,14 +231,14 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(context).pop(false),
                       child: const Text("Odustani"),
                     ),
                     ElevatedButton(
                       onPressed: _zakaziTermin,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
-                      child: const Text("Zakaži termin",
+                      child: const Text("Zakazi termin",
                           style: TextStyle(color: Colors.white)),
                     ),
                   ],
@@ -253,72 +265,101 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
         decoration: _inputDecoration(label, icon),
         items: items,
         onChanged: onChanged,
-        validator: (value) => value == null ? 'Odaberite $label' : null,
+        validator: (value) => value == null ? 'Odaberite ${label}a' : null,
       ),
     );
   }
 
   Widget _buildDatePicker() {
-    return GestureDetector(
-      onTap: pickDate,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: pickDate,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isDateValid ? Colors.grey.shade400 : Colors.red,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('yyyy-MM-dd').format(selectedDate),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const Icon(Icons.calendar_today, color: Colors.blue),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(DateFormat('yyyy-MM-dd').format(selectedDate),
-                style: const TextStyle(fontSize: 16)),
-            const Icon(Icons.calendar_today, color: Colors.blue),
-          ],
-        ),
-      ),
+        if (!_isDateValid)
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0, bottom: 8),
+            child:
+                Text("Odaberite datum.", style: TextStyle(color: Colors.red)),
+          ),
+      ],
     );
   }
 
   Widget _buildTimeSelector() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
-      children: List.generate(12, (index) {
-        int hour = 9 + index ~/ 3;
-        int minute = (index % 3) * 20;
-        String selectedTime =
-            "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: List.generate(12, (index) {
+            int hour = 9 + index ~/ 3;
+            int minute = (index % 3) * 20;
+            String selectedTime =
+                "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
 
-        bool isZauzet = zauzetiTermini.contains(selectedTime);
-        bool isSelected = selectedTime == time;
-        return GestureDetector(
-          onTap: isZauzet
-              ? null
-              : () {
-                  setState(() {
-                    time = selectedTime;
-                  });
-                },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isZauzet
-                  ? Colors.grey.shade400
-                  : isSelected
-                      ? Colors.green
-                      : Colors.blue,
-            ),
-            child: Text(
-              selectedTime,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
+            bool isZauzet = zauzetiTermini.contains(selectedTime);
+            bool isSelected = selectedTime == time;
+
+            return GestureDetector(
+              onTap: isZauzet
+                  ? null
+                  : () {
+                      setState(() {
+                        time = selectedTime;
+                        _isTimeValid = true;
+                      });
+                    },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: isZauzet
+                      ? Colors.grey.shade400
+                      : isSelected
+                          ? Colors.green
+                          : Colors.blue,
+                ),
+                child: Text(
+                  selectedTime,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            );
+          }),
+        ),
+        if (!_isTimeValid)
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0, left: 8),
+            child:
+                Text("Odaberite termin.", style: TextStyle(color: Colors.red)),
           ),
-        );
-      }),
+      ],
     );
   }
 
@@ -326,16 +367,23 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       var noviTermin = {
         "pacijentId": widget.pacijentId ?? odabraniPacijent?.pacijentId,
-        "doktorId": odabraniDoktor?.doktorId,
-        "odjelId": odabraniOdjel?.odjelId,
+        "doktorId": widget.doktor?.doktorId ?? odabraniDoktor?.doktorId,
+        "odjelId": widget.odjel?.odjelId ?? odabraniOdjel?.odjelId,
         "datumTermina": DateFormat('yyyy-MM-dd').format(selectedDate),
         "vrijemeTermina": "$time:00",
         "otkazano": false,
       };
 
       try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
         await terminProvider.insert(noviTermin);
-        if (!mounted) return;
+        if (mounted) Navigator.pop(context);
         showCustomDialog(
             context: context,
             title: "",
@@ -355,19 +403,25 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   userType: widget.userType,
                 );
               } else {
-                return PacijentScreen(
+                return PacijentDetaljiScreen(
                     userId: widget.userId, userType: widget.userType);
               }
             },
           ),
         );
       } catch (e) {
+        if (mounted) Navigator.pop(context);
         await Flushbar(
           message: "Došlo je do greške. Pokušajte ponovo.",
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ).show(context);
       }
+    } else {
+      setState(() {
+        _isDateValid = true;
+        _isTimeValid = time != null;
+      });
     }
   }
 

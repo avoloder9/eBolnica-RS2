@@ -148,5 +148,22 @@ namespace eBolnica.Services.Services
         {
             return Context.MedicinskoOsobljes.Where(o => o.MedicinskoOsobljeId == osobljeId).Select(x => x.OdjelId).FirstOrDefault();
         }
+
+        public override void Delete(int id)
+        {
+            var entity = Context.Set<Database.MedicinskoOsoblje>().Find(id);
+            if (entity == null) { throw new Exception("Medicinsko osoblje nije pronadjeno"); }
+            entity.Obrisano = true;
+            entity.VrijemeBrisanja = DateTime.Now;
+            Context.Update(entity);
+            var korisnik = Context.Set<Database.Korisnik>().Find(entity.KorisnikId);
+            if (korisnik == null) { throw new Exception("Korisnik nije pronadjen"); }
+
+            korisnik.Obrisano = true;
+            korisnik.VrijemeBrisanja = DateTime.Now;
+
+            Context.Update(korisnik);
+            Context.SaveChanges();
+        }
     }
 }

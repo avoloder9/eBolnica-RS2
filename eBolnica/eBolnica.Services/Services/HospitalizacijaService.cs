@@ -39,6 +39,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Odjel.Naziv.StartsWith(searchObject.NazivOdjela));
             }
+            if (searchObject?.PacijentId != null || searchObject!.PacijentId > 0)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId);
+            }
             return query;
         }
         public override void BeforeInsert(HospitalizacijaInsertRequest request, Database.Hospitalizacija entity)

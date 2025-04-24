@@ -83,7 +83,12 @@ class _HospitalizacijaScreenState extends State<HospitalizacijaScreen> {
                   doktorId: doktorId,
                   nazivOdjela: widget.nazivOdjela,
                 ),
-                message: "Nema trenutno hospitalizovanih pacijenata")
+                message: "Nema trenutno hospitalizovanih pacijenata",
+                onDialogClosed: () {
+                  setState(() {});
+                  fetchHospitalizacije();
+                },
+              )
             : _buildResultView());
   }
 

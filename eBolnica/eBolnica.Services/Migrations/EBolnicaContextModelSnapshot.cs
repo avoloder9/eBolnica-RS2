@@ -531,8 +531,8 @@ namespace eBolnica.Services.Migrations
                         .HasColumnName("DoktorID");
 
                     b.Property<string>("Komentar")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("Obrisano")
                         .HasColumnType("bit");
@@ -551,8 +551,8 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<string>("TipOperacije")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("VrijemeBrisanja")
                         .HasColumnType("datetime2");
@@ -799,8 +799,8 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<string>("Opis")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("PacijentId")
                         .HasColumnType("int")
@@ -997,8 +997,8 @@ namespace eBolnica.Services.Migrations
 
                     b.Property<string>("Opis")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int?>("PregledId")
                         .HasColumnType("int")

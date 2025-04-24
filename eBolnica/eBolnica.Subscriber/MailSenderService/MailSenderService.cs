@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 using MailKit.Net.Smtp;
-
+using DotNetEnv;
 
 namespace eBolnica.Subscriber.MailSenderService
 {
@@ -10,16 +10,7 @@ namespace eBolnica.Subscriber.MailSenderService
         {
             if (emailObj == null) return;
 
-            string envFilePath = FindEnvFile();
-            if (!string.IsNullOrEmpty(envFilePath))
-            {
-                DotNetEnv.Env.Load(envFilePath);
-            }
-            else
-            {
-                Console.WriteLine(".env fajl nije pronadjen!");
-                return;
-            }
+            Env.Load();
 
             string fromAddress = Environment.GetEnvironmentVariable("_fromAddress") ?? "ebolnicars2@gmail.com";
             string password = Environment.GetEnvironmentVariable("_password") ?? string.Empty;
@@ -69,25 +60,6 @@ namespace eBolnica.Subscriber.MailSenderService
                 Console.WriteLine($"Error {ex.Message}");
                 return;
             }
-        }
-
-        private static string FindEnvFile()
-        {
-            string currentDir = Directory.GetCurrentDirectory();
-
-            while (!string.IsNullOrEmpty(currentDir))
-            {
-                string potentialEnvPath = Path.Combine(currentDir, ".env");
-
-                if (File.Exists(potentialEnvPath))
-                {
-                    return potentialEnvPath;
-                }
-
-                currentDir = Directory.GetParent(currentDir)?.FullName;
-            }
-
-            return null;
         }
     }
 }

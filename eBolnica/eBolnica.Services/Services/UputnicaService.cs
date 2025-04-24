@@ -43,6 +43,10 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Termin.Pacijent.BrojZdravstveneKartice == searchObject.BrojZdravstveneKartice);
             }
+            if (searchObject?.TerminId != null && searchObject.TerminId > 0)
+            {
+                query = query.Where(x => x.TerminId == searchObject.TerminId);
+            }
             return query;
         }
         public override void BeforeInsert(UputnicaInsertRequest request, Database.Uputnica entity)
@@ -53,12 +57,11 @@ namespace eBolnica.Services.Services
                 throw new Exception("Termin sa zadanim ID-om ne postoji");
             }
         }
-
         public override Uputnica GetById(int id)
         {
-            var entity = Context.Set<Database.Uputnica>().Include(u => u.Termin)
-        .ThenInclude(t => t.Pacijent).ThenInclude(p => p.Korisnik).Include(u => u.Termin).ThenInclude(t => t.Doktor).ThenInclude(d => d.Korisnik)
-    .Include(u => u.Termin.Odjel).FirstOrDefault(x => x.UputnicaId == id);
+            var entity = Context.Set<Database.Uputnica>().Include(u => u.Termin).ThenInclude(t => t.Pacijent).ThenInclude(p => p.Korisnik)
+                          .Include(u => u.Termin).ThenInclude(t => t.Doktor).ThenInclude(d => d.Korisnik).Include(u => u.Termin.Odjel)
+                          .FirstOrDefault(x => x.UputnicaId == id);
             if (entity == null)
             {
                 return null!;
@@ -73,31 +76,27 @@ namespace eBolnica.Services.Services
         public override Uputnica Update(int id, UputnicaUpdateRequest request)
         {
             var entity = GetById(id);
-            var state = BaseUputnicaState.CreateState(entity.StateMachine);
+            var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Update(id, request);
         }
-
         public Uputnica Activate(int id)
         {
             var entity = GetById(id);
             var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Activate(id);
         }
-
         public Uputnica Hide(int id)
         {
             var entity = GetById(id);
             var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Hide(id);
         }
-
         public Uputnica Edit(int id)
         {
             var entity = GetById(id);
             var state = BaseUputnicaState.CreateState(entity.StateMachine!);
             return state.Edit(id);
         }
-
         public List<string> AllowedActions(int id)
         {
             _logger.LogInformation($"Allowed actions called for: {id}");
@@ -114,7 +113,6 @@ namespace eBolnica.Services.Services
                 return state.AllowedActions(entity);
             }
         }
-
         public Uputnica Close(int id)
         {
             var entity = GetById(id);

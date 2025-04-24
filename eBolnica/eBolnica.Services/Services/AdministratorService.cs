@@ -91,7 +91,6 @@ namespace eBolnica.Services.Services
 
             return query;
         }
-
         public override void BeforeUpdate(AdministratorUpdateRequest request, Database.Administrator entity)
         {
             if (!string.IsNullOrEmpty(request.Lozinka))
@@ -135,7 +134,6 @@ namespace eBolnica.Services.Services
             var admin = Context.Administrators.FirstOrDefault(t => t.KorisnikId == korisnikId);
             return admin!.AdministratorId;
         }
-
         public DashboardResponse GetDashboardData()
         {
             var ukupnoPacijenata = Context.Pacijents.Count(p => !p.Obrisano);
@@ -174,7 +172,6 @@ namespace eBolnica.Services.Services
                 TerminiPoMjesecima = terminiPoMjesecima
             };
         }
-
 
     }
 }

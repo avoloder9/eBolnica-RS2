@@ -64,7 +64,7 @@ namespace eBolnica.Services.UputnicaStateMachine
                 case "hidden":
                     return ServiceProvider.GetService<HiddenUputnicaState>()!;
                 case "closed":
-                    return ServiceProvider.GetService<ClosedUputnicaState>();
+                    return ServiceProvider.GetService<ClosedUputnicaState>()!;
                 default: throw new Exception("State not recognized");
             }
         }

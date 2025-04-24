@@ -28,7 +28,7 @@ namespace eBolnica.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var authenticationResponse = await korisnikService.AuthenticateUser(request.Username, request.Password);
+            var authenticationResponse = await korisnikService.AuthenticateUser(request.Username!, request.Password!);
             String? userType;
             string? odjelNaziv = null;
             switch (authenticationResponse.Result)
@@ -36,7 +36,7 @@ namespace eBolnica.API.Controllers
                 case AuthenticationResult.Success:
                     var userId = authenticationResponse.UserId;
 
-                    if (korisnikService.isKorisnikDoktor((int)userId))
+                    if (korisnikService.isKorisnikDoktor((int)userId!))
                     {
                         userType = "doktor";
 
@@ -84,8 +84,6 @@ namespace eBolnica.API.Controllers
 
                 default:
                     return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do neocekivane greške." });
-
-
             }
         }
     }

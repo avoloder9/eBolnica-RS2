@@ -4,6 +4,7 @@ import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/nalaz_parametar_screen.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 
 class NoviNalazScreen extends StatefulWidget {
@@ -89,12 +90,12 @@ class _NoviNalazScreenState extends State<NoviNalazScreen> {
                         odabraniDoktor = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Molimo odaberite doktora';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(
+                      value?.korisnik != null
+                          ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                          : null,
+                      'doktora',
+                    ),
                   ),
                 ),
                 Padding(
@@ -120,12 +121,12 @@ class _NoviNalazScreenState extends State<NoviNalazScreen> {
                         odabraniPacijent = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Molimo odaberite pacijenta';
-                      }
-                      return null;
-                    },
+                    validator: (value) => dropdownValidator(
+                      value?.korisnik != null
+                          ? "${value!.korisnik!.ime} ${value.korisnik!.prezime}"
+                          : null,
+                      'pacijenta',
+                    ),
                   ),
                 ),
                 Padding(

@@ -1,11 +1,10 @@
-﻿using eBolnica.Model.Models;
+﻿using eBolnica.Model;
+using eBolnica.Model.Models;
 using eBolnica.Model.Requests;
 using eBolnica.Model.SearchObjects;
 using eBolnica.Services.Interfaces;
-using eBolnica.Services.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
-
+using Microsoft.AspNetCore.Authorization;
 namespace eBolnica.API.Controllers
 {
     [ApiController]
@@ -17,50 +16,43 @@ namespace eBolnica.API.Controllers
         {
             odjelService = service;
         }
-        [HttpGet("GetDoktorByOdjel")]
-        public IActionResult GetDoktorByOdjel(int odjelId)
-        {
-            try
-            {
-                var doktori = odjelService.GetDoktorByOdjelId(odjelId);
-                return Ok(doktori);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
-        [HttpGet("GetTerminByOdjelId")]
-        public IActionResult GetTerminByOdjelId(int odjelId)
-        {
-            try
-            {
-                var termini = odjelService.GetTerminByOdjelId(odjelId);
-                return Ok(termini);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("get-odjel/{doktorId}")]
-        public IActionResult GetOdjelByDoktorId(int doktorId)
-        {
-            var odjel = odjelService.GetOdjelByDoktorId(doktorId);
-
-            if (odjel == null)
-                return NotFound("Odjel nije pronađen za datog doktora.");
-
-            return Ok(odjel);
-        }
-
+        [Authorize(Roles = "Administrator")]
         [HttpGet("broj-zaposlenih")]
         public IActionResult GetUkupanBrojZaposlenihPoOdjelima()
         {
             var result = odjelService.GetUkupanBrojZaposlenihPoOdjelima();
             return Ok(result);
+        }
+
+        [Authorize(Roles = "Administrator,Doktor,MedicinskoOsoblje,Pacijent")]
+        public override PagedResult<Odjel> GetList([FromQuery] OdjelSearchObject searchObject)
+        {
+            return base.GetList(searchObject);
+        }
+
+        [Authorize(Roles = "Administrator,Doktor,MedicinskoOsoblje,Pacijent")]
+        public override Odjel GetById(int id)
+        {
+            return base.GetById(id);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override Odjel Insert(OdjelInsertRequest request)
+        {
+            return base.Insert(request);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override Odjel Update(int id, OdjelUpdateRequest request)
+        {
+            return base.Update(id, request);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public override void Delete(int id)
+        {
+            base.Delete(id);
         }
     }
 }

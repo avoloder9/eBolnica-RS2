@@ -5,6 +5,7 @@ import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/bolnica_provider.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/screens/odjel_list_screen.dart';
+import 'package:ebolnica_desktop/utils/validator.dart';
 import 'package:flutter/material.dart';
 
 class NoviOdjelScreen extends StatefulWidget {
@@ -42,7 +43,9 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
         resultBolnica = fetchedResult;
       });
     } catch (e) {
-      print('Error fetching data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Greška pri dohvaćanju podataka o bolnici: $e')),
+      );
     }
   }
 
@@ -69,30 +72,22 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: TextFormField(
-                    controller: nazivController,
-                    decoration: InputDecoration(
-                      labelText: 'Naziv',
-                      labelStyle: TextStyle(color: Colors.black54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                      controller: nazivController,
+                      decoration: InputDecoration(
+                        labelText: 'Naziv',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.local_hospital,
+                          color: Colors.blue,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
                       ),
-                      prefixIcon: const Icon(
-                        Icons.local_hospital,
-                        color: Colors.blue,
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Molimo unesite naziv';
-                      }
-                      if (value[0] != value[0].toUpperCase()) {
-                        return 'Naziv mora početi sa velikim slovom';
-                      }
-                      return null;
-                    },
-                  ),
+                      validator: (value) => generalValidator(
+                          value, "Naziv", [notEmpty, startsWithCapital])),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -122,12 +117,8 @@ class _NoviOdjelScreenState extends State<NoviOdjelScreen> {
                         odabranaBolnica = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null || value.naziv == "") {
-                        return 'Molimo odaberite bolnicu';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        dropdownValidator(value?.naziv, 'bolnicu'),
                   ),
                 ),
                 const SizedBox(height: 20),

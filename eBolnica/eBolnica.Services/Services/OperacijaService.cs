@@ -48,6 +48,14 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Doktor.Korisnik.Prezime.StartsWith(searchObject.PrezimeDoktoraGTE));
             }
+            if (searchObject!.DoktorId != null || searchObject.DoktorId > 0)
+            {
+                query = query.Where(x => x.Doktor.DoktorId == searchObject.DoktorId && x.StateMachine != "closed");
+            }
+            if (searchObject!.PacijentId != null || searchObject.PacijentId > 0)
+            {
+                query = query.Where(x => x.PacijentId == searchObject.PacijentId);
+            }
             return query;
         }
         public override void BeforeInsert(OperacijaInsertRequest request, Database.Operacija entity)
@@ -88,7 +96,6 @@ namespace eBolnica.Services.Services
             return Context.Operacijas.GroupBy(x => x.DatumOperacije.Date).Where(g => g.Count(x => x.DoktorId == doktorId) >= 2)
                 .Select(g => g.Key.ToString("yyyy-MM-dd")).ToList();
         }
-
         public override void BeforeUpdate(OperacijaUpdateRequest request, Database.Operacija entity)
         {
             var doktorExists = Context.Doktors.Any(d => d.DoktorId == request.DoktorId);
@@ -99,11 +106,6 @@ namespace eBolnica.Services.Services
 
             request.Adapt(entity);
             base.BeforeUpdate(request, entity);
-        }
-        public List<Model.Models.Operacija> GetOperacijaByPacijentId(int pacijentId)
-        {
-            var operacija = Context.Set<Database.Operacija>().Where(x => x.PacijentId == pacijentId).ToList();
-            return Mapper.Map<List<Model.Models.Operacija>>(operacija);
         }
         public override Model.Models.Operacija Insert(OperacijaInsertRequest request)
         {
@@ -118,28 +120,24 @@ namespace eBolnica.Services.Services
             var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Update(id, request);
         }
-
         public Model.Models.Operacija Activate(int id)
         {
             var entity = GetById(id);
             var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Activate(id);
         }
-
         public Model.Models.Operacija Hide(int id)
         {
             var entity = GetById(id);
             var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Hide(id);
         }
-
         public Model.Models.Operacija Edit(int id)
         {
             var entity = GetById(id);
             var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Edit(id);
         }
-
         public List<string> AllowedActions(int id)
         {
             _logger.LogInformation($"Allowed actions called for: {id}");
@@ -156,14 +154,12 @@ namespace eBolnica.Services.Services
                 return state.AllowedActions(entity);
             }
         }
-
         public Model.Models.Operacija Close(int id)
         {
             var entity = GetById(id);
             var state = BaseOperacijaState.CreateState(entity.StateMachine!);
             return state.Close(id);
         }
-
         public Model.Models.Operacija Cancelled(int id)
         {
             var entity = GetById(id);

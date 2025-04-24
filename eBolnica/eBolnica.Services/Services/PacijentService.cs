@@ -14,14 +14,17 @@ using eBolnica.Services.Interfaces;
 using eBolnica.Model.Models;
 using System.Security.Cryptography.X509Certificates;
 using eBolnica.Model.Response;
+using eBolnica.Services.Recommender;
 
 namespace eBolnica.Services.Services
 {
     public class PacijentService : BaseCRUDService<Pacijent, PacijentSearchObject, Database.Pacijent, PacijentInsertRequest, PacijentUpdateRequest>, IPacijentService
     {
-        public PacijentService(Database.EBolnicaContext context, IMapper mapper) : base(context, mapper)
-        { }
-
+        private readonly IRecommenderService recommenderService;
+        public PacijentService(Database.EBolnicaContext context, IMapper mapper, IRecommenderService recommenderService) : base(context, mapper)
+        {
+            this.recommenderService = recommenderService;
+        }
         public override void BeforeInsert(PacijentInsertRequest request, Database.Pacijent entity)
         {
             var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
@@ -69,7 +72,6 @@ namespace eBolnica.Services.Services
 
             base.BeforeInsert(request, entity);
         }
-
         public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
@@ -85,7 +87,7 @@ namespace eBolnica.Services.Services
                 query = query.Where(x => x.Korisnik.Prezime.StartsWith(searchObject.PrezimeGTE));
             }
 
-            if (searchObject?.BrojZdravstveneKartice != null && searchObject.BrojZdravstveneKartice > 0)
+            if (searchObject?.BrojZdravstveneKartice != null || searchObject!.BrojZdravstveneKartice > 0)
             {
                 query = query.Where(x => x.BrojZdravstveneKartice == searchObject.BrojZdravstveneKartice);
             }
@@ -129,59 +131,12 @@ namespace eBolnica.Services.Services
                 Mapper.Map(request, korisnik);
             }
         }
-
-        public List<Model.Models.Termin> GetTerminByPacijentId(int pacijentId)
-        {
-            var termini = Context.Set<Database.Termin>().Where(x => x.PacijentId == pacijentId)
-                .Include(x => x.Pacijent).ThenInclude(y => y.Korisnik).Include(d => d.Doktor)
-                .ThenInclude(k => k.Korisnik).Include(o => o.Odjel).Where(x => x.DatumTermina >= DateTime.Now && x.Otkazano == false).OrderBy(x => x.DatumTermina).ToList();
-
-            if (!termini.Any())
-            {
-                return new List<Model.Models.Termin>();
-            }
-            var terminModel = termini.Select(p => new Model.Models.Termin
-            {
-                TerminId = p.TerminId,
-                VrijemeTermina = p.VrijemeTermina,
-                DatumTermina = p.DatumTermina,
-                Otkazano = p.Otkazano,
-                Doktor = new Model.Models.Doktor
-                {
-                    Korisnik = new Model.Models.Korisnik
-                    {
-                        Ime = p.Doktor.Korisnik.Ime,
-                        Prezime = p.Doktor.Korisnik.Prezime,
-                        KorisnikId = p.Doktor.KorisnikId
-                    }
-                },
-                DoktorId = p.DoktorId,
-                OdjelId = p.OdjelId,
-                PacijentId = p.PacijentId,
-                Pacijent = new Model.Models.Pacijent
-                {
-                    PacijentId = p.PacijentId,
-                    Korisnik = new Model.Models.Korisnik
-                    {
-                        Ime = p.Pacijent.Korisnik.Ime,
-                        Prezime = p.Pacijent.Korisnik.Prezime,
-                        KorisnikId = p.Pacijent.KorisnikId,
-                    }
-                },
-                Odjel = new Model.Models.Odjel
-                {
-                    OdjelId = p.OdjelId,
-                    Naziv = p.Odjel.Naziv,
-                }
-            }).ToList();
-            return terminModel;
-        }
         public int GetPacijentIdByKorisnikId(int korisnikId)
         {
             var pacijent = Context.Pacijents.FirstOrDefault(t => t.KorisnikId == korisnikId);
             return pacijent!.PacijentId;
         }
-        public List<Pacijent> GetPacijentWithDokumentacija()
+        public List<Pacijent> GetPacijentSaDokumentacija()
         {
             return Context.Pacijents.Where(p => Context.MedicinskaDokumentacijas.Any(d => d.PacijentId == p.PacijentId)).Select(p => new Pacijent
             {
@@ -207,30 +162,30 @@ namespace eBolnica.Services.Services
                 }
             }).ToList();
         }
-        public async Task<List<Database.Pregled>> GetPreglediByPacijentIdAsync(int pacijentId)
+        public async Task<List<PreglediResponse>> GetPreglediByPacijentIdAsync(int pacijentId)
         {
-            return await Context.Pregleds.Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Odjel)
-                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
-                .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Pacijent).ThenInclude(x => x.Korisnik)
-                .Where(p => p.MedicinskaDokumentacija!.PacijentId == pacijentId)
-                .ToListAsync();
-        }
-        public async Task<List<Database.Hospitalizacija>> GetHospitalizacijeByPacijentIdAsync(int pacijentId)
-        {
-            return await Context.Hospitalizacijas.Include(x => x.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
-                .Include(x => x.Odjel).Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Where(x => x.MedicinskaDokumentacija!.PacijentId == pacijentId)
-                .ToListAsync();
-        }
-        public async Task<List<Database.OtpusnoPismo>> GetOtpusnaPismaByPacijentIdAsync(int pacijentId)
-        {
-            return await Context.OtpusnoPismos.Include(x => x.Hospitalizacija).ThenInclude(x => x!.MedicinskaDokumentacija)
-                .Where(x => x.Hospitalizacija!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
-        }
-        public async Task<List<Database.Terapija>> GetTerapijaByPacijentIdAsync(int pacijentId)
-        {
-            return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
-                .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
-                .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId).ToListAsync();
+            var result = await Context.Pregleds.Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Odjel)
+                  .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
+                  .Include(u => u.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Pacijent).ThenInclude(x => x.Korisnik)
+                  .Where(p => p.MedicinskaDokumentacija!.PacijentId == pacijentId)
+                  .ToListAsync();
+
+            var response = result.Select(p => new PreglediResponse
+            {
+                PregledId = p.PregledId,
+                PacijentId = p.Uputnica.Termin.PacijentId,
+                ImeDoktora = p.Uputnica!.Termin!.Doktor!.Korisnik!.Ime!,
+                PrezimeDoktora = p.Uputnica?.Termin?.Doktor?.Korisnik?.Prezime ?? "Nepoznato",
+                ImePacijenta = p.Uputnica?.Termin?.Pacijent.Korisnik.Ime ?? "Nepoznato",
+                PrezimePacijenta = p.Uputnica?.Termin?.Pacijent.Korisnik.Prezime ?? "Nepoznato",
+                NazivOdjela = p.Uputnica?.Termin?.Odjel?.Naziv ?? "Nepoznato",
+                DatumTermina = p.Uputnica?.Termin?.DatumTermina ?? DateTime.MinValue,
+                VrijemeTermina = p.Uputnica?.Termin?.VrijemeTermina ?? TimeSpan.Zero,
+                GlavnaDijagnoza = p.GlavnaDijagnoza ?? "Nema dijagnoze",
+                Anamneza = p.Anamneza ?? "Nema anamneze",
+                Zakljucak = p.Zakljucak ?? "Nema zaključka"
+            }).ToList();
+            return response;
         }
         public async Task<List<Database.Terapija>> GetAktivneTerapijeByPacijentIdAsync(int pacijentId)
         {
@@ -243,16 +198,6 @@ namespace eBolnica.Services.Services
             return await Context.Terapijas.Include(x => x.Pregled).ThenInclude(x => x!.MedicinskaDokumentacija).ThenInclude(x => x!.Pacijent).ThenInclude(x => x.Korisnik)
                 .Include(x => x.Pregled).ThenInclude(x => x!.Uputnica).ThenInclude(x => x.Termin).ThenInclude(x => x.Doktor).ThenInclude(x => x.Korisnik)
                 .Where(x => x.Pregled!.MedicinskaDokumentacija!.PacijentId == pacijentId && x.DatumZavrsetka < DateTime.Now).ToListAsync();
-        }
-        public async Task<List<Database.LaboratorijskiNalaz>> GetNalaziByPacijentIdAsync(int pacijentId)
-        {
-            return await Context.LaboratorijskiNalazs.Include(x => x.Doktor).ThenInclude(x => x.Korisnik).Include(x => x.Pacijent)
-                .ThenInclude(x => x.Korisnik).Where(x => x.PacijentId == pacijentId).ToListAsync();
-        }
-        public async Task<List<Database.Operacija>> GetOperacijeByPacijentIdAsync(int pacijentId)
-        {
-            return await Context.Operacijas.Include(x => x.Pacijent).ThenInclude(x => x.Korisnik).Include(x => x.Doktor)
-                .ThenInclude(x => x.Korisnik).Include(x => x.Terapija).Where(x => x.PacijentId == pacijentId).ToListAsync();
         }
         public List<Model.Response.BrojZaposlenihPoOdjeluResponse> GetUkupanBrojZaposlenihPoOdjelima()
         {
@@ -282,5 +227,30 @@ namespace eBolnica.Services.Services
                 BrojHospitalizovanih = brojHospitalizovanih
             };
         }
+        public List<Model.Models.Doktor> GetPreporuceneDoktore(int pacijentId)
+        {
+            return recommenderService.GetPreporuceniDoktori(pacijentId);
+        }
+        public void TrainModel()
+        {
+            recommenderService.TrainModel();
+        }
+        public override void Delete(int id)
+        {
+            var entity = Context.Set<Database.Pacijent>().Find(id);
+            if (entity == null) { throw new Exception("Pacijent nije pronadjen"); }
+            entity.Obrisano = true;
+            entity.VrijemeBrisanja = DateTime.Now;
+            Context.Update(entity);
+            var korisnik = Context.Set<Database.Korisnik>().Find(entity.KorisnikId);
+            if (korisnik == null) { throw new Exception("Korisnik nije pronadjen"); }
+
+            korisnik.Obrisano = true;
+            korisnik.VrijemeBrisanja = DateTime.Now;
+
+            Context.Update(korisnik);
+            Context.SaveChanges();
+        }
+
     }
 }

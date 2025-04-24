@@ -7,9 +7,10 @@ import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/medicinsko_osoblje_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
+import 'package:ebolnica_desktop/utils/password_validator.dart';
+import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class PostavkeScreen extends StatefulWidget {
@@ -57,11 +58,6 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
     _fetchUserData();
   }
 
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
-  }
-
   dynamic userData;
   int? entityId;
   Future<void> _fetchUserData() async {
@@ -98,7 +94,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
           break;
 
         default:
-          print("Nepoznat tip korisnika: ${widget.userType}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Nepoznat tip korisnika: ${widget.userType}')),
+          );
           return;
       }
       if (userData != null) {
@@ -133,7 +132,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         });
       }
     } catch (e) {
-      print("Error fetching user data :$e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Greška pri dohvaćanju korisničkih podataka')),
+      );
     }
   }
 
@@ -223,7 +225,10 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
             break;
 
           default:
-            print("Nepoznat tip korisnika: ${widget.userType}");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Nepoznat tip korisnika ${widget.userType}')),
+            );
             return;
         }
         setState(() {
@@ -248,7 +253,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Postavke")),
+      appBar: AppBar(title: const Text("Vaš profil")),
       drawer: SideBar(
         userId: widget.userId,
         userType: widget.userType,
@@ -256,115 +261,188 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
       ),
       body: userData == null
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 120,
-                              height: 170,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: _imageBytes != null
-                                      ? MemoryImage(_imageBytes!)
-                                          as ImageProvider
-                                      : (userData!.korisnik!.slika != null &&
-                                              userData!
-                                                  .korisnik!.slika!.isNotEmpty)
-                                          ? MemoryImage(base64Decode(
-                                              userData!.korisnik!.slika!))
-                                          : const AssetImage(
-                                                  'assets/images/osoba.jpg')
-                                              as ImageProvider,
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          tooltip: "Uredi ili sačuvaj izmjene",
+                          icon: Icon(_isEditing ? Icons.save : Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              if (_isEditing) _saveChanges();
+                              _isEditing = true;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Ažurirajte informacije o svom profilu",
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                width: 120,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: _imageBytes != null
+                                        ? MemoryImage(_imageBytes!)
+                                        : (userData!.korisnik!.slika != null &&
+                                                userData!.korisnik!.slika!
+                                                    .isNotEmpty)
+                                            ? MemoryImage(base64Decode(
+                                                userData!.korisnik!.slika!))
+                                            : const AssetImage(
+                                                    'assets/images/osoba.jpg')
+                                                as ImageProvider,
+                                  ),
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 10),
+                            if (_isEditing)
+                              TextButton.icon(
+                                onPressed: _pickImage,
+                                icon: const Icon(Icons.upload),
+                                label: const Text("Dodaj sliku"),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 40),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Row(children: [
+                                Expanded(
+                                    child:
+                                        _buildTextField("Ime", imeController)),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                    child: _buildTextField(
+                                        "Prezime", prezimeController)),
+                              ]),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: _buildTextField(
+                                          "Telefon", telefonController)),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                      child: _buildTextField(
+                                          "Email", emailController)),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                  "Datum rođenja", datumRodjenjaController,
+                                  readOnly: true),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          if (_isEditing)
-                            ElevatedButton(
-                              onPressed: _pickImage,
-                              child: const Text("Dodaj sliku"),
-                            ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    if (widget.userType == "doktor") ...[
+                      _buildTextField(
+                          "Specijalizacija", specijalizacijaController),
+                      const SizedBox(height: 16),
+                      _buildTextField("Biografija", biografijaController,
+                          maxLines: 3),
+                    ],
+                    if (widget.userType == "pacijent") ...[
+                      _buildTextField("Adresa", adresaController),
+                    ],
+                    if (_isEditing) ...[
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField("Lozinka", lozinkaController,
+                                isPassword: true, optional: true),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildTextField(
+                                "Potvrda lozinke", lozinkaPotvrdaController,
+                                isPassword: true, optional: true),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      _buildTextField("Ime", imeController),
-                      _buildTextField("Prezime", prezimeController),
-                      _buildTextField("Telefon", telefonController),
-                      _buildTextField("Email", emailController),
-                      _buildTextField("Datum rođenja", datumRodjenjaController,
-                          isDate: true),
-                      if (widget.userType == "doktor") ...[
-                        _buildTextField(
-                            "Specijalizacija", specijalizacijaController),
-                        _buildTextField("Biografija", biografijaController,
-                            maxLines: 3, isBiografija: true),
-                      ],
-                      if (widget.userType == "pacijent")
-                        _buildTextField("Adresa", adresaController),
-                      if (_isEditing) ...[
-                        _buildTextField("Lozinka", lozinkaController,
-                            isPassword: true, isOptional: true),
-                        _buildTextField(
-                            "Potvrda lozinke", lozinkaPotvrdaController,
-                            isPassword: true, isOptional: true),
-                      ],
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_isEditing) {
-                              _saveChanges();
-                            }
-                            _isEditing = true;
-                          });
-                        },
-                        child: Text(_isEditing ? "Sačuvaj" : "Uredi"),
-                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {int maxLines = 1,
-      bool isPassword = false,
-      bool isOptional = false,
-      bool isDate = false,
-      bool isBiografija = false}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    int maxLines = 1,
+    bool isPassword = false,
+    bool optional = false,
+    bool isDate = false,
+    bool isBiografija = false,
+    bool readOnly = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
-        readOnly: isDate || !_isEditing,
-        maxLines: maxLines,
+        readOnly: readOnly || isDate || !_isEditing,
         obscureText: isPassword,
+        maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         validator: (value) {
-          if (!isOptional && (value == null || value.isEmpty)) {
+          if (!optional && (value == null || value.isEmpty)) {
             return "$label ne može biti prazno";
           }
           if (isPassword && value != null && value.isNotEmpty) {
-            if (value.length < 8) {
-              return "Lozinka mora imati najmanje 8 karaktera";
+            String passwordValidation =
+                PasswordValidator.checkPasswordStrength(value);
+            if (passwordValidation.isNotEmpty) {
+              return passwordValidation;
+            }
+
+            if (label == "Lozinka" &&
+                lozinkaPotvrdaController.text.isNotEmpty &&
+                value != lozinkaPotvrdaController.text) {
+              return "Lozinke se ne poklapaju";
+            }
+
+            if (label == "Potvrda lozinke" &&
+                lozinkaController.text.isNotEmpty &&
+                value != lozinkaController.text) {
+              return "Lozinke se ne poklapaju";
             }
           }
           if (isBiografija && value != null && value.isNotEmpty) {

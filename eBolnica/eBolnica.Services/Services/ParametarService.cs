@@ -18,7 +18,7 @@ namespace eBolnica.Services.Services
         }
         public override IQueryable<Database.Parametar> AddFilter(ParametarSearchObject searchObject, IQueryable<Database.Parametar> query)
         {
-            query = base.AddFilter(searchObject, query);
+            query = base.AddFilter(searchObject, query).Where(x => x.Obrisano == false);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.Naziv))
             {

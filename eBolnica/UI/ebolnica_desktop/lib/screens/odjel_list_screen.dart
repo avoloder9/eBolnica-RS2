@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/models/doktor_model.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/base_provider.dart';
+import 'package:ebolnica_desktop/providers/doktor_provider.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/screens/novi_odjel_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
@@ -19,7 +20,7 @@ class OdjelListScreen extends StatefulWidget {
 
 class _OdjelListScreenState extends State<OdjelListScreen> {
   late OdjelProvider provider;
-
+  late DoktorProvider doktorProvider;
   SearchResult<Odjel>? result;
 
   final TextEditingController _nazivEditingController = TextEditingController();
@@ -31,14 +32,15 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
   void initState() {
     super.initState();
     provider = OdjelProvider();
+    doktorProvider = DoktorProvider();
     _loadInitialData();
   }
 
   Future<void> _loadDoktori(int odjelId) async {
     try {
-      final doktori = await provider.getDoktorByOdjelId(odjelId);
+      final doktori = await doktorProvider.get(filter: {"OdjelId": odjelId});
       setState(() {
-        _doktori = doktori;
+        _doktori = doktori.result;
         final odjel = result?.result.firstWhere(
           (odjel) => odjel.odjelId == odjelId,
           orElse: () => Odjel(),
@@ -58,7 +60,9 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
         setState(() {});
       });
     } catch (e) {
-      print("Greska prilikom ucitavanja doktora");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Greška pri učitavanju doktora')),
+      );
     }
   }
 
@@ -254,7 +258,11 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                                           userType: widget.userType,
                                         ),
                                       ),
-                                    );
+                                    ).then((refresh) {
+                                      if (refresh == true) {
+                                        _loadInitialData();
+                                      }
+                                    });
                                   },
                                   icon: const Icon(Icons.visibility),
                                   label: const Text("Detalji"),
@@ -274,15 +282,15 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
   }
 
   Widget setGlavniDoktor(int odjelId, String nazivOdjela, String nazivDoktora) {
-    final TextEditingController _nazivOdjelaController =
+    final TextEditingController nazivOdjelaController =
         TextEditingController(text: nazivOdjela);
 
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: 400,
         height: 260,
-        child: FutureBuilder<List<Doktor>>(
-          future: provider.getDoktorByOdjelId(odjelId),
+        child: FutureBuilder<SearchResult<Doktor>>(
+          future: doktorProvider.get(filter: {"OdjelId": odjelId}),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -294,12 +302,12 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
               }
 
               return Center(child: Text("Greška: ${snapshot.error}"));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            } else if (!snapshot.hasData || snapshot.data!.count == 0) {
               return const Center(child: Text("Nema dostupnih doktora."));
             } else {
               final doktori = snapshot.data!;
 
-              final glavniDoktor = doktori.firstWhere(
+              final glavniDoktor = doktori.result.firstWhere(
                   (doktor) => doktor.doktorId == _selectedDoktorId,
                   orElse: () => Doktor());
 
@@ -330,7 +338,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextField(
-                      controller: _nazivOdjelaController,
+                      controller: nazivOdjelaController,
                       enabled: false,
                       decoration: InputDecoration(
                         labelText: "Naziv",
@@ -367,7 +375,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 14, horizontal: 16),
                       ),
-                      items: doktori
+                      items: doktori.result
                           .map<DropdownMenuItem<int>>(
                             (doktor) => DropdownMenuItem<int>(
                               value: doktor.doktorId!,
@@ -400,7 +408,7 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                           onPressed: () async {
                             if (_selectedDoktorId != null) {
                               final updateRequest = {
-                                "Naziv": _nazivOdjelaController.text,
+                                "Naziv": nazivOdjelaController.text,
                                 "GlavniDoktorId": _selectedDoktorId
                               };
 

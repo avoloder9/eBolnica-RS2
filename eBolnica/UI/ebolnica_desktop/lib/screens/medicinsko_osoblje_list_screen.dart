@@ -7,7 +7,6 @@ import 'package:ebolnica_desktop/screens/novi_medicinsko_osoblje_screen.dart';
 import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class MedicinskoOsobljeListScreen extends StatefulWidget {
   final int userId;
@@ -25,6 +24,8 @@ class _MedicinskoOsobljeListScreenState
   SearchResult<MedicinskoOsoblje>? result;
   List<MedicinskoOsoblje> osoblje = [];
   List<MedicinskoOsoblje> filteredOsoblje = [];
+  List<String> odjeli = [];
+  String? selectedOdjel = '';
 
   int pageSize = 15;
   int page = 0;
@@ -33,11 +34,6 @@ class _MedicinskoOsobljeListScreenState
     super.initState();
     provider = MedicinskoOsobljeProvider();
     fetchOsoblje();
-  }
-
-  String formattedDate(date) {
-    final formatter = DateFormat('dd/MM/yyyy');
-    return formatter.format(date);
   }
 
   Future<void> fetchOsoblje() async {
@@ -92,14 +88,12 @@ class _MedicinskoOsobljeListScreenState
         children: [
           Expanded(
             child: TextField(
-              onChanged: (value) => filterOsoblje(value),
-              decoration: const InputDecoration(labelText: "Pretraga"),
-            ),
+                onChanged: (value) => filterOsoblje(value),
+                decoration: const InputDecoration(
+                    labelText: "Pretraga",
+                    hintText: "Unesite ime ili prezime osoblja")),
           ),
-          const SizedBox(
-            width: 8,
-          ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
               showDialog(
@@ -111,7 +105,10 @@ class _MedicinskoOsobljeListScreenState
                 },
               );
             },
-            child: const Text("Dodaj novo osoblje"),
+            child: const Text(
+              "Dodaj novo osoblje",
+              style: TextStyle(fontSize: 14),
+            ),
           ),
         ],
       ),
@@ -187,7 +184,7 @@ class _MedicinskoOsobljeListScreenState
                               context: context,
                               title: "Obrisati medicinsko osoblje?",
                               message:
-                                  "Da li ste sigurni da zelite ukloniti odabrano osoblje",
+                                  "Da li ste sigurni da želite ukloniti odabrano osoblje?",
                               confirmText: "Da",
                               onConfirm: () async {
                                 try {

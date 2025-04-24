@@ -36,15 +36,19 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
     pregledi = [];
     doktorId = await doktorProvider.getDoktorIdByKorisnikId(widget.userId);
     if (doktorId != null) {
-      var result = await doktorProvider.getPreglediByDoktorId(doktorId!);
+      var result = await pregledProvider.get(filter: {"DoktorId": doktorId});
       setState(() {
-        pregledi = result;
+        pregledi = result.result;
       });
       if (pregledi == null) {
-        print("Nema pregleda za ovog doktora");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Greška pri dohvaćanju doktora: ')),
+        );
       }
     } else {
-      print("Nije pronadjen doktor");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('nije pronađen doktor')),
+      );
     }
   }
 
@@ -66,6 +70,16 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
   }
 
   Widget _buildResultView() {
+    if (pregledi == null || pregledi!.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text(
+            "Nemate obavljenih pregleda",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
     return Expanded(
         child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -119,20 +133,20 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
             builder: (context, snapshot) {
               bool hasTerapija = snapshot.hasData && snapshot.data != null;
               double dialogHeight = hasTerapija
-                  ? MediaQuery.of(context).size.height * 0.57
-                  : MediaQuery.of(context).size.height * 0.35;
+                  ? MediaQuery.of(context).size.height * 0.50
+                  : MediaQuery.of(context).size.height * 0.3;
 
               return Container(
                 width: MediaQuery.of(context).size.width * 0.7,
                 height: dialogHeight,
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Detalji pregleda",
+                      "🩺 Detalji pregleda",
                       style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     Expanded(
@@ -140,48 +154,91 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDetailRow("Pacijent:",
-                                "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}"),
-                            _buildDetailRow(
-                                "Datum pregleda:",
-                                formattedDate(
-                                    pregled.uputnica!.termin!.datumTermina)),
-                            _buildDetailRow("Glavna dijagnoza:",
-                                pregled.glavnaDijagnoza.toString()),
-                            _buildDetailRow(
-                                "Anamneza:", pregled.anamneza.toString()),
-                            _buildDetailRow(
-                                "Zaključak:", pregled.zakljucak.toString()),
+                            buildDetailRowWithIcon(
+                              icon: Icons.person,
+                              label: "Pacijent:",
+                              value:
+                                  "${pregled.uputnica!.termin!.pacijent!.korisnik!.ime} ${pregled.uputnica!.termin!.pacijent!.korisnik!.prezime}",
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.calendar_today,
+                              label: "Datum pregleda:",
+                              value: formattedDate(
+                                  pregled.uputnica!.termin!.datumTermina),
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.assignment,
+                              label: "Glavna dijagnoza:",
+                              value: pregled.glavnaDijagnoza ?? "N/A",
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.notes,
+                              label: "Anamneza:",
+                              value: pregled.anamneza ?? "N/A",
+                            ),
+                            buildDetailRowWithIcon(
+                              icon: Icons.check_circle_outline,
+                              label: "Zaključak:",
+                              value: pregled.zakljucak ?? "N/A",
+                            ),
                             if (hasTerapija) ...[
-                              const SizedBox(height: 20),
-                              const Text(
-                                "Terapija",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
+                              const SizedBox(height: 10),
                               const Divider(),
-                              _buildDetailRow("Naziv terapije:",
-                                  snapshot.data!.naziv.toString()),
-                              _buildDetailRow(
-                                  "Opis:", snapshot.data!.opis.toString()),
-                              _buildDetailRow("Datum početka:",
-                                  formattedDate(snapshot.data!.datumPocetka)),
-                              _buildDetailRow("Datum završetka:",
-                                  formattedDate(snapshot.data!.datumZavrsetka)),
+                              const Row(
+                                children: [
+                                  Icon(Icons.medical_services,
+                                      size: 22, color: Colors.blueGrey),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Terapija",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              buildDetailRowWithIcon(
+                                icon: Icons.label,
+                                label: "Naziv terapije:",
+                                value: snapshot.data!.naziv!,
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.description,
+                                label: "Opis:",
+                                value: snapshot.data!.opis ?? "N/A",
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.calendar_today,
+                                label: "Datum početka:",
+                                value:
+                                    formattedDate(snapshot.data!.datumPocetka),
+                              ),
+                              buildDetailRowWithIcon(
+                                icon: Icons.event_available,
+                                label: "Datum završetka:",
+                                value: formattedDate(
+                                    snapshot.data!.datumZavrsetka),
+                              ),
                             ],
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("Zatvori",
-                            style: TextStyle(fontSize: 18)),
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 12),
+                        ),
+                        child: const Text(
+                          "Zatvori",
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   ],
@@ -191,28 +248,6 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "$label ",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-              softWrap: true,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

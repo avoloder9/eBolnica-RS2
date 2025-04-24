@@ -11,7 +11,6 @@ namespace eBolnica.Services.Interfaces
 {
     public interface IOperacijaService : ICRUDService<Operacija, OperacijaSearchObject, OperacijaInsertRequest, OperacijaUpdateRequest>
     {
-        public List<Model.Models.Operacija> GetOperacijaByPacijentId(int pacijentId);
         public Operacija Activate(int id);
         public Operacija Hide(int id);
         public Operacija Edit(int id);

@@ -24,7 +24,7 @@ namespace eBolnica.API
                 return AuthenticateResult.Fail("Missing header");
             }
             var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
-            var credentialsBytes = Convert.FromBase64String(authHeader.Parameter);
+            var credentialsBytes = Convert.FromBase64String(authHeader.Parameter!);
             var credentials = Encoding.UTF8.GetString(credentialsBytes).Split(':');
 
             var username = credentials[0];
@@ -36,12 +36,30 @@ namespace eBolnica.API
             }
             else
             {
-                var claims = new List<Claim>()
+                var roles = new List<string>();
+
+                if (_korisnikService.isKorisnikAdministrator(authenticationResponse!.UserId!.Value))
+                    roles.Add("Administrator");
+
+                if (_korisnikService.isKorisnikDoktor(authenticationResponse!.UserId!.Value))
+                    roles.Add("Doktor");
+
+                if (_korisnikService.isKorisnikMedicinskoOsoblje(authenticationResponse!.UserId!.Value))
+                    roles.Add("MedicinskoOsoblje");
+
+                if (_korisnikService.isKorisnikPacijent(authenticationResponse!.UserId!.Value))
+                    roles.Add("Pacijent");
+
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, username),
-                    new Claim(ClaimTypes.NameIdentifier, authenticationResponse.UserId.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, authenticationResponse.UserId.ToString()!)
                 };
 
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
                 var identity = new ClaimsIdentity(claims, Scheme.Name);
 
                 var principal = new ClaimsPrincipal(identity);
