@@ -102,7 +102,7 @@ class _PacijentNalaziScreenState extends State<PacijentNalaziScreen> {
           columns: const [
             DataColumn(label: Text("Doktor")),
             DataColumn(label: Text("Datum nalaza")),
-            DataColumn(label: Text("Akcija")),
+            DataColumn(label: Text("")),
           ],
           rows: List.generate(nalazi!.length, (index) {
             final e = nalazi![index];

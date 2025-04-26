@@ -81,43 +81,50 @@ class _DoktorPreglediScreenState extends State<DoktorPreglediScreen> {
       );
     }
     return Expanded(
-        child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text("Pacijent")),
-            DataColumn(label: Text("Datum pregleda")),
-            DataColumn(label: Text("Glavna dijagnoza")),
-            DataColumn(label: Text("Anamneza")),
-            DataColumn(label: Text("Zakljucak")),
-            DataColumn(label: Text("")),
-          ],
-          rows: pregledi!
-              .map<DataRow>(
-                (e) => DataRow(
-                  cells: [
-                    DataCell(Text(
-                        "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime} ")),
-                    DataCell(Text(
-                        formattedDate((e.uputnica!.termin!.datumTermina)))),
-                    DataCell(Text(e.glavnaDijagnoza.toString())),
-                    DataCell(Text(e.anamneza.toString())),
-                    DataCell(Text(e.zakljucak.toString())),
-                    DataCell(ElevatedButton(
-                      child: const Text("Detalji"),
-                      onPressed: () {
-                        showPregledDetailsDialog(context, e);
-                      },
-                    ))
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: IntrinsicWidth(
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text("Pacijent")),
+                    DataColumn(label: Text("Datum pregleda")),
+                    DataColumn(label: Text("Glavna dijagnoza")),
+                    DataColumn(label: Text("Anamneza")),
+                    DataColumn(label: Text("Zakljucak")),
+                    DataColumn(label: Text("")),
                   ],
+                  rows: pregledi!
+                      .map<DataRow>(
+                        (e) => DataRow(
+                          cells: [
+                            DataCell(Text(
+                                "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime}")),
+                            DataCell(Text(formattedDate(
+                                e.uputnica!.termin!.datumTermina))),
+                            DataCell(Text(e.glavnaDijagnoza.toString())),
+                            DataCell(Text(e.anamneza.toString())),
+                            DataCell(Text(e.zakljucak.toString())),
+                            DataCell(ElevatedButton(
+                              child: const Text("Detalji"),
+                              onPressed: () {
+                                showPregledDetailsDialog(context, e);
+                              },
+                            ))
+                          ],
+                        ),
+                      )
+                      .toList(),
                 ),
-              )
-              .toList(),
-        ),
+              ),
+            ),
+          );
+        },
       ),
-    ));
+    );
   }
 
   void showPregledDetailsDialog(BuildContext context, Pregled pregled) {

@@ -516,8 +516,8 @@ class _PacijentDetaljiScreenState extends State<PacijentDetaljiScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDetailRow(Icons.person, "Pacijent:",
-                                "${pregled.imePacijenta} ${pregled.prezimePacijenta}"),
+                            _buildDetailRow(Icons.person, "Doktor:",
+                                "${pregled.imeDoktora} ${pregled.prezimeDoktora}"),
                             _buildDetailRow(
                                 Icons.calendar_today,
                                 "Datum pregleda:",

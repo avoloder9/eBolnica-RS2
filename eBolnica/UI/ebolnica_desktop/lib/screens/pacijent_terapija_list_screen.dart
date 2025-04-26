@@ -24,11 +24,6 @@ class _TerapijaScreenState extends State<TerapijaScreen> {
     super.initState();
     pacijentProvider = PacijentProvider();
     terapijaProvider = TerapijaProvider();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     fetchTerapije();
   }
 

@@ -68,11 +68,6 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (termini == null || termini!.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        fetchTermini();
-      });
-    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Termini"),
@@ -215,16 +210,41 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Potvrda"),
-          content: const Text("Da li ste sigurni da želite kreirati uputnicu?"),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            "Potvrda",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            "Da li ste sigurni da želite kreirati uputnicu?",
+            style: TextStyle(fontSize: 18),
+          ),
+          actionsPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red.shade400,
+                textStyle: const TextStyle(fontSize: 16),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
               child: const Text("Ne"),
             ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(fontSize: 16),
+                elevation: 0, // bez velike sjene
+              ),
               onPressed: () async {
                 var request = {
                   "TerminId": termin.terminId,
@@ -235,18 +255,22 @@ class _OdjelTerminiScreenState extends State<OdjelTerminiScreen> {
                 try {
                   await uputnicaProvider.insert(request);
                   Navigator.of(context).pop();
-                  await Flushbar(
-                          message: "Uputnica uspješno kreirana",
-                          backgroundColor: Colors.green,
-                          duration: const Duration(seconds: 3))
-                      .show(context);
+                  if (context.mounted) {
+                    await Flushbar(
+                      message: "Uputnica uspješno kreirana",
+                      backgroundColor: Colors.green.shade600,
+                      duration: const Duration(seconds: 3),
+                    ).show(context);
+                  }
                   setState(() {});
                 } catch (error) {
-                  await Flushbar(
-                          message: "Došlo je do greške. Pokušajte ponovo.",
-                          backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 3))
-                      .show(context);
+                  if (context.mounted) {
+                    await Flushbar(
+                      message: "Došlo je do greške. Pokušajte ponovo.",
+                      backgroundColor: Colors.red.shade400,
+                      duration: const Duration(seconds: 3),
+                    ).show(context);
+                  }
                 }
               },
               child: const Text("Da"),

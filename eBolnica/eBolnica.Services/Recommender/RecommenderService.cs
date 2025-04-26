@@ -27,7 +27,6 @@ namespace eBolnica.Services.Recommender
                 {
                     _mlContext = new MLContext();
                 }
-
                 if (File.Exists(ModelFilePath))
                 {
                     using (var stream = new FileStream(ModelFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -38,16 +37,16 @@ namespace eBolnica.Services.Recommender
                 else
                 {
                     var termini = Context.Termins.ToList();
-
+                    var obavljeniPregledi = Context.Pregleds.Where(p => p.Uputnica.Termin.PacijentId == p.Uputnica.Termin.PacijentId && p.Uputnica.StateMachine == "closed")
+                     .Include(p => p.Uputnica).ThenInclude(u => u.Termin).ToList();
                     var data = termini.Select(t => new DoktorPacijentInteraction
                     {
                         PacijentId = (uint)t.PacijentId,
                         DoktorId = (uint)t.DoktorId,
-                        Label = 1f
+                        Label = obavljeniPregledi.Any(p => p.Uputnica.Termin.DoktorId == t.DoktorId) ? 1f : 0f 
                     }).ToList();
 
                     var trainingData = _mlContext.Data.LoadFromEnumerable(data);
-
                     var options = new Microsoft.ML.Trainers.MatrixFactorizationTrainer.Options
                     {
                         MatrixColumnIndexColumnName = nameof(DoktorPacijentInteraction.PacijentId),
@@ -62,7 +61,6 @@ namespace eBolnica.Services.Recommender
 
                     var est = _mlContext.Recommendation().Trainers.MatrixFactorization(options);
                     _model = est.Fit(trainingData);
-
                     using (var stream = new FileStream(ModelFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
                     {
                         _mlContext.Model.Save(_model, trainingData.Schema, stream);
@@ -73,18 +71,24 @@ namespace eBolnica.Services.Recommender
         public List<Model.Models.Doktor> GetPreporuceniDoktori(int pacijentId, int brojPreporuka = 3)
         {
             var doktori = Context.Doktors.Include(d => d.Korisnik).ToList();
+            var obavljeniPregledi = Context.Pregleds
+                .Where(p => p.Uputnica.Termin.PacijentId == pacijentId && p.Uputnica.StateMachine == "closed")
+                .Include(p => p.Uputnica).ThenInclude(u => u.Termin).ToList();
 
-            var prethodniTermini = Context.Termins
-                .Where(t => t.PacijentId == pacijentId)
-                .Include(t => t.Doktor)
-                .ThenInclude(d => d.Korisnik)
+            var obavljeniDoktori = obavljeniPregledi.Select(p => p.Uputnica.Termin.Doktor).Distinct().ToList();
+            var doktoriBezPrethodnih = doktori.Where(d => !obavljeniDoktori.Any(od => od.DoktorId == d.DoktorId)).ToList();
+            var zakazaniPregledi = Context.Uputnicas
+                .Where(u => u.Termin.PacijentId == pacijentId &&
+                            (u.StateMachine != "closed" || u.Termin == null))
+                .Include(u => u.Termin)
+                .Select(u => u.Termin.Doktor)
+                .Distinct()
                 .ToList();
 
-            var prethodniDoktori = prethodniTermini.Select(t => t.Doktor).Distinct().ToList();
-
-            if (!prethodniDoktori.Any())
+            var doktoriZaPreporuku = doktoriBezPrethodnih.Concat(zakazaniPregledi).Distinct().ToList();
+            if (!obavljeniDoktori.Any() && !zakazaniPregledi.Any())
             {
-                return doktori.Take(brojPreporuka).Select(d => new Model.Models.Doktor
+                return doktoriZaPreporuku.Take(brojPreporuka).Select(d => new Model.Models.Doktor
                 {
                     DoktorId = d.DoktorId,
                     Korisnik = new Model.Models.Korisnik
@@ -101,16 +105,15 @@ namespace eBolnica.Services.Recommender
                 }).ToList();
             }
 
-            var doktorTextData = doktori.Select(d => new
+            var doktorTextData = doktoriZaPreporuku.Select(d => new
             {
                 Doktor = d,
                 Text = $"{d.Specijalizacija} {d.Biografija}"
             }).ToList();
 
-            var pacijentProfilTekst = string.Join(" ", prethodniDoktori.Select(d => $"{d.Specijalizacija} {d.Biografija}"));
+            var pacijentProfilTekst = string.Join(" ", obavljeniPregledi.Select(p => $"{p.Uputnica.Termin.Doktor.Specijalizacija} {p.Uputnica.Termin.Doktor.Biografija}"));
 
             var mlContext = new MLContext();
-
             var podaci = doktorTextData.Select(d => new DoktorText { Text = d.Text }).ToList();
             podaci.Add(new DoktorText { Text = pacijentProfilTekst });
 
@@ -119,7 +122,6 @@ namespace eBolnica.Services.Recommender
             var pipeline = mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: nameof(DoktorText.Text));
             var transformer = pipeline.Fit(dataView);
             var transformedData = transformer.Transform(dataView);
-
             var featureColumn = transformedData.GetColumn<float[]>("Features").ToArray();
 
             var pacijentVector = featureColumn.Last();

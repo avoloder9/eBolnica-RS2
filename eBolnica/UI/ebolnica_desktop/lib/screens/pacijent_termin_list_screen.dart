@@ -21,18 +21,12 @@ class _TerminiScreenState extends State<TerminiScreen> {
   late TerminProvider terminProvider;
   List<Termin>? termini = [];
   bool _isLoading = true;
-  bool _dataFetched = false;
 
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
     terminProvider = TerminProvider();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     fetchTermini();
   }
 
@@ -59,13 +53,6 @@ class _TerminiScreenState extends State<TerminiScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_dataFetched) {
-      _dataFetched = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        fetchTermini();
-      });
-    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Termini"),

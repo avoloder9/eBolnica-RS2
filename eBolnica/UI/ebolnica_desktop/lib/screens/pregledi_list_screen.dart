@@ -55,8 +55,9 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(minWidth: MediaQuery.of(context).size.width),
           child: DataTable(
             headingRowHeight: 56,
             columnSpacing: 24,

@@ -225,6 +225,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                     },
                   ),
                 _buildDatePicker(),
+                const SizedBox(height: 10),
                 _buildTimeSelector(),
                 const SizedBox(height: 20),
                 Row(
