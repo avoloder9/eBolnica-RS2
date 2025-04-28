@@ -99,7 +99,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             .show(context);
 
         if (!mounted) return;
-        Future.delayed(const Duration(seconds: 3), () {
+        Future.delayed(const Duration(seconds: 1), () {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

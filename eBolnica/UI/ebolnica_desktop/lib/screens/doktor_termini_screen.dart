@@ -103,6 +103,19 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
       return;
     }
 
+    var medicinskaDokumentacija = await dokumentacijaProvider
+        .getMedicinskaDokumentacijaByPacijentId(pacijentId);
+
+    if (medicinskaDokumentacija == null) {
+      await Flushbar(
+        message:
+            "Pregled nije moguće obaviti jer pacijent nema otvorenu medicinsku dokumentaciju",
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ).show(context);
+      return;
+    }
+
     TextEditingController dijagnozaController = TextEditingController();
     TextEditingController anamnezaController = TextEditingController();
     TextEditingController zakljucakController = TextEditingController();

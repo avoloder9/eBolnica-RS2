@@ -36,6 +36,15 @@ namespace eBolnica.API.Controllers
                 case AuthenticationResult.Success:
                     var userId = authenticationResponse.UserId;
 
+                    var korisnik = await Context.Korisniks.FindAsync(userId);
+                    if (korisnik == null)
+                    {
+                        return NotFound(new { message = "Korisnik nije pronadjen." });
+                    }
+                    if (!korisnik!.Status || (korisnik.Obrisano && korisnik.VrijemeBrisanja != null))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, new { message = "Korisnicki racun je deaktiviran ili obrisan." });
+                    }
                     if (korisnikService.isKorisnikDoktor((int)userId!))
                     {
                         userType = "doktor";
@@ -77,10 +86,10 @@ namespace eBolnica.API.Controllers
                     }
                     return Ok(new { UserId = authenticationResponse.UserId, UserType = userType, Korisnik = authenticationResponse.Korisnik, Odjel = odjelNaziv });
                 case AuthenticationResult.UserNotFound:
-                    return Unauthorized(new { message = "Korisnik nije pronadjen." });
+                    return NotFound(new { message = "Korisnik nije pronadjen." });
 
                 case AuthenticationResult.InvalidPassword:
-                    return Unauthorized(new { message = "Pogresno korisnicko ime ili lozinka." });
+                    return BadRequest(new { message = "Pogresno korisnicko ime ili lozinka." });
 
                 default:
                     return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do neocekivane greške." });

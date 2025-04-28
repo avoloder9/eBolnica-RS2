@@ -275,7 +275,8 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = "Pogrešno korisničko ime ili lozinka.";
         } else if (e.statusCode == 403) {
           final errorResponse = jsonDecode(e.body);
-          errorMessage = errorResponse['message'] ?? "Pristup odbijen.";
+          errorMessage = errorResponse['message'] ??
+              "Korisnički profil je deaktiviran ili obrisan.";
         } else if (e.statusCode == 500) {
           errorMessage = "Greška na serveru. Pokušajte kasnije.";
         }
