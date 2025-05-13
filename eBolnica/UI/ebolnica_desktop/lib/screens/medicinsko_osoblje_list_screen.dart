@@ -186,6 +186,7 @@ class _MedicinskoOsobljeListScreenState
                               message:
                                   "Da li ste sigurni da želite ukloniti odabrano osoblje?",
                               confirmText: "Da",
+                              isWarning: true,
                               onConfirm: () async {
                                 try {
                                   await provider.delete(e.medicinskoOsobljeId!);

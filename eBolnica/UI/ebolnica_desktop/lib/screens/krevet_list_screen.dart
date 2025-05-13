@@ -187,6 +187,7 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                                             message:
                                                 "Da li ste sigurni da želite ukloniti krevet?",
                                             confirmText: "Da",
+                                            isWarning: true,
                                             onConfirm: () async {
                                               try {
                                                 await krevetProvider

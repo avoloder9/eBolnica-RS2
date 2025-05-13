@@ -301,6 +301,7 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                       message:
                                           "Da li ste sigurni da želite ukloniti pacijenta?",
                                       confirmText: "Da",
+                                      isWarning: true,
                                       onConfirm: () async {
                                         try {
                                           await provider.delete(e.pacijentId!);

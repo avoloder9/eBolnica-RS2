@@ -201,6 +201,7 @@ class _SobaListScreenState extends State<SobaListScreen> {
                                           message:
                                               "Da li ste sigurni da želite ukloniti sobu?",
                                           confirmText: "Da",
+                                          isWarning: true,
                                           onConfirm: () async {
                                             try {
                                               await sobaProvider

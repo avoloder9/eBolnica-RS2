@@ -6,15 +6,17 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["eBolnica.API/eBolnica.API.csproj", "eBolnica.API/"]
 RUN dotnet restore "eBolnica.API/eBolnica.API.csproj"
 COPY . .
 WORKDIR "/src/eBolnica.API"
-RUN dotnet build "eBolnica.API.csproj" -c Release -o /app/build
+RUN dotnet build "eBolnica.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "eBolnica.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "eBolnica.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

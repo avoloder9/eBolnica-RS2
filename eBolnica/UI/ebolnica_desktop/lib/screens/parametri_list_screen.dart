@@ -96,6 +96,7 @@ class _ParametriListScreenState extends State<ParametriListScreen> {
                                   message:
                                       "Da li ste sigurni da želite ukloniti parametar",
                                   confirmText: "Da",
+                                  isWarning: true,
                                   onConfirm: () async {
                                     try {
                                       await parametarProvider

@@ -133,6 +133,7 @@ Future<bool?> showCustomDialog({
   required String confirmText,
   required VoidCallback onConfirm,
   String cancelText = "Odustani",
+  bool isWarning = false,
 }) {
   return showDialog<bool>(
     context: context,
@@ -149,9 +150,9 @@ Future<bool?> showCustomDialog({
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
+                Icon(
+                  isWarning ? Icons.error_outline_outlined : Icons.check_circle,
+                  color: isWarning ? Colors.red : Colors.green,
                   size: 60,
                 ),
                 const SizedBox(height: 12),
@@ -189,7 +190,7 @@ Future<bool?> showCustomDialog({
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: isWarning ? Colors.red : Colors.green,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
