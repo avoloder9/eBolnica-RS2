@@ -59,7 +59,7 @@ class _DnevniRasporedScreenState extends State<DnevniRasporedScreen> {
                       dnevniRaspored!.operacije.isEmpty)
               ? const Center(
                   child: Text(
-                    "Nema zakazanih termina ni operacija za danas.",
+                    "Nema zakazanih termina za danas.",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 )

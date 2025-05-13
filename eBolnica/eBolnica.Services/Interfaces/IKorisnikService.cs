@@ -17,6 +17,8 @@ namespace eBolnica.Services.Interfaces
         public bool isKorisnikAdministrator(int userId);
         public bool isKorisnikMedicinskoOsoblje(int userId);
         public bool isKorisnikPacijent(int userId);
+        bool PostojiEmail(string email);
+        bool KorisnickoImePostoji(string korisnickoIme);
 
     }
 }

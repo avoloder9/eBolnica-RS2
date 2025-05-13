@@ -158,7 +158,7 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          DateFormat('yyyy-MM-dd').format(selectedDate),
+                          DateFormat('dd.MM.yyyy').format(selectedDate),
                           style: const TextStyle(fontSize: 18),
                         ),
                         const Icon(Icons.calendar_today),

@@ -290,7 +290,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  DateFormat('yyyy-MM-dd').format(selectedDate),
+                  DateFormat('dd.MM.yyyy').format(selectedDate),
                   style: const TextStyle(fontSize: 16),
                 ),
                 const Icon(Icons.calendar_today, color: Colors.blue),

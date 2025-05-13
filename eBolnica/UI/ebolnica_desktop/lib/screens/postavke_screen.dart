@@ -180,7 +180,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         updatedData["Email"] = emailController.text;
       }
       if (datumRodjenjaController.text.isNotEmpty) {
-        updatedData["DatumRodjenja"] = DateFormat("dd/MM/yyyy")
+        updatedData["DatumRodjenja"] = DateFormat("dd.MM.yyyy")
             .parse(datumRodjenjaController.text)
             .toIso8601String();
       }
@@ -202,7 +202,7 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
       }
       if (widget.userType == "medicinsko osoblje") {
         if (userData != null && userData.odjel != null) {
-          updatedData["Odjel"] = userData.odjel;
+          updatedData["OdjelId"] = userData.odjelId;
         }
       }
       if (_imageBytes != null) {
@@ -233,6 +233,8 @@ class _PostavkeScreenState extends State<PostavkeScreen> {
         }
         setState(() {
           _isEditing = false;
+          lozinkaController.text = "";
+          lozinkaPotvrdaController.text = "";
         });
 
         Flushbar(

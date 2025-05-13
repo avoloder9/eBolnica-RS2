@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_mobile/main.dart';
+import 'package:ebolnica_mobile/providers/korisnik_provider.dart';
 import 'package:ebolnica_mobile/providers/pacijent_provider.dart';
 import 'package:ebolnica_mobile/utils/password_validator.dart';
 import 'package:ebolnica_mobile/utils/utils.dart';
@@ -33,11 +34,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController adresaController = TextEditingController();
   late TextEditingController datumRodjenjaController;
   late PacijentProvider pacijentProvider;
-
+  late KorisnikProvider korisnikProvider;
+  String? _emailError;
+  String? _korisnickoImeError;
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
+    korisnikProvider = KorisnikProvider();
     datumRodjenjaController = TextEditingController(
       text: datumRodjenja != null
           ? '${datumRodjenja!.day}/${datumRodjenja!.month}/${datumRodjenja!.year}'
@@ -83,6 +87,54 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   int _generateHealthCardNumber() {
     Random random = Random();
     return 10000 + random.nextInt(90000);
+  }
+
+  Future<String?> validirajEmail(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Email je obavezan';
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+      return 'Molimo unesite validan email';
+    }
+    try {
+      bool postoji = await korisnikProvider.provjeriEmail(value);
+      if (postoji) {
+        return 'Email je već u upotrebi';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri emaila: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  Future<String?> validirajKorisnickoIme(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Korisničko ime je obavezno';
+    }
+
+    try {
+      bool postoji = await korisnikProvider.provjeriKorisnickoIme(value);
+      if (postoji) {
+        return 'Korisničko ime je već zauzeto';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri korisničkog imena: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  void _onEmailChanged(String value) async {
+    _emailError = await validirajEmail(value, korisnikProvider);
+    setState(() {});
+  }
+
+  void _onKorisnickoImeChanged(String value) async {
+    _korisnickoImeError = await validirajKorisnickoIme(value, korisnikProvider);
+    setState(() {});
   }
 
   Future<void> _sendRegistrationRequest() async {
@@ -265,10 +317,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             const SizedBox(height: 40),
             _buildTextField(imeController, "Ime", Icons.person),
             _buildTextField(prezimeController, "Prezime", Icons.person_outline),
-            _buildTextField(emailController, "Email", Icons.email,
-                TextInputType.emailAddress),
-            _buildTextField(korisnickoImeController, "Korisničko Ime",
-                Icons.account_circle),
+            _buildTextField(
+              emailController,
+              'Email',
+              Icons.email,
+              errorText: _emailError,
+              onChanged: _onEmailChanged,
+            ),
+            _buildTextField(
+              korisnickoImeController,
+              'Korisničko ime',
+              Icons.person,
+              errorText: _korisnickoImeError,
+              onChanged: _onKorisnickoImeChanged,
+            ),
             _buildTextField(lozinkaController, "Lozinka", Icons.lock),
             _buildTextField(
                 lozinkaPotvrdaController, "Lozinka potvrda", Icons.lock)
@@ -324,7 +386,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             const SizedBox(height: 15),
             _buildTextField(
-                telefonController, 'Telefon', Icons.phone, TextInputType.phone),
+              telefonController,
+              'Telefon',
+              Icons.phone,
+            ),
             const SizedBox(height: 15),
             DropdownButtonFormField<String>(
               value: spol.isEmpty ? null : spol,
@@ -340,7 +405,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               items: const [
                 DropdownMenuItem(value: 'Muški', child: Text('Muški')),
-                DropdownMenuItem(value: 'zenski', child: Text('zenski')),
+                DropdownMenuItem(value: 'Ženski', child: Text('Ženski')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -408,8 +473,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String label, IconData icon,
-      [TextInputType type = TextInputType.text]) {
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType type = TextInputType.text,
+    String? errorText,
+    void Function(String)? onChanged,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
@@ -458,8 +528,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           if (label == "Lozinka potvrda" && value != lozinkaController.text) {
             return "Lozinke se ne poklapaju";
           }
+          if (label == "Email" && _emailError != null) return _emailError;
+          if (label == "Korisničko ime" && _korisnickoImeError != null) {
+            return _korisnickoImeError;
+          }
           return null;
         },
+        onChanged: onChanged,
       ),
     );
   }

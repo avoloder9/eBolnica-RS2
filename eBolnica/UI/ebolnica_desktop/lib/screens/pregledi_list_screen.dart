@@ -1,4 +1,5 @@
 import 'package:ebolnica_desktop/models/pregled_model.dart';
+import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/models/terapija_model.dart';
 import 'package:ebolnica_desktop/providers/pregled_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
@@ -18,7 +19,9 @@ class PreglediListScreen extends StatefulWidget {
 class _PreglediListScreenState extends State<PreglediListScreen> {
   late TerapijaProvider terapijaProvider;
   late PregledProvider pregledProvider;
-  List<Pregled>? pregledi = [];
+  int pageSize = 15;
+  int page = 0;
+  SearchResult<Pregled>? pregledi;
   @override
   void initState() {
     super.initState();
@@ -28,10 +31,10 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
   }
 
   Future<void> fetchPregledi() async {
-    pregledi = [];
-    var result = await pregledProvider.get();
+    pregledi = null;
+    var result = await pregledProvider.get(page: page, pageSize: pageSize);
     setState(() {
-      pregledi = result.result;
+      pregledi = result;
     });
   }
 
@@ -46,7 +49,7 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
         userType: widget.userType!,
       ),
       body: Column(
-        children: [_buildResultView()],
+        children: [_buildResultView(), _buildPaginationControls()],
       ),
     );
   }
@@ -59,74 +62,105 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
           constraints:
               BoxConstraints(minWidth: MediaQuery.of(context).size.width),
           child: DataTable(
-            headingRowHeight: 56,
-            columnSpacing: 24,
-            horizontalMargin: 16,
-            columns: const [
-              DataColumn(
-                  label: Text("Pacijent",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(
-                  label: Text("Datum pregleda",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(
-                  label: Text("Glavna dijagnoza",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(
-                  label: Text("Anamneza",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(
-                  label: Text("Zakljucak",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold))),
-              DataColumn(label: Text("")),
-            ],
-            rows: pregledi!
-                .map<DataRow>(
-                  (e) => DataRow(
-                    cells: [
-                      DataCell(Text(
-                          "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime}",
-                          style: const TextStyle(fontSize: 14))),
-                      DataCell(Text(
-                          formattedDate(e.uputnica!.termin!.datumTermina),
-                          style: const TextStyle(fontSize: 14))),
-                      DataCell(Text(e.glavnaDijagnoza.toString(),
-                          style: const TextStyle(fontSize: 14))),
-                      DataCell(Text(e.anamneza.toString(),
-                          style: const TextStyle(fontSize: 14))),
-                      DataCell(Text(e.zakljucak.toString(),
-                          style: const TextStyle(fontSize: 14))),
-                      DataCell(
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+              headingRowHeight: 56,
+              columnSpacing: 24,
+              horizontalMargin: 16,
+              columns: const [
+                DataColumn(
+                    label: Text("Pacijent",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text("Datum pregleda",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text("Glavna dijagnoza",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text("Anamneza",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text("Zakljucak",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DataColumn(label: Text("")),
+              ],
+              rows: pregledi?.result
+                      .map<DataRow>(
+                        (e) => DataRow(
+                          cells: [
+                            DataCell(Text(
+                                "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime}",
+                                style: const TextStyle(fontSize: 14))),
+                            DataCell(Text(
+                                formattedDate(e.uputnica!.termin!.datumTermina),
+                                style: const TextStyle(fontSize: 14))),
+                            DataCell(Text(e.glavnaDijagnoza.toString(),
+                                style: const TextStyle(fontSize: 14))),
+                            DataCell(Text(e.anamneza.toString(),
+                                style: const TextStyle(fontSize: 14))),
+                            DataCell(Text(e.zakljucak.toString(),
+                                style: const TextStyle(fontSize: 14))),
+                            DataCell(
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.blue,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Detalji",
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                onPressed: () {
+                                  showPregledDetailsDialog(context, e);
+                                },
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            "Detalji",
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          onPressed: () {
-                            showPregledDetailsDialog(context, e);
-                          },
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                )
-                .toList(),
-          ),
+                      )
+                      .toList() ??
+                  []),
         ),
       ),
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: page > 0
+              ? () async {
+                  page--;
+                  pregledi = await pregledProvider
+                      .get(filter: {}, page: page, pageSize: pageSize);
+                  setState(() {});
+                }
+              : null,
+        ),
+        Text("Strana ${page + 1}"),
+        IconButton(
+          icon: const Icon(Icons.arrow_forward),
+          onPressed: pregledi != null && pregledi!.result.length == pageSize
+              ? () async {
+                  page++;
+                  pregledi = await pregledProvider
+                      .get(filter: {}, page: page, pageSize: pageSize);
+                  setState(() {});
+                }
+              : null,
+        ),
+      ],
     );
   }
 

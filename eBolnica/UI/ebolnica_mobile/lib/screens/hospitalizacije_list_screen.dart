@@ -29,7 +29,7 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
 
   Future<void> fetchHospitalizacije() async {
     hospitalizacije = await hospitalizacijaProvider
-        .get(filter: {'odjel': widget.nazivOdjela});
+        .get(filter: {'nazivOdjela': widget.nazivOdjela});
     setState(() {});
   }
 
@@ -56,8 +56,8 @@ class _HospitalizacijaListScreenState extends State<HospitalizacijaListScreen> {
         child: hospitalizacije == null || hospitalizacije!.result.isEmpty
             ? const Center(
                 child: Text(
-                  "Nema hospitalizovanih pacijenata.",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  "Nema hospitalizovanih pacijenata na ovom odjelu.",
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
                 ),
               )
             : ListView.builder(

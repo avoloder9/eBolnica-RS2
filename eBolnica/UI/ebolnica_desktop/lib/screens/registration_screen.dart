@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/main.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
+import 'package:ebolnica_desktop/providers/korisnik_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/utils/password_validator.dart';
 import 'package:ebolnica_desktop/utils/validator.dart';
@@ -27,14 +28,55 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController telefonController = TextEditingController();
   final TextEditingController adresaController = TextEditingController();
   late PacijentProvider pacijentProvider;
+  String? _emailError;
+  String? _korisnickoImeError;
+  late KorisnikProvider korisnikProvider;
   @override
   void initState() {
     super.initState();
     pacijentProvider = PacijentProvider();
+    korisnikProvider = KorisnikProvider();
   }
 
   DateTime? datumRodjenja;
   String spol = '';
+  Future<String?> validirajEmail(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Email je obavezan';
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+      return 'Molimo unesite validan email';
+    }
+    try {
+      bool postoji = await korisnikProvider.provjeriEmail(value);
+      if (postoji) {
+        return 'Email je već u upotrebi';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri emaila: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  Future<String?> validirajKorisnickoIme(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Korisničko ime je obavezno';
+    }
+
+    try {
+      bool postoji = await korisnikProvider.provjeriKorisnickoIme(value);
+      if (postoji) {
+        return 'Korisničko ime je već zauzeto';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri korisničkog imena: ${e.toString()}';
+    }
+
+    return null;
+  }
 
   int _calculateAge(DateTime birthDate) {
     final now = DateTime.now();
@@ -118,6 +160,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  void _onEmailChanged(String value) async {
+    _emailError = await validirajEmail(value, korisnikProvider);
+    setState(() {});
+  }
+
+  void _onKorisnickoImeChanged(String value) async {
+    _korisnickoImeError = await validirajKorisnickoIme(value, korisnikProvider);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,14 +221,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       _buildTextField(
                         emailController,
                         'Email',
-                        validator: (value) => generalValidator(
-                            value, 'email', [notEmpty, validEmail]),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email je obavezan';
+                          }
+                          return _emailError;
+                        },
+                        onChanged: _onEmailChanged,
                       ),
                       _buildTextField(
                         korisnickoImeController,
                         'Korisničko ime',
-                        validator: (value) => generalValidator(
-                            value, 'korisničko ime', [notEmpty]),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Korisničko ime je obavezno';
+                          }
+                          return _korisnickoImeError;
+                        },
+                        onChanged: _onKorisnickoImeChanged,
                       ),
                       _buildTextField(lozinkaController, 'Lozinka',
                           obscureText: true, validator: (value) {
@@ -301,7 +363,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       {bool obscureText = false,
       int? maxLength,
       TextInputType? keyboardType,
-      String? Function(String?)? validator}) {
+      String? Function(String?)? validator,
+      void Function(String)? onChanged}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -314,6 +377,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           counterText: '',
         ),
         validator: validator,
+        onChanged: onChanged,
       ),
     );
   }

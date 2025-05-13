@@ -13,6 +13,7 @@ using eBolnica.Services.Helpers;
 using eBolnica.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML;
 
 namespace eBolnica.Services.Services
 {
@@ -122,11 +123,11 @@ namespace eBolnica.Services.Services
                 return new AuthenticationResponse { Result = AuthenticationResult.InvalidPassword };
             }
 
-            return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId, Korisnik=user};
+            return new AuthenticationResponse { Result = AuthenticationResult.Success, UserId = user.KorisnikId, Korisnik = user };
         }
         public bool isKorisnikDoktor(int korisnikId)
         {
-            var user=Context.Doktors.Any(x=>x.KorisnikId== korisnikId);
+            var user = Context.Doktors.Any(x => x.KorisnikId == korisnikId);
             return user;
         }
         public bool isKorisnikAdministrator(int korisnikId)
@@ -144,6 +145,13 @@ namespace eBolnica.Services.Services
             var user = Context.Pacijents.Any(x => x.KorisnikId == korisnikId);
             return user;
         }
-
+        public bool PostojiEmail(string email)
+        {
+            return Context.Korisniks.Any(k => k.Email.ToLower() == email.ToLower() && !k.Obrisano);
+        }
+        public bool KorisnickoImePostoji(string korisnickoIme)
+        {
+            return Context.Korisniks.Any(k => k.KorisnickoIme.ToLower() == korisnickoIme.ToLower() && !k.Obrisano);
+        }
     }
 }

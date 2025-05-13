@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using eBolnica.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using eBolnica.Services.Database;
+using eBolnica.Services.Services;
 
 namespace eBolnica.API.Controllers
 {
@@ -95,5 +96,29 @@ namespace eBolnica.API.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Došlo je do neocekivane greške." });
             }
         }
+
+        [HttpGet("provjeri-email")]
+        [AllowAnonymous]
+        public IActionResult ProvjeriEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("Email je obavezan.");
+
+            bool postoji = korisnikService.PostojiEmail(email);
+            return Ok(new { postoji });
+        }
+
+        [HttpGet("provjeri-korisnickoime")]
+        [AllowAnonymous]
+        public IActionResult ProvjeriKorisnickoIme([FromQuery] string korisnickoIme)
+        {
+            if (string.IsNullOrWhiteSpace(korisnickoIme))
+                return BadRequest("Korisnicko ime je obavezno.");
+
+            bool postoji = korisnikService.KorisnickoImePostoji(korisnickoIme);
+            return Ok(new { postoji });
+        }
+
+
     }
 }

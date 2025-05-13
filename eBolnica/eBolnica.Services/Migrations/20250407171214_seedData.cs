@@ -522,7 +522,7 @@ namespace eBolnica.Services.Migrations
              {
                 {1, 1, "Povreda zgloba", "Pacijent se povrijedio prilikom padanja sa stepenica", "Povreda lijevog zgloba, preporučena terapija", 1, false, null},
                 {2, 2, "Akutna bol u leđima", "Pacijent ima bolove u leđima nakon dizanja težeg tereta", "Preporučena fizikalna terapija i odmor", 2, false, null},
-                {3, 3, "Infekcija disajnih puteva", "Pacijent prijavio kašalj, otežano disanje", "Preporučena terapija antibioticima i kontrola za 7 dana", 9, false, null},
+                {3, 3, "Hernia inguinalis", "Pacijent se žali na bol i otok u preponi, naročito pri naporu", "Preporučena hirurška obrada, ultrazvučni pregled i zakazivanje operativnog zahvata", 9, false, null},
                 {4, 4, "Povreda kuka", "Pacijent povrijedio kuk tokom vožnje bicikla", "Rentgen je pokazao frakturu kuka, preporučena operacija", 10, false, null},
                 {5, 5, "Hipertenzija", "Pacijent ima povećan krvni pritisak, prijavljuje glavobolje", "Potrebna promjena režima ishrane, kontrola nakon 1 mjeseca", 17, false, null},
                 {6, 6, "Astma", "Pacijent prijavio otežano disanje, ima istoriju astme", "Preporučena terapija bronhodilatatorima", 18, false, null},
@@ -548,7 +548,7 @@ namespace eBolnica.Services.Migrations
             {
                 {1, "Ibuprofen", "Protiv bolova, preporučena doza 400mg tri puta dnevno", new DateTime(2025, 4, 3), new DateTime(2025, 4, 14), 1, false, null},
                 {2, "Morfij", "Lijek za smanjenje jake boli u leđima, preporučena doza 10mg svaka 4 sata", new DateTime(2025, 4, 3), new DateTime(2025, 4, 12), 2, false, null},
-                {3, "Amoksicilin", "Antibiotik za liječenje respiratornih infekcija, 500mg svakih 8 sati", new DateTime(2025, 2, 20), new DateTime(2025, 3, 20), 3, false, null},
+                {3, "Amoksicilin", "Antibiotik za liječenje bolova, 500mg svakih 8 sati", new DateTime(2025, 2, 20), new DateTime(2025, 3, 20), 3, false, null},
                 {4, "Paracetamol", "Lijek protiv bolova, 500mg svakih 6 sati, maksimalno 4 puta dnevno", new DateTime(2025, 3, 7), new DateTime(2025, 3, 12), 4, false, null},
                 {5, "Losartan", "Terapija za kontrolu visokog krvnog pritiska, 50mg dnevno", new DateTime(2025, 1, 7), new DateTime(2025, 1, 14), 5, false, null},
                 {6, "Ventolin", "Bronhodilatator, koristi se 2 puta dnevno", new DateTime(2025, 2, 21), new DateTime(2025, 5, 20), 6, false, null},
@@ -665,12 +665,12 @@ namespace eBolnica.Services.Migrations
             });
             migrationBuilder.InsertData(table: "RadniZadatak", columns: new[] { "RadniZadatakID", "DoktorID", "PacijentID", "MedicinskoOsobljeID", "Opis", "DatumZadatka", "Status", "Obrisano", "VrijemeBrisanja" }, values: new object[,]
             {
-                { 1, 5, 1, 1, "Izvršiti vađenje krvi za laboratorijske nalaze", new DateTime(2025, 4, 7), true, false, null },
-                { 2, 10, 3, 3, "Pripremiti pacijenta za CT abdomena", new DateTime(2025, 4, 7), true, false, null },
-                { 3, 15, 5, 4, "Dati propisanu terapiju intravenski", new DateTime(2025, 4, 7), true, false, null },
+                { 1, 1, 1, 1, "Izvršiti vađenje krvi za laboratorijske nalaze", new DateTime(2025, 4, 7), true, false, null },
+                { 2, 1, 3, 3, "Pripremiti pacijenta za CT abdomena", new DateTime(2025, 4, 7), true, false, null },
+                { 3, 15, 5, 1, "Dati propisanu terapiju intravenski", new DateTime(2025, 4, 7), true, false, null },
                 { 4, 20, 4, 12, "Obaviti kontrolu vitalnih znakova svakih 6 sati", new DateTime(2025, 4, 6), true, false, null },
                 { 5, 25, 5, 42, "Pratiti nivo glukoze u krvi i evidentirati", new DateTime(2025, 4, 6), true, false, null },
-                { 6, 30, 21, 12, "Pomoći pacijentu pri kretanju nakon operacije", new DateTime(2025, 4, 5), true, false, null },
+                { 6, 22, 21, 1, "Pomoći pacijentu pri kretanju nakon operacije", new DateTime(2025, 5, 10), true, false, null },
                 { 7, 35, 12, 19, "Obaviti previjanje postoperativne rane", new DateTime(2025, 4, 17), true, false, null },
                 { 8, 40, 21, 5, "Dati terapiju protiv bolova svaka 4 sata", new DateTime(2025, 4, 7), true, false, null },
                 { 9, 45, 12, 2, "Pripremiti pacijenta za otpust i edukovati o terapiji", new DateTime(2025, 4, 7), true, false, null }

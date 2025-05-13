@@ -9,6 +9,7 @@ import 'package:ebolnica_desktop/screens/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebolnica_desktop/models/doktor_model.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
+import 'package:flutter/widgets.dart';
 
 class DoktorListScreen extends StatefulWidget {
   final int userId;
@@ -145,20 +146,19 @@ class _DoktorListScreenState extends State<DoktorListScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
-                      child: Row(
+                      child: Wrap(
+                        spacing: 8.0,
                         children: odjeli.map((odjel) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: ChoiceChip(
-                              label: Text(odjel.naziv ?? 'Nepoznati odjel'),
-                              selected: selectedOdjelId == odjel.odjelId,
-                              onSelected: (isSelected) {
-                                selectOdjel(isSelected ? odjel.odjelId : null);
-                              },
-                              backgroundColor: Colors.blue[100],
-                              selectedColor: Colors.blue[300],
+                          return ChoiceChip(
+                            label: FittedBox(
+                              child: Text(odjel.naziv ?? 'Nepoznati odjel'),
                             ),
+                            selected: selectedOdjelId == odjel.odjelId,
+                            onSelected: (isSelected) {
+                              selectOdjel(isSelected ? odjel.odjelId : null);
+                            },
+                            backgroundColor: Colors.blue[100],
+                            selectedColor: Colors.blue[300],
                           );
                         }).toList(),
                       ),
@@ -225,25 +225,28 @@ class DoktorCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey[300],
-              child: ClipOval(
-                child: slika != null && slika!.isNotEmpty
-                    ? Image(
-                        image: MemoryImage(slika!),
-                        width: 80,
-                        height: 120,
-                        fit: BoxFit.cover,
-                      )
-                    : const Image(
-                        image: AssetImage('assets/images/osoba.jpg'),
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.contain,
-                      ),
+            Flexible(
+              flex: 5,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey[300],
+                child: ClipOval(
+                  child: slika != null && slika!.isNotEmpty
+                      ? Image(
+                          image: MemoryImage(slika!),
+                          width: 80,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        )
+                      : const Image(
+                          image: AssetImage('assets/images/osoba.jpg'),
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.contain,
+                        ),
+                ),
               ),
             ),
             const SizedBox(height: 15),

@@ -170,37 +170,57 @@ class _KrevetListScreenState extends State<KrevetListScreen> {
                         ),
                       ),
                     ),
-                    DataCell(ElevatedButton.icon(
-                      icon: const Icon(Icons.delete),
-                      label: const Text("Ukloni krevet"),
-                      onPressed: () async {
-                        showCustomDialog(
-                          context: context,
-                          title: "Obrisati krevet?",
-                          message:
-                              "Da li ste sigurni da želite ukloniti krevet?",
-                          confirmText: "Da",
-                          onConfirm: () async {
-                            try {
-                              await krevetProvider.delete(e.krevetId!);
-                              await Flushbar(
-                                message: "Krevet je uspješno uklonjen!",
-                                duration: const Duration(seconds: 3),
-                                backgroundColor: Colors.green,
-                              ).show(context);
-                            } catch (error) {
-                              await Flushbar(
-                                message:
-                                    "Došlo je do greške prilikom uklanjanja pacijenta.",
-                                duration: const Duration(seconds: 3),
-                                backgroundColor: Colors.red,
-                              ).show(context);
-                            }
-                            _fetchKreveti();
-                          },
-                        );
-                      },
-                    )),
+                    DataCell(
+                      widget.userType == "administrator"
+                          ? Tooltip(
+                              message: e.zauzet == false
+                                  ? "Ukloni krevet"
+                                  : "Ne možete ukloniti krevet koji je zauzet",
+                              child: ElevatedButton.icon(
+                                  icon: const Icon(Icons.delete),
+                                  label: const Text("Ukloni krevet"),
+                                  onPressed: e.zauzet == false
+                                      ? () async {
+                                          showCustomDialog(
+                                            context: context,
+                                            title: "Obrisati krevet?",
+                                            message:
+                                                "Da li ste sigurni da želite ukloniti krevet?",
+                                            confirmText: "Da",
+                                            onConfirm: () async {
+                                              try {
+                                                await krevetProvider
+                                                    .delete(e.krevetId!);
+                                                await Flushbar(
+                                                  message:
+                                                      "Krevet je uspješno uklonjen!",
+                                                  duration: const Duration(
+                                                      seconds: 3),
+                                                  backgroundColor: Colors.green,
+                                                ).show(context);
+                                              } catch (error) {
+                                                await Flushbar(
+                                                  message:
+                                                      "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                                  duration: const Duration(
+                                                      seconds: 3),
+                                                  backgroundColor: Colors.red,
+                                                ).show(context);
+                                              }
+                                              _fetchKreveti();
+                                            },
+                                          );
+                                        }
+                                      : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: e.zauzet == false
+                                        ? Colors.red
+                                        : Colors.grey.shade400,
+                                    foregroundColor: Colors.white,
+                                  )),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
                 );
               }).toList() ??

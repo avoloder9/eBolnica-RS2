@@ -172,7 +172,6 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                     label: SizedBox(width: 60, child: Text("Adresa"))),
                 const DataColumn(
                     label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
-                const DataColumn(label: Text("Status")),
                 if (widget.userType == "medicinsko osoblje")
                   const DataColumn(label: Text("Medicinska dokumentacija")),
                 if (widget.userType == "administrator")
@@ -206,9 +205,6 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
                                   ),
                                 ),
                               ),
-                              DataCell(Text(e.korisnik!.status == true
-                                  ? "Aktivan"
-                                  : "Neaktivan")),
                               if (widget.userType == "medicinsko osoblje")
                                 DataCell(
                                   FutureBuilder<MedicinskaDokumentacija?>(

@@ -179,18 +179,29 @@ class _OdjelListScreenState extends State<OdjelListScreen> {
                         cells: [
                           DataCell(Text(e.naziv.toString(),
                               style: const TextStyle(fontSize: 16))),
-                          DataCell(Text(e.brojSoba.toString(),
-                              style: const TextStyle(fontSize: 16))),
-                          DataCell(Text(e.brojKreveta.toString(),
-                              style: const TextStyle(fontSize: 16))),
-                          DataCell(Text(e.brojSlobodnihKreveta.toString(),
-                              style: const TextStyle(fontSize: 16))),
+                          DataCell(SizedBox(
+                            width: 50,
+                            child: Center(
+                              child: Text(e.brojSoba.toString(),
+                                  style: const TextStyle(fontSize: 16)),
+                            ),
+                          )),
+                          DataCell(SizedBox(
+                              width: 70,
+                              child: Center(
+                                  child: Text(e.brojKreveta.toString(),
+                                      style: const TextStyle(fontSize: 16))))),
+                          DataCell(SizedBox(
+                              width: 130,
+                              child: Center(
+                                  child: Text(e.brojSlobodnihKreveta.toString(),
+                                      style: const TextStyle(fontSize: 16))))),
                           DataCell(
                             Text(
                               (e.glavniDoktor?.korisnik?.ime != null &&
                                       e.glavniDoktor?.korisnik?.prezime != null)
                                   ? '${e.glavniDoktor?.korisnik?.ime ?? ""} ${e.glavniDoktor?.korisnik?.prezime ?? ""}'
-                                  : "Nema doktora",
+                                  : "Nema glavnog doktora",
                               style: const TextStyle(
                                   fontSize: 16, color: Colors.grey),
                             ),

@@ -48,15 +48,6 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
       setState(() {
         operacije = filtrirane;
       });
-      if (operacije!.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Nema operacija za ovog doktora')),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nije pronadjen doktor')),
-      );
     }
   }
 
@@ -93,7 +84,12 @@ class _OperacijaScreenState extends State<OperacijaScreen> {
         body: operacije == null || operacije!.isEmpty
             ? buildEmptyView(
                 context: context,
-                screen: NovaOperacijaScreen(userId: widget.userId),
+                screen: NovaOperacijaScreen(
+                  userId: widget.userId,
+                  doktorId: doktorId,
+                  userType: widget.userType,
+                  nazivOdjela: widget.nazivOdjela,
+                ),
                 message: "Nema zakazanih operacija",
                 onDialogClosed: () {
                   setState(() {});

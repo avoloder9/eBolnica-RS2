@@ -102,8 +102,18 @@ namespace eBolnica.Services.Services
             }
             return Mapper.Map<Pacijent>(entity);
         }
+        public override Pacijent Update(int id, PacijentUpdateRequest request)
+        {
+            var entity = Context.Pacijents.Include(x => x.Korisnik).FirstOrDefault(x => x.PacijentId== id);
+            if (entity == null) throw new Exception("Pacijent nije pronadjeno");
+            Mapper.Map(request, entity);
+            BeforeUpdate(request, entity);
+            Context.SaveChanges();
+            return Mapper.Map<Pacijent>(entity);
+        }
         public override void BeforeUpdate(PacijentUpdateRequest request, Database.Pacijent entity)
         {
+            base.BeforeUpdate(request, entity);
             if (!string.IsNullOrEmpty(request.Lozinka))
             {
                 var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
@@ -120,11 +130,15 @@ namespace eBolnica.Services.Services
                     throw new Exception("Broj telefona nije validan");
                 }
             }
-            if (request.Lozinka != request.LozinkaPotvrda)
+            if (request.Lozinka != null)
             {
-                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+                if (request.Lozinka != request.LozinkaPotvrda)
+                {
+                    throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+                }
+                entity!.Korisnik.LozinkaSalt = HashGenerator.GenerateSalt();
+                entity.Korisnik.LozinkaHash = HashGenerator.GenerateHash(entity.Korisnik.LozinkaSalt, request.Lozinka);
             }
-            base.BeforeUpdate(request, entity);
             var korisnik = Context.Korisniks.Find(entity.KorisnikId);
             if (korisnik != null)
             {

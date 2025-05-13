@@ -184,50 +184,58 @@ class _SobaListScreenState extends State<SobaListScreen> {
                             style: TextStyle(fontSize: 14)),
                       ),
                     ),
-                    DataCell(Tooltip(
-                      message: e.brojKreveta == 0
-                          ? "Ukloni sobu"
-                          : "Ne možete ukloniti sobu dok sadrži krevete",
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.delete),
-                        label: const Text("Ukloni sobu"),
-                        onPressed: e.brojKreveta == 0
-                            ? () async {
-                                showCustomDialog(
-                                  context: context,
-                                  title: "Obrisati sobu?",
-                                  message:
-                                      "Da li ste sigurni da želite ukloniti sobu?",
-                                  confirmText: "Da",
-                                  onConfirm: () async {
-                                    try {
-                                      await sobaProvider.delete(e.sobaId!);
-                                      await Flushbar(
-                                        message: "Soba je uspješno uklonjena!",
-                                        duration: const Duration(seconds: 3),
-                                        backgroundColor: Colors.green,
-                                      ).show(context);
-                                    } catch (error) {
-                                      await Flushbar(
-                                        message:
-                                            "Došlo je do greške prilikom uklanjanja pacijenta.",
-                                        duration: const Duration(seconds: 3),
-                                        backgroundColor: Colors.red,
-                                      ).show(context);
-                                    }
-                                    _fetchSobe();
-                                  },
-                                );
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: e.brojKreveta == 0
-                              ? Colors.red
-                              : Colors.grey.shade400,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    )),
+                    DataCell(
+                      widget.userType == "administrator"
+                          ? Tooltip(
+                              message: e.brojKreveta == 0
+                                  ? "Ukloni sobu"
+                                  : "Ne možete ukloniti sobu dok sadrži krevete",
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.delete),
+                                label: const Text("Ukloni sobu"),
+                                onPressed: e.brojKreveta == 0
+                                    ? () async {
+                                        showCustomDialog(
+                                          context: context,
+                                          title: "Obrisati sobu?",
+                                          message:
+                                              "Da li ste sigurni da želite ukloniti sobu?",
+                                          confirmText: "Da",
+                                          onConfirm: () async {
+                                            try {
+                                              await sobaProvider
+                                                  .delete(e.sobaId!);
+                                              await Flushbar(
+                                                message:
+                                                    "Soba je uspješno uklonjena!",
+                                                duration:
+                                                    const Duration(seconds: 3),
+                                                backgroundColor: Colors.green,
+                                              ).show(context);
+                                            } catch (error) {
+                                              await Flushbar(
+                                                message:
+                                                    "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                                duration:
+                                                    const Duration(seconds: 3),
+                                                backgroundColor: Colors.red,
+                                              ).show(context);
+                                            }
+                                            _fetchSobe();
+                                          },
+                                        );
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: e.brojKreveta == 0
+                                      ? Colors.red
+                                      : Colors.grey.shade400,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    )
                   ],
                 );
               }).toList() ??

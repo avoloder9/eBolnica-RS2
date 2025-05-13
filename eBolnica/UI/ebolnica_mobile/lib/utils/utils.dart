@@ -62,7 +62,7 @@ Future<List<Pacijent>> fetchPacijenti() async {
 }
 
 String formattedDate(date) {
-  final formatter = DateFormat('dd/MM/yyyy');
+  final formatter = DateFormat('dd.MM.yyyy');
   return formatter.format(date);
 }
 

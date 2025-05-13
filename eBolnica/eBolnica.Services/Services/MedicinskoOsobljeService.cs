@@ -20,7 +20,7 @@ namespace eBolnica.Services.Services
         { }
         public override IQueryable<Database.MedicinskoOsoblje> AddFilter(MedicinskoOsobljeSearchObject searchObject, IQueryable<Database.MedicinskoOsoblje> query)
         {
-            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik).Include(y => y.Odjel).OrderBy(x=>x.Korisnik.Ime).Where(x=>x.Obrisano==false);
+            query = base.AddFilter(searchObject, query).Include(x => x.Korisnik).Include(y => y.Odjel).OrderBy(x => x.Korisnik.Ime).Where(x => x.Obrisano == false);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {
@@ -89,8 +89,19 @@ namespace eBolnica.Services.Services
 
             base.BeforeInsert(request, entity);
         }
+
+        public override MedicinskoOsoblje Update(int id, MedicinskoOsobljeUpdateRequest request)
+        {
+            var entity=Context.MedicinskoOsobljes.Include(x=>x.Korisnik).Include(x=>x.Odjel).FirstOrDefault(x=>x.MedicinskoOsobljeId==id);
+            if (entity == null) throw new Exception("Medicinsko osoblje nije pronadjeno");
+            Mapper.Map(request, entity);
+            BeforeUpdate(request, entity);
+            Context.SaveChanges();
+            return Mapper.Map<MedicinskoOsoblje>(entity);
+        }
         public override void BeforeUpdate(MedicinskoOsobljeUpdateRequest request, Database.MedicinskoOsoblje entity)
         {
+
             if (!string.IsNullOrEmpty(request.Lozinka))
             {
                 var pw = ValidationHelper.CheckPasswordStrength(request.Lozinka);
@@ -98,7 +109,16 @@ namespace eBolnica.Services.Services
                 {
                     throw new Exception("Lozinka nije validna");
                 }
+
+                if (request.Lozinka != request.LozinkaPotvrda)
+                {
+                    throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+                }
+
+                entity.Korisnik.LozinkaSalt = HashGenerator.GenerateSalt();
+                entity.Korisnik.LozinkaHash = HashGenerator.GenerateHash(entity.Korisnik.LozinkaSalt, request.Lozinka);
             }
+
             if (!string.IsNullOrEmpty(request.Telefon))
             {
                 var phoneNumber = ValidationHelper.CheckPhoneNumber(request.Telefon);
@@ -107,16 +127,17 @@ namespace eBolnica.Services.Services
                     throw new Exception("Broj telefona nije validan");
                 }
             }
-            if (request.Lozinka != request.LozinkaPotvrda)
+
+            if (request.OdjelId != null && request.OdjelId != 0)
             {
-                throw new Exception("Lozinka i LozinkaPotvrda moraju biti iste");
+                var odjelExists = Context.Odjels.Any(o => o.OdjelId == request.OdjelId);
+                if (!odjelExists)
+                {
+                    throw new Exception("Odjel s navedenim ID-em ne postoji.");
+                }
+
+                entity.OdjelId = request.OdjelId.Value;
             }
-            var odjelExists = Context.Odjels.Any(o => o.OdjelId == request.OdjelId);
-            if (!odjelExists)
-            {
-                throw new Exception("Odjel s navedenim ID-em ne postoji.");
-            }
-            base.BeforeUpdate(request, entity);
             var korisnik = Context.Korisniks.Find(entity.KorisnikId);
             var odjel = Context.Odjels.Find(entity.OdjelId);
 
@@ -129,6 +150,7 @@ namespace eBolnica.Services.Services
                 Mapper.Map(request, odjel);
             }
         }
+
         public override MedicinskoOsoblje GetById(int id)
         {
 
