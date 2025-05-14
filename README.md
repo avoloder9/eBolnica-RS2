@@ -1,9 +1,8 @@
 # eBolnica-RS2
 Seminarski rad iz predmeta Razvoj softvera II
 
-
 <h1>Upute za pokretanje</h1>
-<b>Nakon kloniranja repozitorija uraditi sljedeće:</b>
+<h2>Nakon kloniranja repozitorija uraditi sljedeće:</h2>
 <ul>
     <li><strong style="font-size: 1.2em;">Extractovati: fit-build-2025-05-13-env</strong></li>
     <li><strong style="font-size: 1.2em;">Postaviti .env fajl u: \eBolnica-RS2\eBolnica</strong></li>
@@ -24,11 +23,32 @@ Seminarski rad iz predmeta Razvoj softvera II
 
 <h1>Napomene</h1>
 <ul>
-    <li><strong style="font-size: 1em;">Nakon dodavanja ili registracije novog pacijenta potrebno je kreirati medicinsku dokumentaciju kako bi se mogao obaviti pregled. Medicinsko osoblje je zaduženo za kreiranje dokumentacije</strong></li>
-    <li><strong style="font-size: 1em;">Za prikaz rasporeda smjena potrebno je generisati raspored od strane Administratora</strong></li>    
-    <li><strong style="font-size: 1em;">Radni zadatak je moguće kreirati samo za osoblje odjela na kojem je doktor zaposlen</strong></li>
-    <li><strong style="font-size: 1em;">Zahjev za slobodan dan se šalje administratoru koji to odobrava ili odbija, a osoblje povratnu informaciju dobija putem maila</strong></li>
-   </ul>
+    <li>
+        Nakon dodavanja ili registracije novog pacijenta, potrebno je kreirati medicinsku dokumentaciju kako bi se mogao obaviti pregled. 
+        <span style="font-weight: 500; color: #2c3e50;">Medicinsko osoblje je zaduženo za kreiranje dokumentacije.</span>
+    </li>
+    <li>
+        <span style="font-weight: 500; color: #2c3e50;">
+            Za prikaz rasporeda smjena potrebno je <b>generisati raspored</b> od strane Administratora.
+        </span>
+    </li>    
+    <li>
+        <span style="font-weight: 500; color: #2c3e50;">
+            Radni zadatak je moguće kreirati samo za osoblje odjela na kojem je doktor zaposlen i koje je trenutno na smjeni i za pacijente koji su hospitalizovani na tom odjelu.
+        </span>
+    </li>
+    <li>
+        <span style="font-weight: 500; color: #2c3e50;">
+            Zahtjev za slobodan dan se šalje Administratoru koji to odobrava ili odbija, a osoblje dobija obavijest putem e-maila.
+        </span>
+    </li>
+    <li>
+        <span style="font-weight: 500; color: #2c3e50;">
+            Sve notifikacije unutar aplikacije se šalju <b> isključivo putem e-maila.</b>
+        </span>
+    </li>
+</ul>
+
 <h1>Kredencijali za prijavu</h1>
 <h2>Desktop aplikacija</h2>
 <h2><strong>Administrator</strong></h2>
