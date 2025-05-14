@@ -3,6 +3,7 @@ import 'package:ebolnica_desktop/models/doktor_model.dart';
 import 'package:ebolnica_desktop/models/odjel_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
 import 'package:ebolnica_desktop/providers/doktor_provider.dart';
+import 'package:ebolnica_desktop/providers/korisnik_provider.dart';
 import 'package:ebolnica_desktop/providers/odjel_provider.dart';
 import 'package:ebolnica_desktop/screens/doktor_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
@@ -26,9 +27,13 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
   final telefonController = TextEditingController();
   final datumController = TextEditingController();
   final odjelController = TextEditingController();
+  final korisnickoImeController = TextEditingController();
   final specijalizacijaController = TextEditingController();
   SearchResult<Doktor>? resultDoktor;
   SearchResult<Odjel>? resultOdjel;
+  late KorisnikProvider korisnikProvider;
+  String? _emailError;
+  String? _korisnickoImeError;
 
   late DoktorProvider doktorProvider;
   late OdjelProvider odjelProvider;
@@ -41,8 +46,58 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
   void initState() {
     super.initState();
     doktorProvider = DoktorProvider();
+    korisnikProvider = KorisnikProvider();
     odjelProvider = OdjelProvider();
     fetchOdjeli();
+  }
+
+  Future<String?> validirajKorisnickoIme(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Korisničko ime je obavezno';
+    }
+
+    try {
+      bool postoji = await korisnikProvider.provjeriKorisnickoIme(value);
+      if (postoji) {
+        return 'Korisničko ime je već zauzeto';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri korisničkog imena: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  Future<String?> validirajEmail(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Email je obavezan';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(value)) {
+      return 'Molimo unesite validan email';
+    }
+    try {
+      bool postoji = await korisnikProvider.provjeriEmail(value);
+      if (postoji) {
+        return 'Email je već u upotrebi';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri emaila: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  void _onEmailChanged(String value) async {
+    _emailError = await validirajEmail(value, korisnikProvider);
+    setState(() {});
+  }
+
+  void _onKorisnickoImeChanged(String value) async {
+    _korisnickoImeError = await validirajKorisnickoIme(value, korisnikProvider);
+    setState(() {});
   }
 
   int _calculateAge(DateTime birthDate) {
@@ -119,13 +174,39 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                   child: TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0)),
-                      prefixIcon: const Icon(Icons.email),
-                    ),
-                    validator: (value) => generalValidator(
-                        value, 'email', [notEmpty, validEmail]),
+                        labelText: 'Email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        prefixIcon: const Icon(Icons.email),
+                        errorText: _emailError),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Molimo unesite email';
+                      }
+                      return _emailError;
+                    },
+                    onChanged: _onEmailChanged,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextFormField(
+                    controller: korisnickoImeController,
+                    decoration: InputDecoration(
+                        labelText: 'Korisnicko ime',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        prefixIcon: const Icon(Icons.account_circle),
+                        errorText: _korisnickoImeError),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Molimo unesite korisnicko ime';
+                      }
+                      return _korisnickoImeError;
+                    },
+                    onChanged: _onKorisnickoImeChanged,
                   ),
                 ),
                 Padding(
@@ -140,7 +221,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                       counterText: '',
                     ),
                     keyboardType: TextInputType.phone,
-                    maxLength: 12,
+                    maxLength: 11,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       PhoneNumberFormatter()
@@ -243,9 +324,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      String korisnickoIme =
-                          imeController.text.trim().toLowerCase();
-                      String lozinka = '${imeController.text.trim()}123!';
+                      String lozinka = 'Doktor123!';
                       lozinkaPotvrda = lozinka;
                       int? dob = _calculateAge(datumRodjenja!);
                       var noviDoktor = {
@@ -257,7 +336,7 @@ class _NoviDoktorScreenState extends State<NoviDoktorScreen> {
                             .trim(),
                         "spol": spol,
                         "datumRodjenja": datumRodjenja?.toIso8601String(),
-                        "korisnickoIme": korisnickoIme,
+                        "korisnickoIme": korisnickoImeController.text.trim(),
                         "lozinka": lozinka,
                         "lozinkaPotvrda": lozinkaPotvrda,
                         "dob": dob,

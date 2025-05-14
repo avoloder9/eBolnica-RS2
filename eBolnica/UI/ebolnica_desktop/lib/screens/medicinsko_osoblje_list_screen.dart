@@ -22,13 +22,22 @@ class _MedicinskoOsobljeListScreenState
     extends State<MedicinskoOsobljeListScreen> {
   late MedicinskoOsobljeProvider provider;
   SearchResult<MedicinskoOsoblje>? result;
-  List<MedicinskoOsoblje> osoblje = [];
-  List<MedicinskoOsoblje> filteredOsoblje = [];
   List<String> odjeli = [];
   String? selectedOdjel = '';
-
+  final ScrollController _horizontalController = ScrollController();
+  final ScrollController _verticalController = ScrollController();
   int pageSize = 15;
   int page = 0;
+  final TextEditingController _imeEditingController = TextEditingController();
+  final TextEditingController _prezimeEditingController =
+      TextEditingController();
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,29 +45,23 @@ class _MedicinskoOsobljeListScreenState
     fetchOsoblje();
   }
 
-  Future<void> fetchOsoblje() async {
-    result = await provider.get(filter: {}, page: page, pageSize: pageSize);
-    setState(() {
-      osoblje = result!.result;
-      filteredOsoblje = result!.result;
-    });
-  }
+  Future<void> fetchOsoblje({bool useFilters = false}) async {
+    var filter = <String, dynamic>{};
 
-  void filterOsoblje(String query) async {
-    final lowerQuery = query.toLowerCase().trim();
-
-    final results = osoblje.where((osoblje) {
-      final ime = osoblje.korisnik?.ime!.toLowerCase() ?? '';
-      final prezime = osoblje.korisnik?.prezime!.toLowerCase() ?? '';
-
-      final matchesSearchQuery = '$ime $prezime'.startsWith(lowerQuery) ||
-          '$prezime $ime'.startsWith(lowerQuery);
-
-      return matchesSearchQuery;
-    }).toList();
-    setState(() {
-      filteredOsoblje = results;
-    });
+    if (useFilters) {
+      if (_imeEditingController.text.isNotEmpty) {
+        filter['imeGTE'] = _imeEditingController.text;
+      }
+      if (_prezimeEditingController.text.isNotEmpty) {
+        filter['prezimeGTE'] = _prezimeEditingController.text;
+      }
+    }
+    result = await provider.get(
+      filter: filter,
+      page: page,
+      pageSize: pageSize,
+    );
+    setState(() {});
   }
 
   @override
@@ -88,10 +91,22 @@ class _MedicinskoOsobljeListScreenState
         children: [
           Expanded(
             child: TextField(
-                onChanged: (value) => filterOsoblje(value),
-                decoration: const InputDecoration(
-                    labelText: "Pretraga",
-                    hintText: "Unesite ime ili prezime osoblja")),
+              controller: _imeEditingController,
+              decoration: const InputDecoration(labelText: "Ime"),
+              onChanged: (value) async {
+                await fetchOsoblje(useFilters: true);
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _prezimeEditingController,
+              decoration: const InputDecoration(labelText: "Prezime"),
+              onChanged: (value) async {
+                await fetchOsoblje(useFilters: true);
+              },
+            ),
           ),
           const SizedBox(width: 20),
           ElevatedButton(
@@ -117,103 +132,127 @@ class _MedicinskoOsobljeListScreenState
 
   Widget _buildResultView() {
     return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: DataTable(
-              columns: const [
-                DataColumn(label: Text("Ime")),
-                DataColumn(label: Text("Prezime")),
-                DataColumn(label: Text("E-mail")),
-                DataColumn(label: Text("Telefon")),
-                DataColumn(
-                    label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
-                DataColumn(label: Text("Spol")),
-                DataColumn(label: Text("Odjel")),
-                DataColumn(label: Text("Status")),
-                DataColumn(label: Text("")),
-                DataColumn(label: Text("")),
-              ],
-              rows: filteredOsoblje
-                  .map<DataRow>(
-                    (e) => DataRow(
-                      cells: [
-                        DataCell(Text(e.korisnik!.ime!)),
-                        DataCell(Text(e.korisnik!.prezime!)),
-                        DataCell(Text(e.korisnik!.email!)),
-                        DataCell(Text(e.korisnik!.telefon ?? "-")),
-                        DataCell(
-                          SizedBox(
-                            width: 100,
-                            child: Center(
-                              child: Text(
-                                formattedDate(e.korisnik!.datumRodjenja),
-                              ),
-                            ),
-                          ),
-                        ),
-                        DataCell(Text(e.korisnik!.spol ?? "-")),
-                        DataCell(Text(e.odjel?.naziv ?? "-")),
-                        DataCell(Text(e.korisnik!.status == true
-                            ? "Aktivan"
-                            : "Neaktivan")),
-                        DataCell(
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.edit),
-                            label: const Text("Ažuriraj podatke"),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    EditMedicinskoOsobljeScreen(
-                                  medicinskoOsobljeId: e.medicinskoOsobljeId!,
-                                  onSave: () {
-                                    fetchOsoblje();
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        DataCell(ElevatedButton.icon(
-                          icon: const Icon(Icons.delete),
-                          label: const Text("Ukloni osoblje"),
-                          onPressed: () async {
-                            showCustomDialog(
-                              context: context,
-                              title: "Obrisati medicinsko osoblje?",
-                              message:
-                                  "Da li ste sigurni da želite ukloniti odabrano osoblje?",
-                              confirmText: "Da",
-                              isWarning: true,
-                              onConfirm: () async {
-                                try {
-                                  await provider.delete(e.medicinskoOsobljeId!);
-                                  await Flushbar(
-                                    message: "Osoblje je uspješno uklonjeno!",
-                                    duration: const Duration(seconds: 3),
-                                    backgroundColor: Colors.green,
-                                  ).show(context);
-                                } catch (error) {
-                                  await Flushbar(
-                                    message:
-                                        "Došlo je do greške prilikom uklanjanja osoblja.",
-                                    duration: const Duration(seconds: 3),
-                                    backgroundColor: Colors.red,
-                                  ).show(context);
-                                }
-                                fetchOsoblje();
-                              },
-                            );
-                          },
-                        )),
-                      ],
+      child: Scrollbar(
+          trackVisibility: true,
+          controller: _horizontalController,
+          child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: _horizontalController,
+              child: Scrollbar(
+                  thumbVisibility: true,
+                  controller: _verticalController,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    controller: _verticalController,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width,
+                      ),
+                      child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text("Ime")),
+                            DataColumn(label: Text("Prezime")),
+                            DataColumn(label: Text("E-mail")),
+                            DataColumn(label: Text("Telefon")),
+                            DataColumn(
+                                label: SizedBox(
+                                    width: 100, child: Text("Datum rodjenja"))),
+                            DataColumn(label: Text("Spol")),
+                            DataColumn(label: Text("Odjel")),
+                            DataColumn(label: Text("Status")),
+                            DataColumn(label: Text("")),
+                            DataColumn(label: Text("")),
+                          ],
+                          rows: result?.result
+                                  .map<DataRow>(
+                                    (e) => DataRow(
+                                      cells: [
+                                        DataCell(Text(e.korisnik!.ime!)),
+                                        DataCell(Text(e.korisnik!.prezime!)),
+                                        DataCell(Text(e.korisnik!.email!)),
+                                        DataCell(
+                                            Text(e.korisnik!.telefon ?? "-")),
+                                        DataCell(
+                                          SizedBox(
+                                            width: 100,
+                                            child: Center(
+                                              child: Text(
+                                                formattedDate(
+                                                    e.korisnik!.datumRodjenja),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        DataCell(Text(e.korisnik!.spol ?? "-")),
+                                        DataCell(Text(e.odjel?.naziv ?? "-")),
+                                        DataCell(Text(e.korisnik!.status == true
+                                            ? "Aktivan"
+                                            : "Neaktivan")),
+                                        DataCell(
+                                          ElevatedButton.icon(
+                                            icon: const Icon(Icons.edit),
+                                            label:
+                                                const Text("Ažuriraj podatke"),
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    EditMedicinskoOsobljeScreen(
+                                                  medicinskoOsobljeId:
+                                                      e.medicinskoOsobljeId!,
+                                                  onSave: () {
+                                                    fetchOsoblje();
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        DataCell(ElevatedButton.icon(
+                                          icon: const Icon(Icons.delete),
+                                          label: const Text("Ukloni osoblje"),
+                                          onPressed: () async {
+                                            showCustomDialog(
+                                              context: context,
+                                              title:
+                                                  "Obrisati medicinsko osoblje?",
+                                              message:
+                                                  "Da li ste sigurni da želite ukloniti odabrano osoblje?",
+                                              confirmText: "Da",
+                                              isWarning: true,
+                                              onConfirm: () async {
+                                                try {
+                                                  await provider.delete(
+                                                      e.medicinskoOsobljeId!);
+                                                  await Flushbar(
+                                                    message:
+                                                        "Osoblje je uspješno uklonjeno!",
+                                                    duration: const Duration(
+                                                        seconds: 3),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                  ).show(context);
+                                                } catch (error) {
+                                                  await Flushbar(
+                                                    message:
+                                                        "Došlo je do greške prilikom uklanjanja osoblja.",
+                                                    duration: const Duration(
+                                                        seconds: 3),
+                                                    backgroundColor: Colors.red,
+                                                  ).show(context);
+                                                }
+                                                fetchOsoblje();
+                                              },
+                                            );
+                                          },
+                                        )),
+                                      ],
+                                    ),
+                                  )
+                                  .toList() ??
+                              []),
                     ),
-                  )
-                  .toList()),
-        ),
-      ),
+                  )))),
     );
   }
 
@@ -228,10 +267,7 @@ class _MedicinskoOsobljeListScreenState
                   page--;
                   result = await provider
                       .get(filter: {}, page: page, pageSize: pageSize);
-                  setState(() {
-                    osoblje = result!.result;
-                    filteredOsoblje = result!.result;
-                  });
+                  setState(() {});
                 }
               : null,
         ),
@@ -241,7 +277,9 @@ class _MedicinskoOsobljeListScreenState
           onPressed: result != null && result!.result.length == pageSize
               ? () async {
                   page++;
-                  await fetchOsoblje();
+                  result = await provider
+                      .get(filter: {}, page: page, pageSize: pageSize);
+
                   setState(() {});
                 }
               : null,

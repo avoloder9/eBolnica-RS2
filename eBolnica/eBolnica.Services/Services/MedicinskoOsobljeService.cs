@@ -35,6 +35,15 @@ namespace eBolnica.Services.Services
             {
                 query = query.Where(x => x.Odjel.Naziv.StartsWith(searchObject.NazivOdjela));
             }
+
+            if (searchObject?.DatumSmjene != null && searchObject?.VrijemeSmjene != null)
+            {
+
+                var vrijeme = searchObject!.VrijemeSmjene!.Value;
+                var datum = searchObject!.DatumSmjene!.Value;
+                query = query.Where(x => x.Korisnik.RasporedSmjenas.Any(rs => rs.Datum.Date == datum && rs.Smjena.VrijemePocetka <= vrijeme && rs.Smjena.VrijemeZavrsetka >= vrijeme));
+            }
+
             return query;
         }
         public override void BeforeInsert(MedicinskoOsobljeInsertRequest request, Database.MedicinskoOsoblje entity)

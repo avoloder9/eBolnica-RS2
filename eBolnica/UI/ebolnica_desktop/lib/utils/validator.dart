@@ -16,6 +16,15 @@ String? notEmpty(String? value) {
   return null;
 }
 
+ValidatorRule maxLength(int length) {
+  return (String? value) {
+    if (value != null && value.trim().length > length) {
+      return '{field} može imati najviše $length znakova';
+    }
+    return null;
+  };
+}
+
 String? startsWithCapital(String? value) {
   if (value == null || value.isEmpty) return null;
   final firstChar = value.trim()[0];
@@ -26,7 +35,9 @@ String? startsWithCapital(String? value) {
 }
 
 String? validEmail(String? value) {
-  if (value == null || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+  if (value == null ||
+      !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+          .hasMatch(value)) {
     return 'Molimo unesite validan email';
   }
   return null;

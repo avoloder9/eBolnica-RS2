@@ -281,8 +281,8 @@ class _EditPacijentScreenState extends State<EditPacijentScreen> {
           }
 
           if (label == "Telefon") {
-            if (!RegExp(r'^\d{1,10}$').hasMatch(trimmed)) {
-              return "Broj telefona može imati najviše 10 cifara.";
+            if (!RegExp(r'^\d{9,10}$').hasMatch(trimmed)) {
+              return "Broj telefona može imati 9 ili 10 cifara.";
             }
           }
 

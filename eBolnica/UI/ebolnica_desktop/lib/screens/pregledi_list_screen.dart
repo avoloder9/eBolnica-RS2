@@ -22,6 +22,16 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
   int pageSize = 15;
   int page = 0;
   SearchResult<Pregled>? pregledi;
+  final ScrollController _horizontalController = ScrollController();
+  final ScrollController _verticalController = ScrollController();
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,79 +66,106 @@ class _PreglediListScreenState extends State<PreglediListScreen> {
 
   Widget _buildResultView() {
     return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints:
-              BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-          child: DataTable(
-              headingRowHeight: 56,
-              columnSpacing: 24,
-              horizontalMargin: 16,
-              columns: const [
-                DataColumn(
-                    label: Text("Pacijent",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text("Datum pregleda",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text("Glavna dijagnoza",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text("Anamneza",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text("Zakljucak",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold))),
-                DataColumn(label: Text("")),
-              ],
-              rows: pregledi?.result
-                      .map<DataRow>(
-                        (e) => DataRow(
-                          cells: [
-                            DataCell(Text(
-                                "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime}",
-                                style: const TextStyle(fontSize: 14))),
-                            DataCell(Text(
-                                formattedDate(e.uputnica!.termin!.datumTermina),
-                                style: const TextStyle(fontSize: 14))),
-                            DataCell(Text(e.glavnaDijagnoza.toString(),
-                                style: const TextStyle(fontSize: 14))),
-                            DataCell(Text(e.anamneza.toString(),
-                                style: const TextStyle(fontSize: 14))),
-                            DataCell(Text(e.zakljucak.toString(),
-                                style: const TextStyle(fontSize: 14))),
-                            DataCell(
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.blue,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Detalji",
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                onPressed: () {
-                                  showPregledDetailsDialog(context, e);
-                                },
-                              ),
-                            ),
+      child: Scrollbar(
+        trackVisibility: true,
+        controller: _horizontalController,
+        child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _horizontalController,
+            child: Scrollbar(
+                thumbVisibility: true,
+                controller: _verticalController,
+                child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    controller: _verticalController,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width,
+                      ),
+                      child: DataTable(
+                          headingRowHeight: 56,
+                          columnSpacing: 24,
+                          horizontalMargin: 16,
+                          columns: const [
+                            DataColumn(
+                                label: Text("Pacijent",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Datum pregleda",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Glavna dijagnoza",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Anamneza",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(
+                                label: Text("Zakljucak",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("")),
                           ],
-                        ),
-                      )
-                      .toList() ??
-                  []),
-        ),
+                          rows: pregledi?.result
+                                  .map<DataRow>(
+                                    (e) => DataRow(
+                                      cells: [
+                                        DataCell(Text(
+                                            "${e.uputnica!.termin!.pacijent!.korisnik!.ime} ${e.uputnica!.termin!.pacijent!.korisnik!.prezime}",
+                                            style:
+                                                const TextStyle(fontSize: 14))),
+                                        DataCell(Text(
+                                            formattedDate(e.uputnica!.termin!
+                                                .datumTermina),
+                                            style:
+                                                const TextStyle(fontSize: 14))),
+                                        DataCell(Text(
+                                            e.glavnaDijagnoza.toString(),
+                                            style:
+                                                const TextStyle(fontSize: 14))),
+                                        DataCell(Text(e.anamneza.toString(),
+                                            style:
+                                                const TextStyle(fontSize: 14))),
+                                        DataCell(Text(e.zakljucak.toString(),
+                                            style:
+                                                const TextStyle(fontSize: 14))),
+                                        DataCell(
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              foregroundColor: Colors.blue,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              "Detalji",
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                            onPressed: () {
+                                              showPregledDetailsDialog(
+                                                  context, e);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  .toList() ??
+                              []),
+                    )))),
       ),
     );
   }

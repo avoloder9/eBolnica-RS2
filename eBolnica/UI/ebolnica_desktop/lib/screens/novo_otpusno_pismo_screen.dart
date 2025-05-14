@@ -2,6 +2,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/providers/otpusno_pismo_provider.dart';
 import 'package:ebolnica_desktop/providers/terapija_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class NovoOtpusnoPismoScreen extends StatefulWidget {
@@ -65,15 +66,17 @@ class _NovoOtpusnoPismoScreenState extends State<NovoOtpusnoPismoScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildTextField(dijagnozaController, "Dijagnoza"),
+                    _buildTextField(dijagnozaController, "Dijagnoza", 400),
                     const SizedBox(height: 16),
-                    _buildTextField(anamnezaController, "Anamneza"),
+                    _buildTextField(anamnezaController, "Anamneza", 400),
                     const SizedBox(height: 16),
-                    _buildTextField(zakljucakController, "Zaključak"),
+                    _buildTextField(zakljucakController, "Zaključak", 400),
                     const SizedBox(height: 24),
-                    _buildTextField(nazivTerapijeController, "Naziv terapije"),
+                    _buildTextField(
+                        nazivTerapijeController, "Naziv terapije", 50),
                     const SizedBox(height: 16),
-                    _buildTextField(opisTerapijeController, "Opis terapije"),
+                    _buildTextField(
+                        opisTerapijeController, "Opis terapije", 200),
                     const SizedBox(height: 24),
                     Row(
                       children: [
@@ -200,16 +203,20 @@ class _NovoOtpusnoPismoScreenState extends State<NovoOtpusnoPismoScreen> {
   }
 }
 
-Widget _buildTextField(TextEditingController controller, String label) {
+Widget _buildTextField(
+    TextEditingController controller, String label, int maxLength) {
   return TextFormField(
     controller: controller,
+    maxLength: maxLength,
+    maxLengthEnforcement: MaxLengthEnforcement.enforced,
     decoration: InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    ),
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        counterText: ''),
     validator: (value) {
       if (value == null || value.isEmpty) {
         return 'Ovo polje je obavezno';

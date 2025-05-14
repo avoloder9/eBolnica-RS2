@@ -100,6 +100,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
       setState(() {
         selectedDate = picked;
         zauzetiTermini = [];
+        time = null;
       });
       loadZauzetiTermini();
     }
@@ -220,6 +221,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       setState(() {
                         odabraniDoktor = value;
                         zauzetiTermini = [];
+                        time = null;
                       });
                       loadZauzetiTermini();
                     },
@@ -276,7 +278,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: pickDate,
+          onTap: odabraniDoktor == null ? null : pickDate,
           child: Container(
             padding: const EdgeInsets.all(14),
             margin: const EdgeInsets.only(bottom: 4),
@@ -324,9 +326,20 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
 
             bool isZauzet = zauzetiTermini.contains(selectedTime);
             bool isSelected = selectedTime == time;
+            bool isDanas = DateTime.now().year == selectedDate.year &&
+                DateTime.now().month == selectedDate.month &&
+                DateTime.now().day == selectedDate.day;
+            bool isProslost = false;
+            if (isDanas) {
+              final now = TimeOfDay.now();
+              final trenutnoMinuta = now.hour * 60 + now.minute;
+              final selektovanoMinuta = hour * 60 + minute;
+              isProslost = selektovanoMinuta <= trenutnoMinuta;
+            }
+            bool isDisabled = isZauzet || isProslost;
 
             return GestureDetector(
-              onTap: isZauzet
+              onTap: isDisabled
                   ? null
                   : () {
                       setState(() {
@@ -340,7 +353,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: isZauzet
+                  color: isDisabled
                       ? Colors.grey.shade400
                       : isSelected
                           ? Colors.green

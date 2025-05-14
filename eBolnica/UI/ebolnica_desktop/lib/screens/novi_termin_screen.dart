@@ -92,6 +92,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
       setState(() {
         selectedDate = picked;
         zauzetiTermini = [];
+        time = null;
       });
       loadZauzetiTermini();
     }
@@ -254,6 +255,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       setState(() {
                         odabraniDoktor = value;
                         zauzetiTermini = [];
+                        time = null;
                       });
                       loadZauzetiTermini();
                     },
@@ -272,18 +274,20 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(children: [
                     GestureDetector(
-                      onTap: pickDate,
+                      onTap: odabraniDoktor == null ? null : pickDate,
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(),
                           borderRadius: BorderRadius.circular(8),
+                          color:
+                              odabraniDoktor == null ? Colors.grey[200] : null,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              DateFormat('yyyy-MM-dd').format(selectedDate),
+                              DateFormat('dd.MM.yyyy').format(selectedDate),
                               style: const TextStyle(fontSize: 18),
                             ),
                             const Icon(Icons.calendar_today),
@@ -304,6 +308,9 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                       return null;
                     },
                     builder: (FormFieldState<String> field) {
+                      if (odabraniDoktor == null) {
+                        return const SizedBox.shrink();
+                      }
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -322,8 +329,24 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                   zauzetiTermini.contains(selectedTime);
                               bool isSelektovan = selectedTime == time;
 
+                              bool isDanas = DateTime.now().year ==
+                                      selectedDate.year &&
+                                  DateTime.now().month == selectedDate.month &&
+                                  DateTime.now().day == selectedDate.day;
+                              bool isProslost = false;
+                              if (isDanas) {
+                                final now = TimeOfDay.now();
+                                final trenutnoMinuta =
+                                    now.hour * 60 + now.minute;
+                                final selektovanoMinuta = hour * 60 + minute;
+                                isProslost =
+                                    selektovanoMinuta <= trenutnoMinuta;
+                              }
+
+                              bool isDisabled = isZauzet || isProslost;
+
                               return ElevatedButton(
-                                onPressed: isZauzet
+                                onPressed: isDisabled
                                     ? null
                                     : () {
                                         setState(() {
@@ -332,7 +355,7 @@ class _NoviTerminScreenState extends State<NoviTerminScreen> {
                                         });
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isZauzet
+                                  backgroundColor: isDisabled
                                       ? Colors.grey
                                       : isSelektovan
                                           ? Colors.green

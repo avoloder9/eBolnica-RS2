@@ -178,7 +178,9 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       prefixIcon: const Icon(Icons.medical_services),
                     ),
                     validator: (value) => generalValidator(
-                        value, 'tip operacije', [notEmpty, startsWithCapital]),
+                        value,
+                        'tip operacije',
+                        [notEmpty, startsWithCapital, maxLength(100)]),
                   ),
                 ),
                 Padding(
@@ -192,6 +194,8 @@ class _NovaOperacijaScreenState extends State<NovaOperacijaScreen> {
                       ),
                       prefixIcon: const Icon(Icons.comment),
                     ),
+                    validator: (value) => generalValidator(value, 'komentar',
+                        [notEmpty, startsWithCapital, maxLength(100)]),
                   ),
                 ),
                 Padding(

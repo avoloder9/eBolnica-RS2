@@ -33,8 +33,16 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
   final TextEditingController _prezimeEditingController =
       TextEditingController();
   final TextEditingController _brojKarticeController = TextEditingController();
-
+  final ScrollController _horizontalController = ScrollController();
+  final ScrollController _verticalController = ScrollController();
   SearchResult<Pacijent>? result;
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -148,217 +156,233 @@ class _PacijentListScreenState extends State<PacijentListScreen> {
 
   Widget _buildResultView() {
     return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      child: Scrollbar(
+        trackVisibility: true,
+        controller: _horizontalController,
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: MediaQuery.of(context).size.width,
-            ),
-            child: DataTable(
-              showCheckboxColumn: false,
-              columns: [
-                const DataColumn(label: Text("Ime")),
-                const DataColumn(label: Text("Prezime")),
-                const DataColumn(label: Text("E-mail")),
-                const DataColumn(
-                    label: SizedBox(
-                        width: 160,
-                        child:
-                            Center(child: Text("Broj zdravstvene kartice")))),
-                const DataColumn(label: Text("Telefon")),
-                const DataColumn(
-                    label: SizedBox(width: 60, child: Text("Adresa"))),
-                const DataColumn(
-                    label: SizedBox(width: 100, child: Text("Datum rodjenja"))),
-                if (widget.userType == "medicinsko osoblje")
-                  const DataColumn(label: Text("Medicinska dokumentacija")),
-                if (widget.userType == "administrator")
-                  const DataColumn(label: Text("")),
-                if (widget.userType == "administrator")
-                  const DataColumn(label: Text("")),
-                if (widget.userType == "administrator")
-                  const DataColumn(label: Text("")),
-              ],
-              rows: result?.result
-                      .map<DataRow>(
-                        (e) => DataRow(
-                            cells: [
-                              DataCell(Text(e.korisnik!.ime!)),
-                              DataCell(Text(e.korisnik!.prezime!)),
-                              DataCell(Text(e.korisnik!.email!)),
-                              DataCell(SizedBox(
-                                  width: 160,
-                                  child: Center(
-                                      child: Text(e.brojZdravstveneKartice
-                                          .toString())))),
-                              DataCell(Text(e.korisnik!.telefon ?? "-")),
-                              DataCell(Text(e.adresa ?? "-")),
-                              DataCell(
-                                SizedBox(
-                                  width: 100,
-                                  child: Center(
-                                    child: Text(
-                                      formattedDate(e.korisnik!.datumRodjenja),
+          scrollDirection: Axis.horizontal,
+          controller: _horizontalController,
+          child: Scrollbar(
+            thumbVisibility: true,
+            controller: _verticalController,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              controller: _verticalController,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width,
+                ),
+                child: DataTable(
+                  showCheckboxColumn: false,
+                  columns: [
+                    const DataColumn(label: Text("Ime")),
+                    const DataColumn(label: Text("Prezime")),
+                    const DataColumn(label: Text("E-mail")),
+                    const DataColumn(
+                        label: SizedBox(
+                            width: 160,
+                            child: Center(
+                                child: Text("Broj zdravstvene kartice")))),
+                    const DataColumn(label: Text("Telefon")),
+                    const DataColumn(
+                        label: SizedBox(width: 60, child: Text("Adresa"))),
+                    const DataColumn(
+                        label: SizedBox(
+                            width: 100, child: Text("Datum rodjenja"))),
+                    if (widget.userType == "medicinsko osoblje")
+                      const DataColumn(label: Text("Medicinska dokumentacija")),
+                    if (widget.userType == "administrator")
+                      const DataColumn(label: Text("")),
+                    if (widget.userType == "administrator")
+                      const DataColumn(label: Text("")),
+                    if (widget.userType == "administrator")
+                      const DataColumn(label: Text("")),
+                  ],
+                  rows: result?.result
+                          .map<DataRow>(
+                            (e) => DataRow(
+                                cells: [
+                                  DataCell(Text(e.korisnik!.ime!)),
+                                  DataCell(Text(e.korisnik!.prezime!)),
+                                  DataCell(Text(e.korisnik!.email!)),
+                                  DataCell(SizedBox(
+                                      width: 160,
+                                      child: Center(
+                                          child: Text(e.brojZdravstveneKartice
+                                              .toString())))),
+                                  DataCell(Text(e.korisnik!.telefon ?? "-")),
+                                  DataCell(Text(e.adresa ?? "-")),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 100,
+                                      child: Center(
+                                        child: Text(
+                                          formattedDate(
+                                              e.korisnik!.datumRodjenja),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              if (widget.userType == "medicinsko osoblje")
-                                DataCell(
-                                  FutureBuilder<MedicinskaDokumentacija?>(
-                                    future: dokumentacijaProvider
-                                        .getMedicinskaDokumentacijaByPacijentId(
-                                            e.pacijentId!),
-                                    builder: (context,
-                                        AsyncSnapshot<MedicinskaDokumentacija?>
-                                            snapshot) {
-                                      if (!snapshot.hasData) {
-                                        return ElevatedButton(
-                                          child: const Text(
-                                              "Kreiraj dokumentaciju"),
-                                          onPressed: () {
-                                            kreirajMedicinskuDokumentaciju(
-                                              context,
-                                              MedicinskaDokumentacija(
-                                                  pacijentId: e.pacijentId!),
-                                            );
-                                          },
-                                        );
-                                      } else {
-                                        return ElevatedButton(
-                                          child: const Text(
-                                              "Prikaži dokumentaciju"),
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  MedicinskaDokumentacijaScreen(
-                                                pacijentId: e.pacijentId!,
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              if (widget.userType == "administrator")
-                                DataCell(ElevatedButton.icon(
-                                  icon: const Icon(Icons.edit),
-                                  label: const Text("Ažuriraj podatke"),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => EditPacijentScreen(
-                                        pacijentId: e.pacijentId!,
-                                        onSave: () {
-                                          _loadData();
-                                        },
-                                      ),
-                                    );
-                                  },
-                                )),
-                              if (widget.userType == "administrator")
-                                DataCell(ElevatedButton.icon(
-                                  icon: const Icon(Icons.edit),
-                                  label: Text(e.korisnik!.status == false
-                                      ? "Aktiviraj"
-                                      : "Deaktiviraj"),
-                                  onPressed: () async {
-                                    bool noviStatus =
-                                        e.korisnik!.status == false;
-
-                                    var request = {
-                                      "ime": e.korisnik!.ime,
-                                      "prezime": e.korisnik!.prezime,
-                                      "telefon": e.korisnik!.telefon,
-                                      "adresa": e.adresa,
-                                      "status": noviStatus
-                                    };
-
-                                    provider.update(e.pacijentId!, request);
-                                    await Flushbar(
-                                            message:
-                                                "Status su uspješno ažuriran",
-                                            duration:
-                                                const Duration(seconds: 3),
-                                            backgroundColor: Colors.green)
-                                        .show(context);
-                                    _loadData();
-                                    setState(() {});
-                                  },
-                                )),
-                              if (widget.userType == "administrator")
-                                DataCell(ElevatedButton.icon(
-                                  icon: const Icon(Icons.delete),
-                                  label: const Text("Ukloni pacijenta"),
-                                  onPressed: () async {
-                                    showCustomDialog(
-                                      context: context,
-                                      title: "Obrisati pacijenta?",
-                                      message:
-                                          "Da li ste sigurni da želite ukloniti pacijenta?",
-                                      confirmText: "Da",
-                                      isWarning: true,
-                                      onConfirm: () async {
-                                        try {
-                                          await provider.delete(e.pacijentId!);
-                                          await Flushbar(
-                                            message:
-                                                "Pacijent je uspješno uklonjen!",
-                                            duration:
-                                                const Duration(seconds: 3),
-                                            backgroundColor: Colors.green,
-                                          ).show(context);
-                                        } catch (error) {
-                                          await Flushbar(
-                                            message:
-                                                "Došlo je do greške prilikom uklanjanja pacijenta.",
-                                            duration:
-                                                const Duration(seconds: 3),
-                                            backgroundColor: Colors.red,
-                                          ).show(context);
-                                        }
-                                        _loadData();
-                                      },
-                                    );
-                                  },
-                                )),
-                            ],
-                            onSelectChanged:
-                                widget.userType == "administrator" ||
-                                        widget.userType == "doktor"
-                                    ? (selected) async {
-                                        if (selected != null && selected) {
-                                          final dokumentacija =
-                                              await dokumentacijaProvider
-                                                  .getMedicinskaDokumentacijaByPacijentId(
-                                                      e.pacijentId!);
-                                          if (dokumentacija == null) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    "Ovaj pacijent nema medicinsku dokumentaciju. Medicinsko osoblje je ovlašteno o kreiranju medicinske dokumentacije."),
-                                              ),
+                                  if (widget.userType == "medicinsko osoblje")
+                                    DataCell(
+                                      FutureBuilder<MedicinskaDokumentacija?>(
+                                        future: dokumentacijaProvider
+                                            .getMedicinskaDokumentacijaByPacijentId(
+                                                e.pacijentId!),
+                                        builder: (context,
+                                            AsyncSnapshot<
+                                                    MedicinskaDokumentacija?>
+                                                snapshot) {
+                                          if (!snapshot.hasData) {
+                                            return ElevatedButton(
+                                              child: const Text(
+                                                  "Kreiraj dokumentaciju"),
+                                              onPressed: () {
+                                                kreirajMedicinskuDokumentaciju(
+                                                  context,
+                                                  MedicinskaDokumentacija(
+                                                      pacijentId:
+                                                          e.pacijentId!),
+                                                );
+                                              },
                                             );
                                           } else {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  MedicinskaDokumentacijaScreen(
-                                                pacijentId: e.pacijentId!,
-                                              ),
+                                            return ElevatedButton(
+                                              child: const Text(
+                                                  "Prikaži dokumentaciju"),
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      MedicinskaDokumentacijaScreen(
+                                                    pacijentId: e.pacijentId!,
+                                                  ),
+                                                );
+                                              },
                                             );
                                           }
-                                        }
-                                      }
-                                    : null),
-                      )
-                      .toList() ??
-                  [],
+                                        },
+                                      ),
+                                    ),
+                                  if (widget.userType == "administrator")
+                                    DataCell(ElevatedButton.icon(
+                                      icon: const Icon(Icons.edit),
+                                      label: const Text("Ažuriraj podatke"),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              EditPacijentScreen(
+                                            pacijentId: e.pacijentId!,
+                                            onSave: () {
+                                              _loadData();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    )),
+                                  if (widget.userType == "administrator")
+                                    DataCell(ElevatedButton.icon(
+                                      icon: const Icon(Icons.edit),
+                                      label: Text(e.korisnik!.status == false
+                                          ? "Aktiviraj"
+                                          : "Deaktiviraj"),
+                                      onPressed: () async {
+                                        bool noviStatus =
+                                            e.korisnik!.status == false;
+
+                                        var request = {
+                                          "ime": e.korisnik!.ime,
+                                          "prezime": e.korisnik!.prezime,
+                                          "telefon": e.korisnik!.telefon,
+                                          "adresa": e.adresa,
+                                          "status": noviStatus
+                                        };
+
+                                        provider.update(e.pacijentId!, request);
+                                        await Flushbar(
+                                                message:
+                                                    "Status su uspješno ažuriran",
+                                                duration:
+                                                    const Duration(seconds: 3),
+                                                backgroundColor: Colors.green)
+                                            .show(context);
+                                        _loadData();
+                                        setState(() {});
+                                      },
+                                    )),
+                                  if (widget.userType == "administrator")
+                                    DataCell(ElevatedButton.icon(
+                                      icon: const Icon(Icons.delete),
+                                      label: const Text("Ukloni pacijenta"),
+                                      onPressed: () async {
+                                        showCustomDialog(
+                                          context: context,
+                                          title: "Obrisati pacijenta?",
+                                          message:
+                                              "Da li ste sigurni da želite ukloniti pacijenta?",
+                                          confirmText: "Da",
+                                          isWarning: true,
+                                          onConfirm: () async {
+                                            try {
+                                              await provider
+                                                  .delete(e.pacijentId!);
+                                              await Flushbar(
+                                                message:
+                                                    "Pacijent je uspješno uklonjen!",
+                                                duration:
+                                                    const Duration(seconds: 3),
+                                                backgroundColor: Colors.green,
+                                              ).show(context);
+                                            } catch (error) {
+                                              await Flushbar(
+                                                message:
+                                                    "Došlo je do greške prilikom uklanjanja pacijenta.",
+                                                duration:
+                                                    const Duration(seconds: 3),
+                                                backgroundColor: Colors.red,
+                                              ).show(context);
+                                            }
+                                            _loadData();
+                                          },
+                                        );
+                                      },
+                                    )),
+                                ],
+                                onSelectChanged:
+                                    widget.userType == "administrator" ||
+                                            widget.userType == "doktor"
+                                        ? (selected) async {
+                                            if (selected != null && selected) {
+                                              final dokumentacija =
+                                                  await dokumentacijaProvider
+                                                      .getMedicinskaDokumentacijaByPacijentId(
+                                                          e.pacijentId!);
+                                              if (dokumentacija == null) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        "Ovaj pacijent nema medicinsku dokumentaciju. Medicinsko osoblje je ovlašteno o kreiranju medicinske dokumentacije."),
+                                                  ),
+                                                );
+                                              } else {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      MedicinskaDokumentacijaScreen(
+                                                    pacijentId: e.pacijentId!,
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          }
+                                        : null),
+                          )
+                          .toList() ??
+                      [],
+                ),
+              ),
             ),
           ),
         ),

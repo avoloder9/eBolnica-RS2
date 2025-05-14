@@ -157,8 +157,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) => generalValidator(
-                              value, 'glavnu dijagnozu', [notEmpty]),
+                          validator: (value) => generalValidator(value,
+                              'glavnu dijagnozu', [notEmpty, maxLength(400)]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -172,8 +172,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) =>
-                              generalValidator(value, 'anamnezu', [notEmpty]),
+                          validator: (value) => generalValidator(
+                              value, 'anamnezu', [notEmpty, maxLength(400)]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -187,8 +187,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          validator: (value) =>
-                              generalValidator(value, 'zaključak', [notEmpty]),
+                          validator: (value) => generalValidator(
+                              value, 'zaključak', [notEmpty, maxLength(400)]),
                           maxLines: 2,
                         ),
                         const SizedBox(height: 12),
@@ -220,8 +220,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
-                            validator: (value) =>
-                                generalValidator(value, 'naziv', [notEmpty]),
+                            validator: (value) => generalValidator(
+                                value, 'naziv', [notEmpty, maxLength(50)]),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
@@ -234,8 +234,8 @@ class _DoktorTerminiScreenState extends State<DoktorTerminiScreen> {
                               filled: true,
                               fillColor: Colors.grey[100],
                             ),
-                            validator: (value) => generalValidator(
-                                value, 'opis terapije', [notEmpty]),
+                            validator: (value) => generalValidator(value,
+                                'opis terapije', [notEmpty, maxLength(200)]),
                           ),
                           const SizedBox(height: 12),
                           Row(

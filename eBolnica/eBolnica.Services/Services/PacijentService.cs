@@ -75,7 +75,7 @@ namespace eBolnica.Services.Services
         public override IQueryable<Database.Pacijent> AddFilter(PacijentSearchObject searchObject, IQueryable<Database.Pacijent> query)
         {
             query = base.AddFilter(searchObject, query);
-            query = query.Include(x => x.Korisnik).Where(x => x.Obrisano == false);
+            query = query.Include(x => x.Korisnik).Where(x => x.Obrisano == false).OrderBy(x=>x.Korisnik.Ime);
 
             if (!string.IsNullOrWhiteSpace(searchObject?.ImeGTE))
             {

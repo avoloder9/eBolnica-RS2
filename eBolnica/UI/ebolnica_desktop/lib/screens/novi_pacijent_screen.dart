@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:ebolnica_desktop/models/pacijent_model.dart';
 import 'package:ebolnica_desktop/models/search_result.dart';
+import 'package:ebolnica_desktop/providers/korisnik_provider.dart';
 import 'package:ebolnica_desktop/providers/pacijent_provider.dart';
 import 'package:ebolnica_desktop/screens/pacijent_list_screen.dart';
 import 'package:ebolnica_desktop/utils/utils.dart';
@@ -25,10 +26,14 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
   final imeController = TextEditingController();
   final prezimeController = TextEditingController();
   final emailController = TextEditingController();
+  final korisnickoImeController = TextEditingController();
   final telefonController = TextEditingController();
   final adresaController = TextEditingController();
   final datumController = TextEditingController();
   SearchResult<Pacijent>? result;
+  late KorisnikProvider korisnikProvider;
+  String? _emailError;
+  String? _korisnickoImeError;
 
   String spol = '';
   DateTime? datumRodjenja;
@@ -39,6 +44,46 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
   void initState() {
     super.initState();
     provider = PacijentProvider();
+    korisnikProvider = KorisnikProvider();
+  }
+
+  Future<String?> validirajEmail(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Email je obavezan';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(value)) {
+      return 'Molimo unesite validan email';
+    }
+    try {
+      bool postoji = await korisnikProvider.provjeriEmail(value);
+      if (postoji) {
+        return 'Email je već u upotrebi';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri emaila: ${e.toString()}';
+    }
+
+    return null;
+  }
+
+  Future<String?> validirajKorisnickoIme(
+      String? value, KorisnikProvider korisnikProvider) async {
+    if (value == null || value.isEmpty) {
+      return 'Korisničko ime je obavezno';
+    }
+
+    try {
+      bool postoji = await korisnikProvider.provjeriKorisnickoIme(value);
+      if (postoji) {
+        return 'Korisničko ime je već zauzeto';
+      }
+    } catch (e) {
+      return 'Greška pri provjeri korisničkog imena: ${e.toString()}';
+    }
+
+    return null;
   }
 
   int _calculateAge(DateTime birthDate) {
@@ -54,6 +99,16 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
   int _generateHealthCardNumber() {
     Random random = Random();
     return 10000 + random.nextInt(90000);
+  }
+
+  void _onEmailChanged(String value) async {
+    _emailError = await validirajEmail(value, korisnikProvider);
+    setState(() {});
+  }
+
+  void _onKorisnickoImeChanged(String value) async {
+    _korisnickoImeError = await validirajKorisnickoIme(value, korisnikProvider);
+    setState(() {});
   }
 
   @override
@@ -109,14 +164,39 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                   child: TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      prefixIcon: const Icon(Icons.email),
-                    ),
-                    validator: (value) => generalValidator(
-                        value, 'email', [notEmpty, validEmail]),
+                        labelText: 'Email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        prefixIcon: const Icon(Icons.email),
+                        errorText: _emailError),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Molimo unesite email';
+                      }
+                      return _emailError;
+                    },
+                    onChanged: _onEmailChanged,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextFormField(
+                    controller: korisnickoImeController,
+                    decoration: InputDecoration(
+                        labelText: 'Korisnicko ime',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        prefixIcon: const Icon(Icons.account_circle),
+                        errorText: _korisnickoImeError),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Molimo unesite korisnicko ime';
+                      }
+                      return _korisnickoImeError;
+                    },
+                    onChanged: _onKorisnickoImeChanged,
                   ),
                 ),
                 Padding(
@@ -132,13 +212,14 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                       counterText: '',
                     ),
                     keyboardType: TextInputType.phone,
-                    maxLength: 12,
+                    maxLength: 11,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       PhoneNumberFormatter()
                     ],
-                    validator: (value) =>
-                        generalValidator(value, 'telefon', [notEmpty]),
+                    validator: (value) => generalValidator(value, 'telefon', [
+                      notEmpty,
+                    ]),
                   ),
                 ),
                 Padding(
@@ -219,9 +300,7 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                   ),
                   onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      String korisnickoIme =
-                          imeController.text.trim().toLowerCase();
-                      String lozinka = '${imeController.text.trim()}123!';
+                      String lozinka = 'Pacijent123!';
                       lozinkaPotvrda = lozinka;
                       int? dob = _calculateAge(datumRodjenja!);
                       var noviPacijent = {
@@ -234,7 +313,7 @@ class _NoviPacijentScreenState extends State<NoviPacijentScreen> {
                         "adresa": adresaController.text.trim(),
                         "spol": spol,
                         "datumRodjenja": datumRodjenja?.toIso8601String(),
-                        "korisnickoIme": korisnickoIme,
+                        "korisnickoIme": korisnickoImeController.text.trim(),
                         "lozinka": lozinka,
                         "lozinkaPotvrda": lozinkaPotvrda,
                         "brojZdravstveneKartice": _generateHealthCardNumber(),

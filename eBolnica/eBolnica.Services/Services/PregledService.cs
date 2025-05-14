@@ -27,7 +27,7 @@ namespace eBolnica.Services.Services
         {
             query = base.AddFilter(searchObject, query).Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(o => o.Odjel)
                 .Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Doktor).ThenInclude(d => d.Korisnik)
-                .Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Pacijent).ThenInclude(p => p.Korisnik);
+                .Include(x => x.Uputnica).ThenInclude(y => y.Termin).ThenInclude(t => t.Pacijent).ThenInclude(p => p.Korisnik).OrderByDescending(x=>x.Uputnica.Termin.DatumTermina);
             if (!string.IsNullOrWhiteSpace(searchObject?.PacijentImeGTE))
             {
                 query = query.Where(x => x.Uputnica.Termin.Pacijent.Korisnik.Ime.StartsWith(searchObject.PacijentImeGTE));

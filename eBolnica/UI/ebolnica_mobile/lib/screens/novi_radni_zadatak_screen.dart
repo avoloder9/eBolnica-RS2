@@ -59,8 +59,13 @@ class _NoviRadniZadatakScreenState extends State<NoviRadniZadatakScreen> {
   }
 
   void fetchOsoblje() async {
-    var result = await medicinskoOsobljeProvider
-        .get(filter: {'nazivOdjela': widget.nazivOdjela});
+    DateTime now = DateTime.now();
+    var result = await medicinskoOsobljeProvider.get(filter: {
+      'nazivOdjela': widget.nazivOdjela,
+      'datumSmjene': now.toIso8601String(),
+      'vrijemeSmjene':
+          "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00"
+    });
     setState(() {
       medicinskoOsoblje = result.result;
     });
@@ -88,7 +93,7 @@ class _NoviRadniZadatakScreenState extends State<NoviRadniZadatakScreen> {
             key: _formKey,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const Text(
-                "Novi termin",
+                "Novi radni zadatak",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),

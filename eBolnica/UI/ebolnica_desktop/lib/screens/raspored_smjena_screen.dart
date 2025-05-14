@@ -176,7 +176,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                           children: [
                             Text(
                               startDate != null
-                                  ? DateFormat('yyyy-MM-dd').format(startDate!)
+                                  ? DateFormat('dd.MM.yyyy').format(startDate!)
                                   : "Odaberite početni datum",
                               style: TextStyle(
                                 fontSize: 18,
@@ -219,7 +219,7 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                           children: [
                             Text(
                               endDate != null
-                                  ? DateFormat('yyyy-MM-dd').format(endDate!)
+                                  ? DateFormat('dd.MM.yyyy').format(endDate!)
                                   : "Odaberite krajnji datum",
                               style: TextStyle(
                                 fontSize: 18,
@@ -302,11 +302,31 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
   }
 
   Future<void> pickStartDate(Function setDialogState) async {
+    var result = await rasporedSmjenaProvider.get();
+    List<DateTime> zauzetiDatumi = result.result
+        .map<DateTime>((e) {
+          DateTime d = DateTime.parse(e.datum.toString());
+          return DateTime(d.year, d.month, d.day);
+        })
+        .toSet()
+        .toList();
+    DateTime now = DateTime.now();
+    DateTime initial = now;
+    while (zauzetiDatumi.any((z) =>
+        z.year == initial.year &&
+        z.month == initial.month &&
+        z.day == initial.day)) {
+      initial = initial.add(const Duration(days: 1));
+    }
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: startDate ?? DateTime.now(),
+      initialDate: initial,
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
+      selectableDayPredicate: (DateTime date) {
+        return !zauzetiDatumi.any((z) =>
+            z.year == date.year && z.month == date.month && z.day == date.day);
+      },
     );
 
     if (picked != null && picked != startDate) {
@@ -941,8 +961,10 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                       onTap: () async {
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
+                          initialDate:
+                              DateTime.now().add(const Duration(days: 1)),
+                          firstDate:
+                              DateTime.now().add(const Duration(days: 1)),
                           lastDate:
                               DateTime.now().add(const Duration(days: 365)),
                         );
@@ -962,8 +984,8 @@ class _RasporedSmjenaScreenState extends State<RasporedSmjenaScreen> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (value) =>
-                          generalValidator(value, 'razlog', [notEmpty]),
+                      validator: (value) => generalValidator(
+                          value, 'razlog', [notEmpty, maxLength(40)]),
                     ),
                   ],
                 ),
