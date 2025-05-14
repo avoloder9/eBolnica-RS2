@@ -65,8 +65,11 @@ namespace eBolnica.Services.Services
         }
         public List<Database.MedicinskoOsoblje> GetMedicinskoOsobljeNaSmjeni(DateTime datumZadatka, TimeSpan vrijemeZadatka)
         {
-            var trenutnoOsoblje = Context.RasporedSmjenas.Where(rs => rs.Datum.Date == datumZadatka.Date && rs.Smjena.VrijemePocetka <= vrijemeZadatka
-            && rs.Smjena.VrijemeZavrsetka >= vrijemeZadatka).SelectMany(rs => rs.Korisnik.MedicinskoOsobljes).Distinct().ToList();
+            var trenutnoOsoblje = Context.RasporedSmjenas.Where(rs => rs.Datum.Date == datumZadatka.Date && ((rs.Smjena.VrijemePocetka <= vrijemeZadatka
+            && rs.Smjena.VrijemeZavrsetka >= vrijemeZadatka) || (rs.Smjena.VrijemePocetka > rs.Smjena.VrijemeZavrsetka &&
+             (vrijemeZadatka >= rs.Smjena.VrijemePocetka || vrijemeZadatka <= rs.Smjena.VrijemeZavrsetka)))).SelectMany(rs => rs.Korisnik.MedicinskoOsobljes)
+             .Distinct().ToList();
+
             return trenutnoOsoblje;
         }
     }

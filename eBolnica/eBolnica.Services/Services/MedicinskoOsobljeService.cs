@@ -41,7 +41,8 @@ namespace eBolnica.Services.Services
 
                 var vrijeme = searchObject!.VrijemeSmjene!.Value;
                 var datum = searchObject!.DatumSmjene!.Value;
-                query = query.Where(x => x.Korisnik.RasporedSmjenas.Any(rs => rs.Datum.Date == datum && rs.Smjena.VrijemePocetka <= vrijeme && rs.Smjena.VrijemeZavrsetka >= vrijeme));
+                query = query.Where(x => x.Korisnik.RasporedSmjenas.Any(rs => rs.Datum.Date == datum && (rs.Smjena.VrijemePocetka <= vrijeme && rs.Smjena.VrijemeZavrsetka >= vrijeme) ||
+                (rs.Smjena.VrijemePocetka > rs.Smjena.VrijemeZavrsetka && vrijeme >= rs.Smjena.VrijemePocetka || vrijeme <= rs.Smjena.VrijemeZavrsetka)));
             }
 
             return query;
@@ -101,7 +102,7 @@ namespace eBolnica.Services.Services
 
         public override MedicinskoOsoblje Update(int id, MedicinskoOsobljeUpdateRequest request)
         {
-            var entity=Context.MedicinskoOsobljes.Include(x=>x.Korisnik).Include(x=>x.Odjel).FirstOrDefault(x=>x.MedicinskoOsobljeId==id);
+            var entity = Context.MedicinskoOsobljes.Include(x => x.Korisnik).Include(x => x.Odjel).FirstOrDefault(x => x.MedicinskoOsobljeId == id);
             if (entity == null) throw new Exception("Medicinsko osoblje nije pronadjeno");
             Mapper.Map(request, entity);
             BeforeUpdate(request, entity);
